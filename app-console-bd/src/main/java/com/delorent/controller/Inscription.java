@@ -1,4 +1,5 @@
-public class inscription {
+package com.delorent.controller;
+public class Inscription {
         private final UtilisateurRepository utilisateurRepo;
         private final EntrepriseRepository entrepriseRepo;
         private final int utilisateurEnCoursId;
@@ -10,5 +11,4 @@ public class inscription {
         public void inscrireEntreprise(String raisonSociale, String siret){
             entrepriseRepo.insert(raisonSociale, siret, utilisateurEnCoursId);
         }
-
 }

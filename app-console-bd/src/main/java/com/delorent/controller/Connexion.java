@@ -1,6 +1,6 @@
-package com.delorent.controller;
+package main.java.com.delorent.controller;
 public class Connexion {
-    public connecter(String email, String motDePasse) {
-        return true;
+    public void connecter(String email, String motDePasse) {
+        return;
     }
 }
