@@ -11,37 +11,119 @@
 
 <hr>
 
+<div th:if="${succesLocation}">
+    <p style="color:green;" th:text="${succesLocation}">OK</p>
+</div>
+<div th:if="${erreurLocation}">
+    <p style="color:red;" th:text="${erreurLocation}">Erreur</p>
+</div>
+
+<h2>Créer une location</h2>
+
+<form th:action="@{/location/creer}" method="post">
+    <p>
+        <label>Loueur :</label><br>
+        <select name="idLoueur" required>
+            <option value="" disabled selected>-- Choisir un loueur --</option>
+            <option th:each="u : ${loueurs}"
+                    th:value="${u.id_utilisateur}"
+                    th:text="${u.prenom + ' ' + u.nom + ' (#' + u.id_utilisateur + ')'}">
+                Loueur
+            </option>
+        </select>
+    </p>
+
+    <p>
+        <label>Véhicule :</label><br>
+        <select name="idLouable" required>
+            <option value="" disabled selected>-- Choisir un véhicule --</option>
+            <option th:each="v : ${louables}"
+                    th:value="${v.idLouable}"
+                    th:text="${'#' + v.idLouable + ' - ' + v.marque + ' ' + v.modele + ' (' + v.immatriculation + ') - ' + v.prixJour + '€/jour'}">
+                Véhicule
+            </option>
+        </select>
+    </p>
+
+    <p>
+        <label>Assurance :</label><br>
+        <select name="idAssurance" required>
+            <option value="" disabled selected>-- Choisir une assurance --</option>
+            <option th:each="a : ${assurances}"
+                    th:value="${a.id_assurance}"
+                    th:text="${a.nom_assurance + ' (' + a.prix_journalier + '€/jour)'}">
+                Assurance
+            </option>
+        </select>
+    </p>
+
+    <p>
+        <label>Date début :</label><br>
+        <input type="date" name="dateDebut" required>
+    </p>
+
+    <p>
+        <label>Date fin :</label><br>
+        <input type="date" name="dateFin" required>
+    </p>
+
+    <p>
+        <label>Lieu de prise (optionnel) :</label><br>
+        <input type="text" name="lieuPrise" placeholder="Ex: Toulouse - Centre">
+    </p>
+
+    <p>
+        <label>Lieu de dépôt (optionnel) :</label><br>
+        <input type="text" name="lieuDepot" placeholder="Ex: Toulouse - Aéroport">
+    </p>
+
+    <button type="submit">Créer la location</button>
+</form>
+
+<hr>
+
+<h2>Contrats de location (tous)</h2>
+
+<div th:if="${#lists.isEmpty(contrats)}">
+    <p>Aucun contrat en base.</p>
+</div>
+
+<table th:if="${!#lists.isEmpty(contrats)}" border="1" cellpadding="6" cellspacing="0">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Loueur</th>
+        <th>Véhicule</th>
+        <th>Assurance</th>
+        <th>Début</th>
+        <th>Fin</th>
+        <th>Lieu prise</th>
+        <th>Lieu dépôt</th>
+        <th>Prix final</th>
+        <th>État</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="c : ${contrats}">
+        <td th:text="${c.id_contrat}">1</td>
+        <td th:text="${c.prenom_loueur + ' ' + c.nom_loueur + ' (#' + c.id_loueur + ')'}">Loueur</td>
+        <td th:text="${c.marque + ' ' + c.modele + ' (' + c.immatriculation + ') - #' + c.id_louable}">Veh</td>
+        <td th:text="${c.nom_assurance}">Assurance</td>
+        <td th:text="${c.date_debut}">debut</td>
+        <td th:text="${c.date_fin}">fin</td>
+        <td th:text="${c.lieu_prise}">prise</td>
+        <td th:text="${c.lieu_depot}">depot</td>
+        <td th:text="${c.prix_final}">0</td>
+        <td th:text="${c.etat}">EN_ATTENTE</td>
+    </tr>
+    </tbody>
+</table>
+
+<hr>
+
 <div th:if="${dbOk}">
     <p>✅ DB OK</p>
-    <p>Nombre de lignes dans la table: <strong th:text="${dbCount}">0</strong></p>
-
-    <div th:if="${#lists.isEmpty(users)}">
-        <p>⚠️ Requête SELECT vide (aucune ligne retournée)</p>
-    </div>
-
-    <div th:if="${!#lists.isEmpty(users)}">
-
-        <h2>Lignes (affichage brut)</h2>
-
-        <div th:each="row, rowStat : ${users}">
-            <h3 th:text="${'Ligne #' + (rowStat.index + 1)}">Ligne #1</h3>
-
-            <!-- Affiche la Map entière en debug (utile) -->
-            <pre th:text="${row}">{col=value}</pre>
-
-            <!-- Affiche clé -> valeur proprement -->
-            <ul>
-                <li th:each="entry : ${row.entrySet()}">
-                    <strong th:text="${entry.key}">col</strong>
-                    :
-                    <span th:text="${entry.value}">val</span>
-                </li>
-            </ul>
-
-            <hr>
-        </div>
-
-    </div>
+    <p>Nombre de lignes dans la table UTILISATEUR: <strong th:text="${dbCount}">0</strong></p>
 </div>
 
 <div th:if="${!dbOk}">

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Louer un véhicule</title>
+</head>
+<body>
+
+<h1>Louer un véhicule</h1>
+
+<p>
+    <a th:href="@{/}">← Retour accueil</a>
+</p>
+
+<div th:if="${succes}">
+    <p style="color: green;" th:text="${succes}">Succès</p>
+</div>
+
+<div th:if="${erreur}">
+    <p style="color: red;" th:text="${erreur}">Erreur</p>
+</div>
+
+<hr>
+
+<form th:action="@{/louer}" method="post">
+    <div>
+        <label for="idLoueur">ID Loueur</label><br>
+        <input id="idLoueur" name="idLoueur" type="number" min="1" required>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="idLouable">Véhicule (louable)</label><br>
+        <select id="idLouable" name="idLouable" required>
+            <option value="" disabled selected>-- Choisir --</option>
+            <option th:each="l : ${louables}"
+                    th:value="${l.get('idLouable')}"
+                    th:text="${'ID ' + l.get('idLouable') + ' - ' + l.get('marque') + ' ' + l.get('modele') + ' (' + l.get('immatriculation') + ') - ' + l.get('prixJour') + '€/jour - ' + l.get('statut')}">
+                Louable
+            </option>
+        </select>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="idAssurance">Assurance</label><br>
+        <select id="idAssurance" name="idAssurance" required>
+            <option value="" disabled selected>-- Choisir --</option>
+            <option th:each="a : ${assurances}"
+                    th:value="${a.get('id_assurance')}"
+                    th:text="${a.get('nom_assurance') + ' - ' + a.get('prix_journalier') + '€/jour'}">
+                Assurance
+            </option>
+        </select>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="dateDebut">Date début</label><br>
+        <input id="dateDebut" name="dateDebut" type="date" required>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="dateFin">Date fin</label><br>
+        <input id="dateFin" name="dateFin" type="date" required>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="lieuDepotOptionnel">Lieu de dépôt (optionnel)</label><br>
+        <input id="lieuDepotOptionnel" name="lieuDepotOptionnel" type="text" placeholder="Ex: Toulouse">
+    </div>
+
+    <br>
+
+    <button type="submit">Confirmer la location</button>
+</form>
+
+<hr>
+
+<div th:if="${contrat != null}">
+    <h2>Résumé contrat</h2>
+    <ul>
+        <li>Date début : <span th:text="${contrat.dateDebut}">dateDebut</span></li>
+        <li>Date fin : <span th:text="${contrat.dateFin}">dateFin</span></li>
+        <li>Lieu prise : <span th:text="${contrat.lieuPrise}">lieuPrise</span></li>
+        <li>Lieu dépôt : <span th:text="${contrat.lieuDepot}">lieuDepot</span></li>
+    </ul>
+</div>
+
+</body>
+</html>

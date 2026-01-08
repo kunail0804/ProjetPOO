@@ -38,7 +38,7 @@ public class ServiceLocationBd implements ServiceLocation {
             throw new IllegalArgumentException("La date de fin doit être après la date de début.");
         }
 
-        // 1) Récupérer l'agent propriétaire du louable
+        // 1) Récupérer l'agent propriétaire (id_proprietaire) du louable
         Integer idAgent = jdbc.queryForObject(
                 "SELECT id_proprietaire FROM LOUABLE WHERE idLouable = ?",
                 Integer.class,
@@ -58,9 +58,24 @@ public class ServiceLocationBd implements ServiceLocation {
             throw new IllegalArgumentException("Assurance non disponible pour cet agent.");
         }
 
-        // 3) Vérifier chevauchement de contrats (hors ANNULE/REFUSE)
-        Timestamp debutTs = Timestamp.valueOf(dateDebut.atStartOfDay());
-        Timestamp finTs = Timestamp.valueOf(dateFin.atStartOfDay());
+        // 3) Lieu de prise = lieuPrincipal du véhicule (NON modifiable)
+        final String lieuPrise = jdbc.queryForObject(
+                "SELECT lieuPrincipal FROM LOUABLE WHERE idLouable = ?",
+                String.class,
+                idLouable
+        );
+        if (lieuPrise == null || lieuPrise.isBlank()) {
+            throw new IllegalStateException("Le véhicule n'a pas de lieuPrincipal défini (lieu de prise).");
+        }
+
+        // Lieu de dépôt : optionnel, sinon = lieuPrise
+        final String lieuDepot = (lieuDepotOptionnel != null && !lieuDepotOptionnel.isBlank())
+                ? lieuDepotOptionnel.trim()
+                : lieuPrise;
+
+        // 4) Vérifier chevauchement de contrats (hors ANNULE/REFUSE)
+        final Timestamp debutTs = Timestamp.valueOf(dateDebut.atStartOfDay());
+        final Timestamp finTs = Timestamp.valueOf(dateFin.atStartOfDay());
 
         Integer chevauchements = jdbc.queryForObject(
                 """
@@ -79,7 +94,7 @@ public class ServiceLocationBd implements ServiceLocation {
             throw new IllegalStateException("Le louable est déjà réservé sur cette période.");
         }
 
-        // 4) Calcul du prix final
+        // 5) Calcul du prix final
         Double prixJour = jdbc.queryForObject(
                 "SELECT prixJour FROM LOUABLE WHERE idLouable = ?",
                 Double.class,
@@ -97,28 +112,9 @@ public class ServiceLocationBd implements ServiceLocation {
         long nbJours = ChronoUnit.DAYS.between(dateDebut, dateFin);
         if (nbJours <= 0) nbJours = 1;
 
-        double prixFinal = (prixJour + prixAssuranceJour) * nbJours;
+        final double prixFinal = (prixJour + prixAssuranceJour) * nbJours;
 
-        // 5) Lieu de prise / dépôt (obligatoires en base chez toi)
-        String lieuPriseTmp = jdbc.queryForObject(
-                "SELECT lieuPrincipal FROM LOUABLE WHERE idLouable = ?",
-                String.class,
-                idLouable
-        );
-
-        if (lieuPriseTmp == null || lieuPriseTmp.isBlank()) {
-            lieuPriseTmp = "INCONNU";
-        }
-
-        String lieuDepotTmp = (lieuDepotOptionnel != null && !lieuDepotOptionnel.isBlank())
-                ? lieuDepotOptionnel
-                : lieuPriseTmp;
-
-        // variables finales pour la lambda
-        final String lieuPrise = lieuPriseTmp;
-        final String lieuDepot = lieuDepotTmp;
-
-        // 6) Insertion du contrat (avec lieu_prise/lieu_depot)
+        // 6) Insertion du contrat (on renseigne lieu_prise et lieu_depot)
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(con -> {
@@ -145,13 +141,18 @@ public class ServiceLocationBd implements ServiceLocation {
             return ps;
         }, keyHolder);
 
-        // (optionnel) récupérer l'id généré si tu veux le logger
-        // Number idGenere = keyHolder.getKey();
+        Integer idContrat = null;
+        if (keyHolder.getKey() != null) {
+            idContrat = keyHolder.getKey().intValue();
+        }
 
-        // 7) Retourner ton modèle (actuellement sans ids)
+        // 7) Retour modèle
         return new Contrat(
+                idContrat,
                 Date.valueOf(dateDebut),
                 Date.valueOf(dateFin),
+                prixFinal,
+                "EN_ATTENTE",
                 lieuPrise,
                 lieuDepot
         );

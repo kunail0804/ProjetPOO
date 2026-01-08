@@ -4,39 +4,34 @@ import com.delorent.controller.LouerController;
 import com.delorent.model.Contrat;
 import com.delorent.service.ServiceLocation;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.time.LocalDate;
 
+@SpringBootApplication
 public class TestLocationConsole {
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext contexte = SpringApplication.run(App.class, args);
+        ConfigurableApplicationContext ctx = SpringApplication.run(TestLocationConsole.class, args);
 
-        // Récupère ton service réel (implémentation @Service)
-        ServiceLocation serviceLocation = contexte.getBean(ServiceLocation.class);
+        try {
+            ServiceLocation serviceLocation = ctx.getBean(ServiceLocation.class);
+            LouerController louerController = new LouerController(serviceLocation);
 
-        // Ton contrôleur n’est pas un bean Spring -> on l’instancie
-        LouerController controleur = new LouerController(serviceLocation);
+            Contrat contrat = louerController.louerVehicule(
+                    1, // idLoueur
+                    2, // idLouable (choisis un véhicule dispo)
+                    1, // idAssurance (doit être possédée par l'agent du véhicule)
+                    LocalDate.of(2026, 1, 20),
+                    LocalDate.of(2026, 1, 22),
+                    "Toulouse Aéroport" // lieuDepotOptionnel (modifiable)
+            );
 
-        int idLoueur = 1;
-        int idLouable = 1;
+            System.out.println("Location OK : " + contrat);
 
-        // Mets ici un id_assurance qui existe (SELECT * FROM ASSURANCE;)
-        int idAssurance = 1;
-
-        LocalDate dateDebut = LocalDate.now().plusDays(1);
-        LocalDate dateFin = LocalDate.now().plusDays(4);
-
-        // null si pas d’option dépôt différent, sinon un lieu
-        String lieuDepotOptionnel = "Toulouse";
-
-        Contrat contrat = controleur.louerVehicule(
-                idLoueur, idLouable, idAssurance, dateDebut, dateFin, lieuDepotOptionnel
-        );
-
-        System.out.println("Location OK : " + contrat);
-
-        contexte.close();
+        } finally {
+            SpringApplication.exit(ctx);
+        }
     }
 }
