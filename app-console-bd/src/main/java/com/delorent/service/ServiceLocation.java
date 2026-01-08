@@ -1,8 +1,15 @@
 package com.delorent.service;
 
-import com.delorent.controller.ContratLocation;
-import com.delorent.dto.DemandeLocation;
+import com.delorent.model.Contrat;
+
+import java.time.LocalDate;
 
 public interface ServiceLocation {
-    ContratLocation louer(DemandeLocation demande);
+
+    Contrat louer(int idLoueur,
+                  int idLouable,
+                  int idAssurance,
+                  LocalDate dateDebut,
+                  LocalDate dateFin,
+                  String lieuDepotOptionnel);
 }

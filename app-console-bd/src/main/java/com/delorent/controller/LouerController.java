@@ -1,6 +1,6 @@
 package com.delorent.controller;
 
-import com.delorent.dto.DemandeLocation;
+import com.delorent.model.Contrat;
 import com.delorent.service.ServiceLocation;
 
 import java.time.LocalDate;
@@ -13,22 +13,13 @@ public class LouerController {
         this.serviceLocation = serviceLocation;
     }
 
-    public ContratLocation louerVehicule(int idLoueur,
-                                         int idLouable,
-                                         int idAssurance,
-                                         LocalDate dateDebut,
-                                         LocalDate dateFin,
-                                         String lieuDepotOptionnel) {
+    public Contrat louerVehicule(int idLoueur,
+                                 int idLouable,
+                                 int idAssurance,
+                                 LocalDate dateDebut,
+                                 LocalDate dateFin,
+                                 String lieuDepotOptionnel) {
 
-        DemandeLocation demande = new DemandeLocation(
-                idLoueur,
-                idLouable,
-                idAssurance,
-                dateDebut,
-                dateFin,
-                lieuDepotOptionnel
-        );
-
-        return serviceLocation.louer(demande);
+        return serviceLocation.louer(idLoueur, idLouable, idAssurance, dateDebut, dateFin, lieuDepotOptionnel);
     }
 }
