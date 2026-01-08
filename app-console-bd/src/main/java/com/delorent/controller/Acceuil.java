@@ -1,4 +1,4 @@
-package main.java.com.delorent.controller;
+package com.delorent.controller;
 public class Acceuil {
     public void redirigerVersRecherche(){
         return;
