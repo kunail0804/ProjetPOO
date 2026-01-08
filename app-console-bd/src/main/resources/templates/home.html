@@ -7,10 +7,47 @@
 <body>
 
 <h1>Accueil</h1>
+<p th:text="${message}">Message</p>
 
-<p th:text="${message}">
-    Message par défaut (si Thymeleaf ne fonctionne pas)
-</p>
+<hr>
+
+<div th:if="${dbOk}">
+    <p>✅ DB OK</p>
+    <p>Nombre de lignes dans la table: <strong th:text="${dbCount}">0</strong></p>
+
+    <div th:if="${#lists.isEmpty(users)}">
+        <p>⚠️ Requête SELECT vide (aucune ligne retournée)</p>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(users)}">
+
+        <h2>Lignes (affichage brut)</h2>
+
+        <div th:each="row, rowStat : ${users}">
+            <h3 th:text="${'Ligne #' + (rowStat.index + 1)}">Ligne #1</h3>
+
+            <!-- Affiche la Map entière en debug (utile) -->
+            <pre th:text="${row}">{col=value}</pre>
+
+            <!-- Affiche clé -> valeur proprement -->
+            <ul>
+                <li th:each="entry : ${row.entrySet()}">
+                    <strong th:text="${entry.key}">col</strong>
+                    :
+                    <span th:text="${entry.value}">val</span>
+                </li>
+            </ul>
+
+            <hr>
+        </div>
+
+    </div>
+</div>
+
+<div th:if="${!dbOk}">
+    <p>❌ Erreur BD :</p>
+    <pre th:text="${dbError}">Erreur</pre>
+</div>
 
 </body>
 </html>
