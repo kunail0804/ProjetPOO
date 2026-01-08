@@ -26,8 +26,5 @@ replay_pid*
 # vscode
 .vscode/
 
-# properties files (BD connexion file)
-*.properties
-
 # target folder
 target/
