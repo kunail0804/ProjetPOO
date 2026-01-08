@@ -7,7 +7,7 @@ public abstract class Vehicule extends Louable {
 
     // Constructeur (optionnel, à adapter selon vos besoins)
     public Vehicule(int id, String marque, String modele, double prixJour, String immatriculation) {
-        super(id, marque, modele, prixJour); // Appel au constructeur de Louable
+        super(id, marque, modele, prixJour);
         this.immatriculation = immatriculation;
     }
 

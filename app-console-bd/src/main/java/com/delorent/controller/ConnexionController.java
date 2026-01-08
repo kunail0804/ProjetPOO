@@ -1,5 +1,5 @@
 package com.delorent.controller;
-public class Connexion {
+public class ConnexionController {
     public void connecter(String email, String motDePasse) {
         return;
     }
