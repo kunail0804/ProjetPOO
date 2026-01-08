@@ -1,4 +1,6 @@
-package main.java.com.delorent.controller;
+package com.delorent.controller;
+
+
 public class ProfilLouable {
     public void getProfilLouable (int idLouable) {
         return;
@@ -7,7 +9,7 @@ public class ProfilLouable {
         return false;
     }
     
-    public void noterLouable(int idLouable, int note, typeNotation typeNotation){
+    public void noterLouable(int idLouable, int note){
         return;
     }
 

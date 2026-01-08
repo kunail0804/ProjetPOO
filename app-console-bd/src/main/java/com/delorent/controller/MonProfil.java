@@ -1,9 +1,19 @@
-package main.java.com.delorent.controller;
+package com.delorent.controller;
+
+import java.util.List;
+import com.delorent.model.Assurance;
+import com.delorent.model.EntrepriseEntretien;
 
 public class MonProfil {
-    private final List<assurances> assurances;
+    private final List<Assurance> assurances;
     private final boolean contratManuel;
-    private final entrepriseEntretient entrepriseEntretient;
+    private final EntrepriseEntretien entrepriseEntretient;
+
+    public MonProfil(List<Assurance> assurances, boolean contratManuel, EntrepriseEntretien entrepriseEntretient){
+        this.assurances = assurances;
+        this.contratManuel = contratManuel;
+        this.entrepriseEntretient = entrepriseEntretient;
+    }
 
     public void getProfil(){
         return;
@@ -21,11 +31,11 @@ public class MonProfil {
         return;
     }
 
-    public void ajouterAssurance(assurance assurance){
+    public void ajouterAssurance(Assurance assurance){
         return;
     }
 
-    public void supprimerAssurance(assurance assurance){
+    public void supprimerAssurance(Assurance assurance){
         return;
     }
 

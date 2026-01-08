@@ -1,14 +1,24 @@
 package com.delorent.controller;
+
+import com.delorent.repository.EntrepriseRepository;
+import com.delorent.repository.UserRepository;
+
 public class Inscription {
-        private final UtilisateurRepository utilisateurRepo;
+        private final UserRepository utilisateurRepo;
         private final EntrepriseRepository entrepriseRepo;
         private final int utilisateurEnCoursId;
-        public void inscrire(String email, String motDePasse, String telephone,
-                TypeUtilisateur typeUtilisateur) {
-                utilisateurEnCoursId = utilisateurRepo.insert(email, motDePasse, telephone, typeUtilisateur);
+
+        public Inscription(UserRepository utilisateurRepo, EntrepriseRepository entrepriseRepo){
+            this.utilisateurRepo = utilisateurRepo;
+            this.entrepriseRepo = entrepriseRepo;
+            this.utilisateurEnCoursId = -1;
+        }
+
+        public void inscrire(String email, String motDePasse, String telephone) {
+                
         }
 
         public void inscrireEntreprise(String raisonSociale, String siret){
-            entrepriseRepo.insert(raisonSociale, siret, utilisateurEnCoursId);
+            
         }
 }

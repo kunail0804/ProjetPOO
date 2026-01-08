@@ -1,4 +1,4 @@
-package main.java.com.delorent.controller;
+package com.delorent.controller;
 
 public class ProfilAgentController {
     public void getProfilAgent(int idUser){
@@ -8,7 +8,7 @@ public class ProfilAgentController {
         return true;
     }
 
-    public void noter(int idAgent, typeNotation typeNotation){
+    public void noter(int idAgent){
         return;
     }
 }
