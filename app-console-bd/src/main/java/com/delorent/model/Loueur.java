@@ -1,4 +1,4 @@
-package main.java.com.delorent.model;
+package com.delorent.model;
 
 public class Loueur extends Utilisateur {
 
