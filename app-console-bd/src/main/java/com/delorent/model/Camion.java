@@ -8,9 +8,10 @@ public class Camion extends Vehicule {
     private double longueurM;
     private String permisRequis; // Exemple: "B", "C"
     
-    public Camion(int id, String marque, String modele, double prixJour, String immatriculation, int chargeMaxKg,
-            double volumeUtileM3, double hauteurM, double longueurM, String permisRequis) {
-        super(id, marque, modele, prixJour, immatriculation);
+    public Camion(int id, int idProprietaire, String marque, double prixJour, String modele, int annee, 
+        String couleur, String immatriculation, int chargeMaxKg,
+        double volumeUtileM3, double hauteurM, double longueurM, String permisRequis) {
+        super(id, idProprietaire, marque, prixJour, modele, annee, couleur, immatriculation);
         this.chargeMaxKg = chargeMaxKg;
         this.volumeUtileM3 = volumeUtileM3;
         this.hauteurM = hauteurM;
