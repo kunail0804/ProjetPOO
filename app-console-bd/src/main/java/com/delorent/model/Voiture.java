@@ -9,9 +9,9 @@ public class Voiture extends Vehicule {
     private Carburant carburant; // Utilise l'Enum créé plus haut
     private boolean climatisation;
     
-    public Voiture(int id, String marque, String modele, double prixJour, String immatriculation, int nbPortes,
+    public Voiture(int id, int idProprietaire, String marque, double prixJour, String modele, int annee, String couleur, String immatriculation, int nbPortes,
             int nbPlaces, int volumeCoffreLitres, TypeBoite boite, Carburant carburant, boolean climatisation) {
-        super(id, marque, modele, prixJour, immatriculation);
+        super(id, idProprietaire, marque, prixJour, modele, annee, couleur, immatriculation);
         this.nbPortes = nbPortes;
         this.nbPlaces = nbPlaces;
         this.volumeCoffreLitres = volumeCoffreLitres;
