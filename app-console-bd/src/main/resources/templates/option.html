@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Options payantes</title>
+</head>
+<body>
+
+<h1>Mes options payantes</h1>
+<p>Agent : <strong th:text="${idAgent}">0</strong></p>
+
+<table border="1" cellpadding="8">
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Prix mensuel</th>
+      <th>Description</th>
+      <th>Statut</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr th:each="opt : ${options}">
+      <td th:text="${opt.nomOption}">Nom</td>
+      <td th:text="${opt.prixMensuel}">0</td>
+      <td th:text="${opt.description}">desc</td>
+
+      <td>
+        <span th:if="${opt.activePourAgent}">✅ ACTIVE</span>
+        <span th:if="${!opt.activePourAgent}">❌ INACTIVE</span>
+      </td>
+
+      <td>
+        <form th:if="${!opt.activePourAgent}"
+              th:action="@{'/agent/options/' + ${opt.idOption} + '/contracter'}"
+              method="post">
+          <input type="hidden" name="idAgent" th:value="${idAgent}">
+          <button type="submit">Contracter</button>
+        </form>
+
+        <form th:if="${opt.activePourAgent}"
+              th:action="@{'/agent/options/' + ${opt.idOption} + '/annuler'}"
+              method="post">
+          <input type="hidden" name="idAgent" th:value="${idAgent}">
+          <button type="submit">Annuler</button>
+        </form>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

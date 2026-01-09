@@ -1,14 +1,14 @@
 package com.delorent.controller;
 
-import com.delorent.repository.EntrepriseRepository;
+import com.delorent.repository.OptionPayanteRepository;
 import com.delorent.repository.UserRepository;
 
 public class Inscription {
         private final UserRepository utilisateurRepo;
-        private final EntrepriseRepository entrepriseRepo;
+        private final OptionPayanteRepository entrepriseRepo;
         private final int utilisateurEnCoursId;
 
-        public Inscription(UserRepository utilisateurRepo, EntrepriseRepository entrepriseRepo){
+        public Inscription(UserRepository utilisateurRepo, OptionPayanteRepository entrepriseRepo){
             this.utilisateurRepo = utilisateurRepo;
             this.entrepriseRepo = entrepriseRepo;
             this.utilisateurEnCoursId = -1;
