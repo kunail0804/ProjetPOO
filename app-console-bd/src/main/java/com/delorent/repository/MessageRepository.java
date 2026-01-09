@@ -18,14 +18,24 @@ public class MessageRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // 1. Trouver toutes mes discussions ET le nom de la personne avec qui je parle
+    // 1. Trouver toutes mes discussions ET le nom de l'interlocuteur
     public List<Discussion> trouverDiscussionsUtilisateur(int monId) {
-        // Cette requête regarde si je suis user1 OU user2
-        // Et elle joint la table UTILISATEUR pour récupérer le nom de celui qui N'EST PAS moi
-        String sql = "SELECT d.idDiscussion, d.dateCreation, " +
-                     "u.nom AS nomInterlocuteur " + // On met le nom de l'autre dans l'objet Discussion
+        // CORRECTION MAJEURE ICI :
+        // Comme 'nom' n'est pas dans UTILISATEUR, on doit aller le chercher dans AGENT ou LOUEUR.
+        // On utilise COALESCE : ça prend le premier nom non-nul qu'il trouve (Agent, sinon Loueur, sinon l'email).
+        
+        String sql = "SELECT " +
+                     "d.idDiscussion, " +
+                     "d.dateCreation, " +
+                     "COALESCE(a.nom, l.nom, u.mail) AS nomInterlocuteur " + // On prend le nom dispo, sinon le mail
                      "FROM DISCUSSION d " +
+                     // On joint l'utilisateur qui N'EST PAS moi
                      "JOIN UTILISATEUR u ON (u.idUtilisateur = d.idUtilisateur1 OR u.idUtilisateur = d.idUtilisateur2) " +
+                     // On essaie de voir si cet utilisateur est un AGENT
+                     "LEFT JOIN AGENT a ON u.idUtilisateur = a.idUtilisateur " +
+                     // On essaie de voir si cet utilisateur est un LOUEUR
+                     "LEFT JOIN LOUEUR l ON u.idUtilisateur = l.idUtilisateur " +
+                     
                      "WHERE (d.idUtilisateur1 = ? OR d.idUtilisateur2 = ?) " +
                      "AND u.idUtilisateur != ?"; 
         
