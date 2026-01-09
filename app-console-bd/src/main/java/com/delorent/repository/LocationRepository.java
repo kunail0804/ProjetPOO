@@ -3,6 +3,8 @@ package com.delorent.repository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -15,61 +17,88 @@ public class LocationRepository {
         this.jdbc = jdbc;
     }
 
-    public List<Map<String, Object>> listerLoueurs() {
+    public List<Map<String, Object>> findLouablesAvecVehicule() {
+        // LOUABLE.marque + VEHICULE.modele, immatriculation...
         return jdbc.queryForList("""
-            SELECT u.id_utilisateur, u.prenom, u.nom, u.email
-            FROM UTILISATEUR u
-            JOIN LOUEUR l ON l.id_utilisateur = u.id_utilisateur
-            ORDER BY u.prenom, u.nom
+            SELECT
+              l.id AS idLouable,
+              l.marque AS marque,
+              v.modele AS modele,
+              v.immatriculation AS immatriculation,
+              l.prixJour AS prixJour,
+              l.statut AS statut,
+              l.lieuPrincipal AS lieuPrincipal
+            FROM LOUABLE l
+            LEFT JOIN VEHICULE v ON v.id = l.id
+            ORDER BY l.id ASC
         """);
     }
 
-    public List<Map<String, Object>> listerLouables() {
+    public List<Map<String, Object>> findAssurances() {
         return jdbc.queryForList("""
-            SELECT lo.idLouable,
-                   v.marque, v.modele, v.immatriculation,
-                   lo.prixJour, lo.statut, lo.lieuPrincipal
-            FROM LOUABLE lo
-            JOIN VEHICULE v ON v.id_louable = lo.idLouable
-            ORDER BY lo.idLouable DESC
-        """);
-    }
-
-    public List<Map<String, Object>> listerAssurances() {
-        return jdbc.queryForList("""
-            SELECT id_assurance, nom_assurance, prix_journalier
+            SELECT idAssurance, identifiant, nom, tarifJournalier
             FROM ASSURANCE
-            ORDER BY nom_assurance
+            ORDER BY tarifJournalier ASC
         """);
     }
 
-    public List<Map<String, Object>> listerContrats() {
-        return jdbc.queryForList("""
-            SELECT c.id_contrat,
-                   c.date_debut,
-                   c.date_fin,
-                   c.etat,
-                   c.prix_final,
-                   c.lieu_prise,
-                   c.lieu_depot,
+    public Map<String, Object> getLouable(int idLouable) {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+            SELECT id, prixJour, statut, lieuPrincipal
+            FROM LOUABLE
+            WHERE id = ?
+            LIMIT 1
+        """, idLouable);
+        return rows.isEmpty() ? null : rows.get(0);
+    }
 
-                   ul.id_utilisateur AS id_loueur,
-                   ul.prenom AS prenom_loueur,
-                   ul.nom AS nom_loueur,
+    public boolean contratChevauche(int idLouable, LocalDate debut, LocalDate fin) {
+        Integer count = jdbc.queryForObject("""
+            SELECT COUNT(*)
+            FROM CONTRAT
+            WHERE idLouable = ?
+              AND NOT (dateFin < ? OR dateDebut > ?)
+        """, Integer.class, idLouable, Date.valueOf(debut), Date.valueOf(fin));
 
-                   v.id_louable,
-                   v.marque,
-                   v.modele,
-                   v.immatriculation,
+        return count != null && count > 0;
+    }
 
-                   a.id_assurance,
-                   a.nom_assurance
+    public int insertContrat(LocalDate debut, LocalDate fin, String lieuPrise, String lieuDepot,
+                            int idLoueur, int idLouable, Integer idAssurance) {
+        jdbc.update("""
+            INSERT INTO CONTRAT (dateDebut, dateFin, lieuPrise, lieuDepot, idLoueur, idLouable, idAssurance)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, Date.valueOf(debut), Date.valueOf(fin), lieuPrise, lieuDepot, idLoueur, idLouable, idAssurance);
 
+        Integer id = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+        return id == null ? -1 : id;
+    }
+
+    public Map<String, Object> getContrat(int idContrat) {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+            SELECT c.idContrat,
+                   c.dateDebut,
+                   c.dateFin,
+                   c.lieuPrise,
+                   c.lieuDepot,
+                   c.idLoueur,
+                   c.idLouable,
+                   c.idAssurance,
+                   a.nom AS assuranceNom
             FROM CONTRAT c
-            JOIN UTILISATEUR ul ON ul.id_utilisateur = c.id_loueur
-            JOIN VEHICULE v ON v.id_louable = c.id_louable
-            JOIN ASSURANCE a ON a.id_assurance = c.id_assurance
-            ORDER BY c.id_contrat DESC
-        """);
+            LEFT JOIN ASSURANCE a ON a.idAssurance = c.idAssurance
+            WHERE c.idContrat = ?
+            LIMIT 1
+        """, idContrat);
+
+        return rows.isEmpty() ? null : rows.get(0);
     }
+
+    public List<Map<String, Object>> findLoueurs() {
+    return jdbc.queryForList("""
+        SELECT idUtilisateur, prenom, nom
+        FROM LOUEUR
+        ORDER BY prenom ASC, nom ASC
+    """);
+}
 }
