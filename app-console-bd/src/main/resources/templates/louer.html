@@ -8,9 +8,7 @@
 
 <h1>Louer un véhicule</h1>
 
-<p>
-    <a th:href="@{/}">← Retour accueil</a>
-</p>
+<p><a th:href="@{/}">← Retour accueil</a></p>
 
 <div th:if="${succes}">
     <p style="color: green;" th:text="${succes}">Succès</p>
@@ -23,9 +21,17 @@
 <hr>
 
 <form th:action="@{/louer}" method="post">
+
     <div>
-        <label for="idLoueur">ID Loueur</label><br>
-        <input id="idLoueur" name="idLoueur" type="number" min="1" required>
+        <label for="idLoueur">Loueur</label><br>
+        <select id="idLoueur" name="idLoueur" required>
+            <option value="" disabled selected>-- Choisir un loueur --</option>
+            <option th:each="u : ${loueurs}"
+                    th:value="${u.get('idUtilisateur')}"
+                    th:text="${'ID ' + u.get('idUtilisateur') + ' - ' + u.get('prenom') + ' ' + u.get('nom')}">
+                Loueur
+            </option>
+        </select>
     </div>
 
     <br>
@@ -36,10 +42,31 @@
             <option value="" disabled selected>-- Choisir --</option>
             <option th:each="l : ${louables}"
                     th:value="${l.get('idLouable')}"
-                    th:text="${'ID ' + l.get('idLouable') + ' - ' + l.get('marque') + ' ' + l.get('modele') + ' (' + l.get('immatriculation') + ') - ' + l.get('prixJour') + '€/jour - ' + l.get('statut')}">
+                    th:attr="data-lieu=${l.get('lieuPrincipal')}"
+                    th:text="${'ID ' + l.get('idLouable')
+                               + ' - ' + l.get('marque') + ' ' + (l.get('modele') == null ? '' : l.get('modele'))
+                               + ' (' + (l.get('immatriculation') == null ? '' : l.get('immatriculation')) + ')'
+                               + ' - ' + l.get('prixJour') + '€/jour'
+                               + ' - ' + (l.get('statut') == null ? '' : l.get('statut'))}">
                 Louable
             </option>
         </select>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="lieuPriseReadonly">Lieu de prise (non modifiable, lié au louable)</label><br>
+        <input id="lieuPriseReadonly" type="text" readonly value="">
+    </div>
+
+    <br>
+
+    <div>
+        <label>Disponibilités (pour ce véhicule)</label>
+        <ul id="listeDispos">
+            <li>Choisis un véhicule pour afficher ses disponibilités.</li>
+        </ul>
     </div>
 
     <br>
@@ -49,8 +76,8 @@
         <select id="idAssurance" name="idAssurance" required>
             <option value="" disabled selected>-- Choisir --</option>
             <option th:each="a : ${assurances}"
-                    th:value="${a.get('id_assurance')}"
-                    th:text="${a.get('nom_assurance') + ' - ' + a.get('prix_journalier') + '€/jour'}">
+                    th:value="${a.get('idAssurance')}"
+                    th:text="${a.get('nom') + ' - ' + a.get('tarifJournalier') + '€/jour'}">
                 Assurance
             </option>
         </select>
@@ -91,8 +118,50 @@
         <li>Date fin : <span th:text="${contrat.dateFin}">dateFin</span></li>
         <li>Lieu prise : <span th:text="${contrat.lieuPrise}">lieuPrise</span></li>
         <li>Lieu dépôt : <span th:text="${contrat.lieuDepot}">lieuDepot</span></li>
+        <li>Prix estimé : <span th:text="${contrat.prixEstime}">0</span> €</li>
     </ul>
 </div>
+
+<script>
+    const selectLouable = document.getElementById('idLouable');
+    const lieuPrise = document.getElementById('lieuPriseReadonly');
+    const ul = document.getElementById('listeDispos');
+
+    function fmt(dtStr) {
+        // dtStr arrive souvent en "2026-01-10T00:00:00.000+00:00" ou "2026-01-10 00:00:00"
+        return dtStr ? dtStr.replace('T', ' ').replace('.000+00:00', '') : '';
+    }
+
+    async function loadDispos(idLouable) {
+        ul.innerHTML = '<li>Chargement...</li>';
+        try {
+            const res = await fetch(`/louer/disponibilites?idLouable=${encodeURIComponent(idLouable)}`);
+            const data = await res.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+                ul.innerHTML = '<li>Aucune disponibilité trouvée.</li>';
+                return;
+            }
+
+            const items = data.map(d => {
+                const reserve = Number(d.estReservee) === 1;
+                const label = `${fmt(d.dateDebut)} → ${fmt(d.dateFin)} ${reserve ? '(réservée)' : '(disponible)'}`;
+                return `<li>${label}</li>`;
+            });
+
+            ul.innerHTML = items.join('');
+        } catch (e) {
+            ul.innerHTML = '<li>Erreur lors du chargement des disponibilités.</li>';
+        }
+    }
+
+    selectLouable.addEventListener('change', () => {
+        const opt = selectLouable.options[selectLouable.selectedIndex];
+        lieuPrise.value = opt.getAttribute('data-lieu') || '';
+        const id = selectLouable.value;
+        if (id) loadDispos(id);
+    });
+</script>
 
 </body>
 </html>

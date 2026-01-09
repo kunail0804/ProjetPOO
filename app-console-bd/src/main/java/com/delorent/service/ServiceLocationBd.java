@@ -1,17 +1,16 @@
 package com.delorent.service;
 
 import com.delorent.model.Contrat;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ServiceLocationBd implements ServiceLocation {
@@ -23,6 +22,7 @@ public class ServiceLocationBd implements ServiceLocation {
     }
 
     @Override
+    @Transactional
     public Contrat louer(int idLoueur,
                          int idLouable,
                          int idAssurance,
@@ -30,7 +30,6 @@ public class ServiceLocationBd implements ServiceLocation {
                          LocalDate dateFin,
                          String lieuDepotOptionnel) {
 
-        // 0) Validations
         if (dateDebut == null || dateFin == null) {
             throw new IllegalArgumentException("Les dates de location sont obligatoires.");
         }
@@ -38,123 +37,166 @@ public class ServiceLocationBd implements ServiceLocation {
             throw new IllegalArgumentException("La date de fin doit être après la date de début.");
         }
 
-        // 1) Récupérer l'agent propriétaire (id_proprietaire) du louable
-        Integer idAgent = jdbc.queryForObject(
-                "SELECT id_proprietaire FROM LOUABLE WHERE idLouable = ?",
-                Integer.class,
-                idLouable
+        // Existence loueur / louable / assurance (TON schéma)
+        Integer loueurOk = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM LOUEUR WHERE idUtilisateur = ?",
+                Integer.class, idLoueur
         );
-        if (idAgent == null) {
-            throw new IllegalArgumentException("Louable introuvable : idLouable=" + idLouable);
+        if (loueurOk == null || loueurOk == 0) {
+            throw new IllegalArgumentException("Loueur introuvable : id=" + idLoueur);
         }
 
-        // 2) Vérifier que l'assurance est proposée par cet agent
-        Integer nb = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM POSSEDE_ASSURANCE WHERE id_agent = ? AND id_assurance = ?",
-                Integer.class,
-                idAgent, idAssurance
+        Integer louableOk = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM LOUABLE WHERE id = ?",
+                Integer.class, idLouable
         );
-        if (nb == null || nb == 0) {
-            throw new IllegalArgumentException("Assurance non disponible pour cet agent.");
+        if (louableOk == null || louableOk == 0) {
+            throw new IllegalArgumentException("Véhicule/louable introuvable : id=" + idLouable);
         }
 
-        // 3) Lieu de prise = lieuPrincipal du véhicule (NON modifiable)
-        final String lieuPrise = jdbc.queryForObject(
-                "SELECT lieuPrincipal FROM LOUABLE WHERE idLouable = ?",
-                String.class,
-                idLouable
+        Integer assuranceOk = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM ASSURANCE WHERE idAssurance = ?",
+                Integer.class, idAssurance
         );
-        if (lieuPrise == null || lieuPrise.isBlank()) {
-            throw new IllegalStateException("Le véhicule n'a pas de lieuPrincipal défini (lieu de prise).");
+        if (assuranceOk == null || assuranceOk == 0) {
+            throw new IllegalArgumentException("Assurance introuvable : id=" + idAssurance);
         }
 
-        // Lieu de dépôt : optionnel, sinon = lieuPrise
-        final String lieuDepot = (lieuDepotOptionnel != null && !lieuDepotOptionnel.isBlank())
+        // Lieu de prise = LOUABLE.lieuPrincipal (NON modifiable)
+        String lieuPrise = jdbc.queryForObject(
+                "SELECT lieuPrincipal FROM LOUABLE WHERE id = ?",
+                String.class, idLouable
+        );
+        if (lieuPrise == null) lieuPrise = "";
+
+        String lieuDepot = (lieuDepotOptionnel != null && !lieuDepotOptionnel.isBlank())
                 ? lieuDepotOptionnel.trim()
                 : lieuPrise;
 
-        // 4) Vérifier chevauchement de contrats (hors ANNULE/REFUSE)
-        final Timestamp debutTs = Timestamp.valueOf(dateDebut.atStartOfDay());
-        final Timestamp finTs = Timestamp.valueOf(dateFin.atStartOfDay());
+        // On travaille en intervalles [debut, fin) à minuit
+        Timestamp debutTs = Timestamp.valueOf(dateDebut.atStartOfDay());
+        Timestamp finTs = Timestamp.valueOf(dateFin.atStartOfDay());
 
+        // 1) Vérifier qu'il existe un créneau DISPONIBILITE couvrant la période (non réservé)
+        List<Map<String, Object>> slots = jdbc.queryForList(
+                """
+                SELECT idDisponibilite, dateDebut, dateFin, estReservee, prixJournalier
+                FROM DISPONIBILITE
+                WHERE idLouable = ?
+                  AND estReservee = 0
+                  AND dateDebut <= ?
+                  AND dateFin >= ?
+                ORDER BY dateDebut ASC
+                LIMIT 1
+                """,
+                idLouable, debutTs, finTs
+        );
+
+        if (slots.isEmpty()) {
+            throw new IllegalStateException("Aucune disponibilité ne couvre cette période pour ce véhicule.");
+        }
+
+        Map<String, Object> slot = slots.get(0);
+        int idDisponibilite = ((Number) slot.get("idDisponibilite")).intValue();
+        Timestamp slotStart = (Timestamp) slot.get("dateDebut");
+        Timestamp slotEnd = (Timestamp) slot.get("dateFin");
+        Double prixJournalierSlot = slot.get("prixJournalier") == null ? null : ((Number) slot.get("prixJournalier")).doubleValue();
+
+        // 2) Vérifier chevauchement avec contrats existants (TON schéma en DATE)
         Integer chevauchements = jdbc.queryForObject(
                 """
                 SELECT COUNT(*)
                 FROM CONTRAT
-                WHERE id_louable = ?
-                  AND etat NOT IN ('ANNULE','REFUSE')
-                  AND date_debut < ?
-                  AND date_fin > ?
+                WHERE idLouable = ?
+                  AND dateDebut < ?
+                  AND dateFin > ?
                 """,
                 Integer.class,
-                idLouable, finTs, debutTs
+                idLouable, java.sql.Date.valueOf(dateFin), java.sql.Date.valueOf(dateDebut)
         );
 
         if (chevauchements != null && chevauchements > 0) {
-            throw new IllegalStateException("Le louable est déjà réservé sur cette période.");
+            throw new IllegalStateException("Le véhicule est déjà loué sur cette période.");
         }
 
-        // 5) Calcul du prix final
+        // 3) Prix estimé (LOUABLE.prixJour + ASSURANCE.tarifJournalier) * nbJours
         Double prixJour = jdbc.queryForObject(
-                "SELECT prixJour FROM LOUABLE WHERE idLouable = ?",
-                Double.class,
-                idLouable
+                "SELECT prixJour FROM LOUABLE WHERE id = ?",
+                Double.class, idLouable
         );
-        Double prixAssuranceJour = jdbc.queryForObject(
-                "SELECT prix_journalier FROM ASSURANCE WHERE id_assurance = ?",
-                Double.class,
-                idAssurance
+        Double tarifAssurance = jdbc.queryForObject(
+                "SELECT tarifJournalier FROM ASSURANCE WHERE idAssurance = ?",
+                Double.class, idAssurance
         );
-
         if (prixJour == null) prixJour = 0.0;
-        if (prixAssuranceJour == null) prixAssuranceJour = 0.0;
+        if (tarifAssurance == null) tarifAssurance = 0.0;
 
         long nbJours = ChronoUnit.DAYS.between(dateDebut, dateFin);
         if (nbJours <= 0) nbJours = 1;
 
-        final double prixFinal = (prixJour + prixAssuranceJour) * nbJours;
+        double prixEstime = (prixJour + tarifAssurance) * nbJours;
 
-        // 6) Insertion du contrat (on renseigne lieu_prise et lieu_depot)
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbc.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
+        // 4) Insertion CONTRAT (TON schéma)
+        try {
+            jdbc.update(
                     """
-                    INSERT INTO CONTRAT(
-                        id_loueur, id_agent, id_louable, id_assurance,
-                        date_debut, date_fin, etat, prix_final,
-                        lieu_prise, lieu_depot
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, 'EN_ATTENTE', ?, ?, ?)
+                    INSERT INTO CONTRAT(dateDebut, dateFin, lieuPrise, lieuDepot, idLoueur, idLouable, idAssurance)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     """,
-                    Statement.RETURN_GENERATED_KEYS
+                    java.sql.Date.valueOf(dateDebut),
+                    java.sql.Date.valueOf(dateFin),
+                    lieuPrise,
+                    lieuDepot,
+                    idLoueur,
+                    idLouable,
+                    idAssurance
             );
-            ps.setInt(1, idLoueur);
-            ps.setInt(2, idAgent);
-            ps.setInt(3, idLouable);
-            ps.setInt(4, idAssurance);
-            ps.setTimestamp(5, debutTs);
-            ps.setTimestamp(6, finTs);
-            ps.setDouble(7, prixFinal);
-            ps.setString(8, lieuPrise);
-            ps.setString(9, lieuDepot);
-            return ps;
-        }, keyHolder);
-
-        Integer idContrat = null;
-        if (keyHolder.getKey() != null) {
-            idContrat = keyHolder.getKey().intValue();
+        } catch (DataAccessException e) {
+            throw new IllegalStateException("Erreur lors de la création du contrat : " + rootMessage(e));
         }
 
-        // 7) Retour modèle
-        return new Contrat(
-                idContrat,
-                Date.valueOf(dateDebut),
-                Date.valueOf(dateFin),
-                prixFinal,
-                "EN_ATTENTE",
-                lieuPrise,
-                lieuDepot
+        // 5) Split du créneau DISPONIBILITE :
+        //    - supprimer le slot d'origine
+        //    - créer [slotStart, debutTs) si besoin
+        //    - créer [debutTs, finTs) réservé
+        //    - créer [finTs, slotEnd) si besoin
+        // Ordre IMPORTANT pour ne pas déclencher le trigger de chevauchement.
+        jdbc.update("DELETE FROM DISPONIBILITE WHERE idDisponibilite = ?", idDisponibilite);
+
+        if (slotStart.before(debutTs)) {
+            jdbc.update(
+                    """
+                    INSERT INTO DISPONIBILITE(idLouable, dateDebut, dateFin, estReservee, prixJournalier)
+                    VALUES (?, ?, ?, 0, ?)
+                    """,
+                    idLouable, slotStart, debutTs, prixJournalierSlot
+            );
+        }
+
+        jdbc.update(
+                """
+                INSERT INTO DISPONIBILITE(idLouable, dateDebut, dateFin, estReservee, prixJournalier)
+                VALUES (?, ?, ?, 1, ?)
+                """,
+                idLouable, debutTs, finTs, prixJournalierSlot
         );
+
+        if (finTs.before(slotEnd)) {
+            jdbc.update(
+                    """
+                    INSERT INTO DISPONIBILITE(idLouable, dateDebut, dateFin, estReservee, prixJournalier)
+                    VALUES (?, ?, ?, 0, ?)
+                    """,
+                    idLouable, finTs, slotEnd, prixJournalierSlot
+            );
+        }
+
+        return new Contrat(dateDebut, dateFin, lieuPrise, lieuDepot, prixEstime);
+    }
+
+    private static String rootMessage(Throwable t) {
+        Throwable cur = t;
+        while (cur.getCause() != null) cur = cur.getCause();
+        return cur.getMessage() == null ? cur.getClass().getSimpleName() : cur.getMessage();
     }
 }

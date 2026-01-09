@@ -1,66 +1,26 @@
 package com.delorent.model;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 public class Contrat {
 
-    private Integer idContrat;
-    private Date dateDebut;
-    private Date dateFin;
-    private Double prixFinal;
-    private String etat;
-    private String lieuPrise;
-    private String lieuDepot;
+    private final LocalDate dateDebut;
+    private final LocalDate dateFin;
+    private final String lieuPrise;
+    private final String lieuDepot;
+    private final double prixEstime;
 
-    public Contrat() {}
-
-    public Contrat(Integer idContrat,
-                   Date dateDebut,
-                   Date dateFin,
-                   Double prixFinal,
-                   String etat,
-                   String lieuPrise,
-                   String lieuDepot) {
-        this.idContrat = idContrat;
+    public Contrat(LocalDate dateDebut, LocalDate dateFin, String lieuPrise, String lieuDepot, double prixEstime) {
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
-        this.prixFinal = prixFinal;
-        this.etat = etat;
         this.lieuPrise = lieuPrise;
         this.lieuDepot = lieuDepot;
+        this.prixEstime = prixEstime;
     }
 
-    public Integer getIdContrat() { return idContrat; }
-    public void setIdContrat(Integer idContrat) { this.idContrat = idContrat; }
-
-    public Date getDateDebut() { return dateDebut; }
-    public void setDateDebut(Date dateDebut) { this.dateDebut = dateDebut; }
-
-    public Date getDateFin() { return dateFin; }
-    public void setDateFin(Date dateFin) { this.dateFin = dateFin; }
-
-    public Double getPrixFinal() { return prixFinal; }
-    public void setPrixFinal(Double prixFinal) { this.prixFinal = prixFinal; }
-
-    public String getEtat() { return etat; }
-    public void setEtat(String etat) { this.etat = etat; }
-
+    public LocalDate getDateDebut() { return dateDebut; }
+    public LocalDate getDateFin() { return dateFin; }
     public String getLieuPrise() { return lieuPrise; }
-    public void setLieuPrise(String lieuPrise) { this.lieuPrise = lieuPrise; }
-
     public String getLieuDepot() { return lieuDepot; }
-    public void setLieuDepot(String lieuDepot) { this.lieuDepot = lieuDepot; }
-
-    @Override
-    public String toString() {
-        return "Contrat{" +
-                "idContrat=" + idContrat +
-                ", dateDebut=" + dateDebut +
-                ", dateFin=" + dateFin +
-                ", prixFinal=" + prixFinal +
-                ", etat='" + etat + '\'' +
-                ", lieuPrise='" + lieuPrise + '\'' +
-                ", lieuDepot='" + lieuDepot + '\'' +
-                '}';
-    }
+    public double getPrixEstime() { return prixEstime; }
 }

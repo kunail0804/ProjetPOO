@@ -5,11 +5,11 @@ import com.delorent.service.ServiceLocation;
 
 import java.time.LocalDate;
 
-public class LouerController {
+public class LouerConsoleController {
 
     private final ServiceLocation serviceLocation;
 
-    public LouerController(ServiceLocation serviceLocation) {
+    public LouerConsoleController(ServiceLocation serviceLocation) {
         this.serviceLocation = serviceLocation;
     }
 

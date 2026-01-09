@@ -5,7 +5,6 @@ import com.delorent.model.Contrat;
 import java.time.LocalDate;
 
 public interface ServiceLocation {
-
     Contrat louer(int idLoueur,
                   int idLouable,
                   int idAssurance,
