@@ -6,16 +6,12 @@ public class Loueur extends Utilisateur {
     private String prenom;
 
     // Constructeur
-    public Loueur(int idUtilisateur, String mdp, String ville,
-                  String codePostal, String region,
-                  String telephone, String mail,
-                  String dateInscription,
-                  String nom, String prenom) {
+    public Loueur(String mail, String motDePasse, String adresse,
+                       String ville, String codePostal, String region,
+                       String telephone,String nom, String prenom) {
 
         // Appel du constructeur de la classe mère
-        super(idUtilisateur, mdp, ville, codePostal, region,
-              telephone, mail, dateInscription);
-
+        super(mail, motDePasse, adresse, ville, codePostal, region, telephone);
         this.nom = nom;
         this.prenom = prenom;
     }

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription</title>
+</head>
+<body>
+
+<h1>Inscription</h1>
+
+<!-- Sélection du type de compte -->
+<div>
+    <label for="role">Type de compte</label><br>
+    <select id="role" name="role" onchange="onRoleChange()" required>
+        <option value="">-- Sélectionner un rôle --</option>
+        <option value="AGENT">Agent</option>
+        <option value="LOUEUR">Loueur</option>
+        <option value="ENTRETIEN">Entreprise d'entretien</option>
+        <option value="AGENT_PRO">Agent professionnel</option>
+    </select>
+</div>
+
+<br>
+
+<form th:action="@{/inscription}" method="post">
+
+    <!-- Champ caché pour envoyer le rôle au controller -->
+    <input type="hidden" id="roleHidden" name="role">
+
+    <!-- Champs communs -->
+    <div>
+        <label for="username">Nom d'utilisateur</label><br>
+        <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Nom d'utilisateur"
+                required
+        >
+    </div>
+
+    <br>
+
+    <div>
+        <label for="email">Email</label><br>
+        <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="email@exemple.com"
+                required
+        >
+    </div>
+
+    <br>
+
+    <div>
+        <label for="password">Mot de passe</label><br>
+        <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Mot de passe"
+                required
+        >
+    </div>
+
+    <br>
+
+    <!-- Champs PRO (Entreprise d'entretien / Agent pro) -->
+    <div id="proFields" style="display: none;">
+
+        <div>
+            <label for="raisonSociale">Raison sociale</label><br>
+            <input
+                    type="text"
+                    id="raisonSociale"
+                    name="raisonSociale"
+                    placeholder="Nom de l'entreprise"
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label for="siret">Numéro SIRET</label><br>
+            <input
+                    type="text"
+                    id="siret"
+                    name="siret"
+                    placeholder="12345678900000"
+            >
+        </div>
+
+        <br>
+    </div>
+
+    <button type="submit">S'inscrire</button>
+
+</form>
+
+<!-- JS minimal, clair, local -->
+<script>
+    function onRoleChange() {
+        const roleSelect = document.getElementById("role");
+        const selectedRole = roleSelect.value;
+
+        const proFields = document.getElementById("proFields");
+        const roleHidden = document.getElementById("roleHidden");
+
+        // Toujours envoyer le rôle au backend
+        roleHidden.value = selectedRole;
+
+        // Affichage conditionnel
+        if (selectedRole === "ENTRETIEN" || selectedRole === "AGENT_PRO") {
+            proFields.style.display = "block";
+        } else {
+            proFields.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>

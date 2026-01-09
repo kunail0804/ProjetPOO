@@ -2,27 +2,19 @@ package com.delorent.model;
 
 public class Agent extends Utilisateur{
 
-   private String typeAgent;
    private String nom;
    private String prenom;
 
-   public Agent(int idUtilisateur, String adresse, String ville, String codePostal, String region, String telephone,
-      String mail, String motDePasse, String typeAgent, String nom, String prenom) {
-    super(idUtilisateur, adresse, ville, codePostal, region, telephone, mail, motDePasse);
-    this.typeAgent = typeAgent;
+   public Agent(String mail, String motDePasse, String adresse,
+                       String ville, String codePostal, String region,
+                       String telephone, String nom, String prenom) {
+    super(mail, motDePasse, adresse, ville, codePostal, region, telephone);
     this.nom = nom;
     this.prenom = prenom;
   }
   
-   public String getTypeAgent () { return typeAgent; }
    public String getNom () { return nom; }
    public String getPrenom () { return prenom; }
-
-
-   public void setTypeAgent(String typeAgent) 
-      {
-        this.typeAgent = typeAgent;
-      }
 	 
       public void setNom(String nom) 
       
