@@ -16,9 +16,23 @@ public class Utilisateur {
     //private LocalDate dateInscription;
 
     // Constructeur
-    public Utilisateur(int idUtilisateur,  String adresse,
+    public Utilisateur(String mail, String motDePasse, String adresse,
                        String ville, String codePostal, String region,
-                       String telephone, String mail, String motDePasse
+                       String telephone
+                       /*LocalDate dateInscription*/) {
+        this.adresse = adresse;
+        this.ville = ville;
+        this.codePostal = codePostal;
+        this.region = region;
+        this.telephone = telephone;
+        this.mail = mail;
+        this.motDePasse = motDePasse;
+        //this.dateInscription = dateInscription;
+    }
+
+    public Utilisateur(int idUtilisateur, String mail, String motDePasse, String adresse,
+                       String ville, String codePostal, String region,
+                       String telephone
                        /*LocalDate dateInscription*/) {
         this.idUtilisateur = idUtilisateur;
         this.adresse = adresse;

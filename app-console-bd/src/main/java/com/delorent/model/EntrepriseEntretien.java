@@ -7,20 +7,38 @@ public class EntrepriseEntretien extends Utilisateur {
     private String noSiret;
 
     public EntrepriseEntretien(
-            int idUtilisateur,
+            String mail, 
+            String motDePasse, 
             String adresse,
-            String ville,
-            String codePostal,
+            String ville, 
+            String codePostal, 
             String region,
             String telephone,
-            String mail,
-            String motDePasse,
             String nomEntreprise,
             String raisonSoc,
             String noSiret
     ) {
-        super(idUtilisateur, adresse, ville, codePostal, region,
-              telephone, mail, motDePasse);
+        super(mail, motDePasse, adresse, ville, codePostal, region, telephone);
+
+        this.nomEntreprise = nomEntreprise;
+        this.raisonSoc = raisonSoc;
+        this.noSiret = noSiret;
+    }
+
+    public EntrepriseEntretien(
+            int idUtilisateur,
+            String mail, 
+            String motDePasse, 
+            String adresse,
+            String ville, 
+            String codePostal, 
+            String region,
+            String telephone,
+            String nomEntreprise,
+            String raisonSoc,
+            String noSiret
+    ) {
+        super(idUtilisateur, mail, motDePasse, adresse, ville, codePostal, region, telephone);
 
         this.nomEntreprise = nomEntreprise;
         this.raisonSoc = raisonSoc;
