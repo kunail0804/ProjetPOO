@@ -1,8 +1,10 @@
 package com.delorent.repository;
 
+import org.springframework.stereotype.Repository;
 import java.util.List;
 
-public interface Repository<T, ID> {
+@Repository
+public interface RepositoryBase<T, ID> {
     List<T> getAll();
     T get(ID id);
 

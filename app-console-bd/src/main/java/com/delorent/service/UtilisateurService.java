@@ -46,7 +46,7 @@ public class UtilisateurService {
     // --- Méthodes demandées ---
 
     @Transactional
-    public long ajouterAgent(String username, String email, String password) {
+    public long ajouterAgent(String username, String email, String password, String nom, String prenom) {
         String u = clean(username);
         String e = clean(email);
         String p = clean(password);
@@ -60,7 +60,7 @@ public class UtilisateurService {
     }
 
     @Transactional
-    public long ajouterLoueur(String username, String email, String password) {
+    public long ajouterLoueur(String username, String email, String password, String nom, String prenom) {
         String u = clean(username);
         String e = clean(email);
         String p = clean(password);
@@ -75,7 +75,7 @@ public class UtilisateurService {
 
     @Transactional
     public long ajouterEntrepriseEntretien(String username, String email, String password,
-                                          String raisonSociale, String siret) {
+                                          String nomEntreprise, String raisonSociale, String siret) {
         String u = clean(username);
         String e = clean(email);
         String p = clean(password);

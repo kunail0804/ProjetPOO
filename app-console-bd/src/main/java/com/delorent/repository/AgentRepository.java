@@ -1,8 +1,10 @@
 package com.delorent.repository;
 
+import org.springframework.stereotype.Repository;
 import com.delorent.model.Agent;
 
-public class AgentRepository implements Repository<Agent, Long> {
+@Repository
+public class AgentRepository implements RepositoryBase<Agent, Long> {
 
     @Override
     public java.util.List<Agent> getAll() {

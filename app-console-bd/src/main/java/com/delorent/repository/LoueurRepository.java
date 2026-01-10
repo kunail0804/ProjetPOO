@@ -1,8 +1,10 @@
 package com.delorent.repository;
 
+import org.springframework.stereotype.Repository;
 import com.delorent.model.Loueur;
 
-public class LoueurRepository implements Repository<Loueur, Long> {
+@Repository
+public class LoueurRepository implements RepositoryBase<Loueur, Long> {
 
     @Override
     public java.util.List<Loueur> getAll() {

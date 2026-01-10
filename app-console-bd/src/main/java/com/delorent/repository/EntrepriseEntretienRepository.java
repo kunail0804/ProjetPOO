@@ -1,8 +1,10 @@
 package com.delorent.repository;
 
+import org.springframework.stereotype.Repository;
 import com.delorent.model.EntrepriseEntretien;
 
-public class EntrepriseEntretienRepository implements Repository<EntrepriseEntretien, Long> {
+@Repository
+public class EntrepriseEntretienRepository implements RepositoryBase<EntrepriseEntretien, Long> {
 
     @Override
     public java.util.List<EntrepriseEntretien> getAll() {

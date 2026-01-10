@@ -1,8 +1,10 @@
 package com.delorent.repository;
 
+import org.springframework.stereotype.Repository;
 import com.delorent.model.Utilisateur;
 
-public class UtilisateurRepository implements Repository<Utilisateur, Long> {
+@Repository
+public class UtilisateurRepository implements RepositoryBase<Utilisateur, Long> {
 
     @Override
     public java.util.List<Utilisateur> getAll() {
