@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Véhicules Disponibles - Plateforme Autopartage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .header .count {
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête -->
+        <div class="header">
+            <h1 th:text="${message}">Véhicules disponibles</h1>
+            <p>
+                <span class="count" th:text="${nombreVehicule}">0</span> 
+                <span th:text="${nombreVehicule > 1} ? 'véhicules disponibles' : 'véhicule disponible'">véhicules disponibles</span>
+            </p>
+        </div>
+        
+        <!-- Message simple -->
+        <div style="background: white; padding: 30px; border-radius: 15px; text-align: center;">
+            <h2>🚗 Plateforme Autopartage</h2>
+            <p style="margin-top: 20px; color: #666;">
+                Application en cours de développement
+            </p>
+            <div style="margin-top: 30px;">
+                <a href="/vehicule/" style="margin: 10px; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px;">
+                    Accueil
+                </a>
+                <a href="/vehicule/disponibles" style="margin: 10px; padding: 10px 20px; background: #4caf50; color: white; text-decoration: none; border-radius: 5px;">
+                    Véhicules disponibles
+                </a>
+                <a href="/vehicule/tous" style="margin: 10px; padding: 10px 20px; background: #ff9800; color: white; text-decoration: none; border-radius: 5px;">
+                    Tous les véhicules
+                </a>
+            </div>
+        </div>
+        
+        <!-- Pied de page -->
+        <div class="footer">
+            <p>© 2024 Plateforme Autopartage - US.V.1 par Alexia</p>
+        </div>
+    </div>
+</body>
+</html>
