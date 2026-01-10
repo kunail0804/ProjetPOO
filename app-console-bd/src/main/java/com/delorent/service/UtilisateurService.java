@@ -14,11 +14,15 @@ import com.delorent.model.Loueur;
 @Service
 public class UtilisateurService {
 
-    private AgentRepository agentRepository;
-    private LoueurRepository loueurRepository;
-    private EntrepriseEntretienRepository entrepriseEntretienRepository;
+    private final AgentRepository agentRepository;
+    private final LoueurRepository loueurRepository;
+    private final EntrepriseEntretienRepository entrepriseEntretienRepository;
 
-    public UtilisateurService(AgentRepository agentRepository, LoueurRepository loueurRepository, EntrepriseEntretienRepository entrepriseEntretienRepository) {
+    public UtilisateurService(
+            AgentRepository agentRepository,
+            LoueurRepository loueurRepository,
+            EntrepriseEntretienRepository entrepriseEntretienRepository
+    ) {
         this.agentRepository = agentRepository;
         this.loueurRepository = loueurRepository;
         this.entrepriseEntretienRepository = entrepriseEntretienRepository;
@@ -39,63 +43,131 @@ public class UtilisateurService {
     }
 
     private String hashPassword(String rawPassword) {
-        // TODO
+        // TODO: BCryptPasswordEncoder etc.
         return rawPassword;
     }
 
-    // --- Méthodes demandées ---
+    // --- Méthodes demandées (ordre des args = constructeurs des modèles) ---
 
     @Transactional
-    public long ajouterAgent(String username, String email, String password, String nom, String prenom) {
-        String u = clean(username);
+    public long ajouterAgent(
+            String email,
+            String password,
+            String adresse,
+            String ville,
+            String codePostal,
+            String region,
+            String telephone,
+            String nom,
+            String prenom
+    ) {
         String e = clean(email);
         String p = clean(password);
+        String a = clean(adresse);
+        String v = clean(ville);
+        String cp = clean(codePostal);
+        String r = clean(region);
+        String t = clean(telephone);
+        String n = clean(nom);
+        String pr = clean(prenom);
 
-        require(u, "username");
         require(e, "email");
         require(p, "password");
+        require(a, "adresse");
+        require(v, "ville");
+        require(cp, "codePostal");
+        require(r, "region");
+        require(t, "telephone");
+        require(n, "nom");
+        require(pr, "prenom");
 
         String passwordHash = hashPassword(p);
-        return agentRepository.add(new Agent(e, passwordHash, "", "", "", "", "", u, ""));
+
+        // Agent(String mail, String motDePasse, String adresse, String ville, String codePostal, String region, String telephone, String nom, String prenom)
+        return agentRepository.add(new Agent(e, passwordHash, a, v, cp, r, t, n, pr));
     }
 
     @Transactional
-    public long ajouterLoueur(String username, String email, String password, String nom, String prenom) {
-        String u = clean(username);
+    public long ajouterLoueur(
+            String email,
+            String password,
+            String adresse,
+            String ville,
+            String codePostal,
+            String region,
+            String telephone,
+            String nom,
+            String prenom
+    ) {
         String e = clean(email);
         String p = clean(password);
+        String a = clean(adresse);
+        String v = clean(ville);
+        String cp = clean(codePostal);
+        String r = clean(region);
+        String t = clean(telephone);
+        String n = clean(nom);
+        String pr = clean(prenom);
 
-        require(u, "username");
         require(e, "email");
         require(p, "password");
+        require(a, "adresse");
+        require(v, "ville");
+        require(cp, "codePostal");
+        require(r, "region");
+        require(t, "telephone");
+        require(n, "nom");
+        require(pr, "prenom");
 
         String passwordHash = hashPassword(p);
-        return loueurRepository.add(new Loueur(e, passwordHash, "", "", "", "", "", u, ""));
+
+        // Loueur(String mail, String motDePasse, String adresse, String ville, String codePostal, String region, String telephone, String nom, String prenom)
+        return loueurRepository.add(new Loueur(e, passwordHash, a, v, cp, r, t, n, pr));
     }
 
     @Transactional
-    public long ajouterEntrepriseEntretien(String username, String email, String password,
-                                          String nomEntreprise, String raisonSociale, String siret) {
-        String u = clean(username);
+    public long ajouterEntrepriseEntretien(
+            String email,
+            String password,
+            String adresse,
+            String ville,
+            String codePostal,
+            String region,
+            String telephone,
+            String nomEntreprise,
+            String raisonSociale,
+            String siret
+    ) {
         String e = clean(email);
         String p = clean(password);
+        String a = clean(adresse);
+        String v = clean(ville);
+        String cp = clean(codePostal);
+        String r = clean(region);
+        String t = clean(telephone);
+        String ne = clean(nomEntreprise);
         String rs = clean(raisonSociale);
         String si = clean(siret);
 
-        require(u, "username");
         require(e, "email");
         require(p, "password");
+        require(a, "adresse");
+        require(v, "ville");
+        require(cp, "codePostal");
+        require(r, "region");
+        require(t, "telephone");
+        require(ne, "nomEntreprise");
         require(rs, "raisonSociale");
         require(si, "siret");
 
         String passwordHash = hashPassword(p);
 
-        return entrepriseEntretienRepository.add(new EntrepriseEntretien(e, passwordHash, "", "", "", "", "", u, rs, si));
+        // EntrepriseEntretien(String mail, String motDePasse, String adresse, String ville, String codePostal, String region, String telephone, String nomEntreprise, String raisonSoc, String noSiret)
+        return entrepriseEntretienRepository.add(new EntrepriseEntretien(e, passwordHash, a, v, cp, r, t, ne, rs, si));
     }
 
     /** TODO:
      * @Transactional
-    public long ajouterAgentProfessionnel(String username, String email, String password,
-                                          String raisonSociale, String siret) {
-    }**/
+     * public long ajouterAgentProfessionnel(...) { ... }
+     */
 }

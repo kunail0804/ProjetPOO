@@ -32,151 +32,291 @@
     <!-- Champ caché pour envoyer le rôle au controller -->
     <input type="hidden" id="roleHidden" name="role" th:value="${role}">
 
-    <!-- Champs communs (présents dans Utilisateur) -->
-    <div>
-        <label for="username">Nom d'utilisateur</label><br>
-        <input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="Nom d'utilisateur"
-                required
-                th:value="${username}"
-        >
-    </div>
+    <!-- Tout le formulaire (hors select) est caché tant qu'aucun rôle n'est sélectionné -->
+    <div id="formFields" style="display:none;">
 
-    <br>
-
-    <div>
-        <label for="email">Email</label><br>
-        <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="email@exemple.com"
-                required
-                th:value="${email}"
-        >
-    </div>
-
-    <br>
-
-    <div>
-        <label for="password">Mot de passe</label><br>
-        <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Mot de passe"
-                required
-        >
-    </div>
-
-    <br>
-
-    <!-- Champs AGENT / LOUEUR (nom, prenom) -->
-    <div id="personFields" style="display:none;">
-        <h2>Informations personnelles</h2>
+        <!-- Champs communs -->
+        <h2>Compte</h2>
 
         <div>
-            <label for="nom">Nom</label><br>
+            <label for="email">Email</label><br>
             <input
-                    type="text"
-                    id="nom"
-                    name="nom"
-                    placeholder="Nom"
-                    th:value="${nom}"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="email@exemple.com"
+                    required
+                    th:value="${email}"
             >
         </div>
 
         <br>
 
         <div>
-            <label for="prenom">Prénom</label><br>
+            <label for="password">Mot de passe</label><br>
             <input
-                    type="text"
-                    id="prenom"
-                    name="prenom"
-                    placeholder="Prénom"
-                    th:value="${prenom}"
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Mot de passe"
+                    required
             >
         </div>
 
         <br>
+
+        <!-- Champs AGENT / LOUEUR (nom, prenom + adresse) -->
+        <div id="personFields" style="display:none;">
+            <h2>Informations personnelles</h2>
+
+            <div>
+                <label for="nom">Nom</label><br>
+                <input
+                        type="text"
+                        id="nom"
+                        name="nom"
+                        placeholder="Nom"
+                        th:value="${nom}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="prenom">Prénom</label><br>
+                <input
+                        type="text"
+                        id="prenom"
+                        name="prenom"
+                        placeholder="Prénom"
+                        th:value="${prenom}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="telephone">Téléphone</label><br>
+                <input
+                        type="tel"
+                        id="telephone"
+                        name="telephone"
+                        placeholder="0612345678"
+                        th:value="${telephone}"
+                >
+            </div>
+
+            <br>
+
+            <h3>Adresse</h3>
+
+            <div>
+                <label for="adresse">Adresse</label><br>
+                <input
+                        type="text"
+                        id="adresse"
+                        name="adresse"
+                        placeholder="12 rue Exemple"
+                        th:value="${adresse}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="ville">Ville</label><br>
+                <input
+                        type="text"
+                        id="ville"
+                        name="ville"
+                        placeholder="Toulouse"
+                        th:value="${ville}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="codePostal">Code postal</label><br>
+                <input
+                        type="text"
+                        id="codePostal"
+                        name="codePostal"
+                        placeholder="31000"
+                        th:value="${codePostal}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="region">Région</label><br>
+                <input
+                        type="text"
+                        id="region"
+                        name="region"
+                        placeholder="Occitanie"
+                        th:value="${region}"
+                >
+            </div>
+
+            <br>
+        </div>
+
+        <!-- Champs ENTRETIEN (entreprise + adresse) -->
+        <div id="entrepriseFields" style="display:none;">
+            <h2>Informations entreprise</h2>
+
+            <div>
+                <label for="nomEntreprise">Nom de l'entreprise</label><br>
+                <input
+                        type="text"
+                        id="nomEntreprise"
+                        name="nomEntreprise"
+                        placeholder="Nom de l'entreprise"
+                        th:value="${nomEntreprise}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="raisonSociale">Raison sociale</label><br>
+                <input
+                        type="text"
+                        id="raisonSociale"
+                        name="raisonSociale"
+                        placeholder="Raison sociale"
+                        th:value="${raisonSociale}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="siret">Numéro SIRET</label><br>
+                <input
+                        type="text"
+                        id="siret"
+                        name="siret"
+                        placeholder="12345678900000"
+                        th:value="${siret}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="telephoneEntreprise">Téléphone</label><br>
+                <input
+                        type="tel"
+                        id="telephoneEntreprise"
+                        name="telephone"
+                        placeholder="0512345678"
+                        th:value="${telephone}"
+                >
+            </div>
+
+            <br>
+
+            <h3>Adresse</h3>
+
+            <div>
+                <label for="adresseEntreprise">Adresse</label><br>
+                <input
+                        type="text"
+                        id="adresseEntreprise"
+                        name="adresse"
+                        placeholder="12 rue Exemple"
+                        th:value="${adresse}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="villeEntreprise">Ville</label><br>
+                <input
+                        type="text"
+                        id="villeEntreprise"
+                        name="ville"
+                        placeholder="Toulouse"
+                        th:value="${ville}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="codePostalEntreprise">Code postal</label><br>
+                <input
+                        type="text"
+                        id="codePostalEntreprise"
+                        name="codePostal"
+                        placeholder="31000"
+                        th:value="${codePostal}"
+                >
+            </div>
+
+            <br>
+
+            <div>
+                <label for="regionEntreprise">Région</label><br>
+                <input
+                        type="text"
+                        id="regionEntreprise"
+                        name="region"
+                        placeholder="Occitanie"
+                        th:value="${region}"
+                >
+            </div>
+
+            <br>
+        </div>
+
+        <button type="submit">S'inscrire</button>
     </div>
-
-    <!-- Champs ENTRETIEN (nomEntreprise, raisonSociale, siret) -->
-    <div id="entrepriseFields" style="display:none;">
-        <h2>Informations entreprise</h2>
-
-        <div>
-            <label for="nomEntreprise">Nom de l'entreprise</label><br>
-            <input
-                    type="text"
-                    id="nomEntreprise"
-                    name="nomEntreprise"
-                    placeholder="Nom de l'entreprise"
-                    th:value="${nomEntreprise}"
-            >
-        </div>
-
-        <br>
-
-        <div>
-            <label for="raisonSociale">Raison sociale</label><br>
-            <input
-                    type="text"
-                    id="raisonSociale"
-                    name="raisonSociale"
-                    placeholder="Raison sociale"
-                    th:value="${raisonSociale}"
-            >
-        </div>
-
-        <br>
-
-        <div>
-            <label for="siret">Numéro SIRET</label><br>
-            <input
-                    type="text"
-                    id="siret"
-                    name="siret"
-                    placeholder="12345678900000"
-                    th:value="${siret}"
-            >
-        </div>
-
-        <br>
-    </div>
-
-    <button type="submit">S'inscrire</button>
 </form>
 
 <script>
     function setEnabled(containerId, enabled) {
         const container = document.getElementById(containerId);
         if (!container) return;
-        const inputs = container.querySelectorAll("input, select, textarea");
+        const inputs = container.querySelectorAll("input, select, textarea, button");
         inputs.forEach(i => i.disabled = !enabled);
     }
 
     function onRoleChange() {
-        const roleSelect = document.getElementById("role");
-        const selectedRole = roleSelect.value;
+        const selectedRole = document.getElementById("role").value;
 
+        // Sync rôle dans le hidden
         const roleHidden = document.getElementById("roleHidden");
         roleHidden.value = selectedRole;
 
+        const formFields = document.getElementById("formFields");
         const personFields = document.getElementById("personFields");
         const entrepriseFields = document.getElementById("entrepriseFields");
 
-        // reset affichage
+        // Si aucun rôle => on cache tout le formulaire (hors select) et on désactive
+        if (!selectedRole) {
+            formFields.style.display = "none";
+            setEnabled("formFields", false);
+            personFields.style.display = "none";
+            entrepriseFields.style.display = "none";
+            return;
+        }
+
+        // Rôle sélectionné => on montre le formulaire de base (email/mdp)
+        formFields.style.display = "block";
+        setEnabled("formFields", true);
+
+        // Reset sections spécifiques
         personFields.style.display = "none";
         entrepriseFields.style.display = "none";
         setEnabled("personFields", false);
         setEnabled("entrepriseFields", false);
 
-        // afficher selon rôle (AgentPro ignoré pour l'instant)
+        // Afficher selon rôle
         if (selectedRole === "AGENT" || selectedRole === "LOUEUR") {
             personFields.style.display = "block";
             setEnabled("personFields", true);

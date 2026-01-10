@@ -12,12 +12,19 @@ public class Agent extends Utilisateur{
     this.nom = nom;
     this.prenom = prenom;
   }
+
+    public Agent(int idUtilisateur, String mail, String motDePasse, String adresse,
+                       String ville, String codePostal, String region,
+                       String telephone, String nom, String prenom) {
+    super(idUtilisateur, mail, motDePasse, adresse, ville, codePostal, region, telephone);
+    this.nom = nom;
+    this.prenom = prenom;
+  }
   
    public String getNom () { return nom; }
    public String getPrenom () { return prenom; }
 	 
       public void setNom(String nom) 
-      
       {
         this.nom = nom;
     }

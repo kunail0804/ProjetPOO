@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion réussie</title>
+</head>
+<body>
+
+<h1>Résultat de la connexion</h1>
+
+<p th:text="${message}">
+    Connexion réussie
+</p>
+
+<a th:href="@{/connexion}">Retour à la connexion</a>
+
+</body>
+</html>
