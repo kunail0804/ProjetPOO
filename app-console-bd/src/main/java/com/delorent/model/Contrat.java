@@ -1,44 +1,26 @@
 package com.delorent.model;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 public class Contrat {
-   private Date dateDebut;
-   private Date dateFin;
-   private String lieuPrise;
-   private String lieuDepot;
 
-   public Contrat (Date dateDebut, Date dateFin, String lieuPrise, String lieuDepot)
-       {
-       this.dateDebut = dateDebut;
-       this.dateFin = dateFin;
-       this.lieuPrise = lieuPrise;
-	   this.lieuDepot = lieuDepot;
-       }
+    private final LocalDate dateDebut;
+    private final LocalDate dateFin;
+    private final String lieuPrise;
+    private final String lieuDepot;
+    private final double prixEstime;
 
-   public Date getDateDebut () { return dateDebut; }
-   public Date getDateFin () { return dateFin; }
-   public String getLieuPrise () { return lieuPrise; }
-   public String getLieuDepot () { return lieuDepot; }
-
-
-      public void setDateDebut(Date DateDebut) 
-      
-        {
-        this.dateDebut = dateDebut;  
-    }
-	  public void setDateFin(Date DateFin) 
-        {
-        this.dateFin = dateFin; 
-    }
-	  public void setLieuPrise(String lieuPrise) 
-        {
+    public Contrat(LocalDate dateDebut, LocalDate dateFin, String lieuPrise, String lieuDepot, double prixEstime) {
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
         this.lieuPrise = lieuPrise;
-    }
-	  public void setLieuDepot(String lieuDepot) 
-      
-        {this.lieuDepot = lieuDepot;
-
+        this.lieuDepot = lieuDepot;
+        this.prixEstime = prixEstime;
     }
 
+    public LocalDate getDateDebut() { return dateDebut; }
+    public LocalDate getDateFin() { return dateFin; }
+    public String getLieuPrise() { return lieuPrise; }
+    public String getLieuDepot() { return lieuDepot; }
+    public double getPrixEstime() { return prixEstime; }
 }

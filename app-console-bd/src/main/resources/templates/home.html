@@ -11,6 +11,14 @@
 
 <hr>
 
+<p>
+    <a th:href="@{/louer}">
+        <button type="button">Louer un véhicule</button>
+    </a>
+</p>
+
+<hr>
+
 <div th:if="${dbOk}">
     <p>✅ DB OK</p>
     <p>Nombre de lignes dans la table: <strong th:text="${dbCount}">0</strong></p>
@@ -26,10 +34,8 @@
         <div th:each="row, rowStat : ${users}">
             <h3 th:text="${'Ligne #' + (rowStat.index + 1)}">Ligne #1</h3>
 
-            <!-- Affiche la Map entière en debug (utile) -->
             <pre th:text="${row}">{col=value}</pre>
 
-            <!-- Affiche clé -> valeur proprement -->
             <ul>
                 <li th:each="entry : ${row.entrySet()}">
                     <strong th:text="${entry.key}">col</strong>

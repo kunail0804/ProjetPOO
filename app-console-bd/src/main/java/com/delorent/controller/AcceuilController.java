@@ -1,5 +1,5 @@
 package com.delorent.controller;
-public class Acceuil {
+public class AcceuilController {
     public void redirigerVersRecherche(){
         return;
     }

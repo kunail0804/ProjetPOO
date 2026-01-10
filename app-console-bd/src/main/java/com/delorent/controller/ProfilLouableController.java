@@ -1,7 +1,7 @@
 package com.delorent.controller;
 
 
-public class ProfilLouable {
+public class ProfilLouableController {
     public void getProfilLouable (int idLouable) {
         return;
     }
