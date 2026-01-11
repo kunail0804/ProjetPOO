@@ -45,6 +45,9 @@ public abstract class Utilisateur {
         //this.dateInscription = dateInscription;
     }
 
+    public Utilisateur() {
+        // Constructeur vide indispensable
+    }
     // Getters et Setters
 
     public int getIdUtilisateur() {

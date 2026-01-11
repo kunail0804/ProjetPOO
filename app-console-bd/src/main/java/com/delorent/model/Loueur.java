@@ -26,6 +26,14 @@ public class Loueur extends Utilisateur {
         this.prenom = prenom;
     }
 
+    public Loueur() {
+        super(); // Appelle le constructeur vide de Utilisateur
+    }
+
+    // Méthode utilitaire pour l'affichage (Thymeleaf appelle getNomComplet() quand on écrit ${loueur.nomComplet})
+    public String getNomComplet() {
+        return this.getPrenom() + " " + this.getNom();
+    }
     // Getters
     public String getNom() {
         return nom;

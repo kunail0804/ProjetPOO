@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Profil Loueur</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-primary mb-5">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">🚗 Mon Espace Loueur</span>
+            <a href="/" class="btn btn-outline-light btn-sm">Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                
+                <div class="card shadow">
+                    <div class="card-header bg-white py-3">
+                        <h4 class="mb-0 text-primary">Informations Personnelles</h4>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="row mb-4 align-items-center">
+                            <div class="col-md-3 text-center">
+                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto" 
+                                     style="width: 100px; height: 100px; font-size: 2em;">
+                                    <span th:text="${#strings.substring(loueur.prenom,0,1)}">A</span>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <h2 th:text="${loueur.nomComplet}">Jean Dupont</h2>
+                                <span class="badge bg-success">Compte Vérifié</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="small text-muted">Email</label>
+                                <p class="fw-bold" th:text="${loueur.mail}">email@test.com</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted">Téléphone</label>
+                                <p class="fw-bold" th:text="${loueur.telephone} ?: 'Non renseigné'">06...</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted">Ville</label>
+                                <p class="fw-bold" th:text="${loueur.ville}">Paris</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted">Code Postal</label>
+                                <p class="fw-bold" th:text="${loueur.codePostal} ?: '...'">75000</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 text-end">
+                            <button class="btn btn-outline-primary">Modifier mes informations ✏️</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
