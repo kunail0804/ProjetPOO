@@ -12,6 +12,9 @@
         .ok { color: green; }
         .err { color: red; }
         .btn { display:inline-block; padding:6px 10px; border:1px solid #ccc; border-radius:6px; text-decoration:none; }
+        .filters { display:flex; gap:12px; align-items:end; flex-wrap:wrap; }
+        .filters label { display:block; font-size:0.9em; margin-bottom:4px; }
+        .filters input { padding:6px 10px; border:1px solid #ccc; border-radius:6px; }
     </style>
 </head>
 <body>
@@ -27,6 +30,30 @@
 </div>
 <div th:if="${erreur}">
     <p class="err" th:text="${erreur}">Erreur</p>
+</div>
+
+<div class="box" style="margin-bottom: 12px;">
+    <form method="get" th:action="@{/louables}" class="filters">
+        <div>
+            <label for="prixMax">Prix max / jour (€)</label>
+            <input id="prixMax"
+                   type="number"
+                   name="prixMax"
+                   min="0"
+                   step="0.01"
+                   placeholder="ex: 50"
+                   th:value="${filtrePrixMax}">
+        </div>
+
+        <div>
+            <button class="btn" type="submit">Filtrer</button>
+            <a class="btn" th:href="@{/louables}">Réinitialiser</a>
+        </div>
+    </form>
+
+    <p class="muted" style="margin-top:8px" th:if="${filtrePrixMax != null}">
+        Filtre actif : prix ≤ <span th:text="${filtrePrixMax}">50</span> €/jour
+    </p>
 </div>
 
 <div class="box">

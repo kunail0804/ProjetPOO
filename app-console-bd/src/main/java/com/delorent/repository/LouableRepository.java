@@ -3,6 +3,8 @@ package com.delorent.repository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.delorent.model.LouableFiltre;
+import com.delorent.model.SqlClause;
 import com.delorent.model.StatutLouable;
 
 import java.util.List;
@@ -36,15 +38,32 @@ public class LouableRepository  implements RepositoryBase<LouableSummary, Intege
         ));
     }
 
-    public List<LouableSummary> getAllDisponible() {
-        String sql = "SELECT * FROM " + T_LOUABLE + " WHERE " + COL_STATUT + " = ?";
-        return jdbcTemplate.query(sql, new Object[]{StatutLouable.DISPONIBLE.name()}, (rs, i) -> new LouableSummary(
+    public List<LouableSummary> getDisponibles(List<LouableFiltre> filtres) {
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        sql.append("SELECT l.* FROM ").append(T_LOUABLE).append(" l ");
+        sql.append("WHERE l.").append(COL_STATUT).append(" = ? ");
+        params.add(StatutLouable.DISPONIBLE.name());
+
+        for (LouableFiltre f : filtres) {
+            if (f != null && f.isActif()) {
+                SqlClause c = f.toSqlClause();
+                sql.append("AND ").append(c.predicate()).append(" ");
+                params.addAll(c.params());
+            }
+        }
+
+        sql.append("ORDER BY l.").append(COL_PRIXJOUR).append(" ASC");
+
+        return jdbcTemplate.query(sql.toString(), params.toArray(), (rs, i) -> new LouableSummary(
             rs.getInt(COL_ID),
             rs.getDouble(COL_PRIXJOUR),
             StatutLouable.valueOf(rs.getString(COL_STATUT)),
             rs.getString(COL_LIEU)
         ));
     }
+
 
     @Override
     public LouableSummary get(Integer id) {
@@ -92,53 +111,5 @@ public class LouableRepository  implements RepositoryBase<LouableSummary, Intege
         String sql = "DELETE FROM " + T_LOUABLE + " WHERE " + COL_ID + " = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
-    }
-
-    public List<Map<String, Object>> rechercherVehicules(String ville, String marque, Integer anneeMin, Double prixMax) {
-        StringBuilder sql = new StringBuilder();
-        List<Object> params = new ArrayList<>();
-
-        // 1. SELECT : On récupère toutes les nouvelles infos
-        // J'utilise des alias pour être sûr des noms en Java
-        sql.append("SELECT l.idLouable AS id, ");
-        sql.append("       l.prixJour AS prix, ");
-        sql.append("       l.lieuPrincipal AS ville, "); // Nouvelle colonne
-        sql.append("       v.marque AS marque, ");
-        sql.append("       v.modele AS modele, ");
-        sql.append("       v.annee AS annee, ");         // Nouvelle colonne
-        sql.append("       v.kilometrage AS km, ");      // Nouvelle colonne
-        sql.append("       v.immatriculation AS immatriculation ");
-        
-        sql.append("FROM VEHICULE v ");
-        sql.append("JOIN LOUABLE l ON v.id_louable = l.idLouable ");
-        sql.append("WHERE 1=1 ");
-
-        // 2. CRITÈRES DE SÉLECTION DYNAMIQUES
-
-        // Filtre Ville (lieuPrincipal)
-        if (ville != null && !ville.trim().isEmpty()) {
-            sql.append("AND l.lieuPrincipal LIKE ? ");
-            params.add("%" + ville + "%");
-        }
-
-        // Filtre Marque
-        if (marque != null && !marque.trim().isEmpty()) {
-            sql.append("AND v.marque LIKE ? ");
-            params.add("%" + marque + "%");
-        }
-
-        // Filtre Année Minimum (ex: cherche voiture plus récente que 2018)
-        if (anneeMin != null) {
-            sql.append("AND v.annee >= ? ");
-            params.add(anneeMin);
-        }
-
-        // Filtre Prix Maximum (ex: budget max 50€)
-        if (prixMax != null) {
-            sql.append("AND l.prixJour <= ? ");
-            params.add(prixMax);
-        }
-
-        return jdbcTemplate.queryForList(sql.toString(), params.toArray());
     }
 }
