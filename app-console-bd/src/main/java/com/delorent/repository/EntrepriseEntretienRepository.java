@@ -1,15 +1,18 @@
 package com.delorent.repository;
 
-import com.delorent.model.EntrepriseEntretien;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.List;
+
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.List;
+import com.delorent.model.EntrepriseEntretien;
+import com.delorent.model.Tarif;
 
 @Repository
 public class EntrepriseEntretienRepository implements RepositoryBase<EntrepriseEntretien, Long> {
@@ -184,5 +187,19 @@ public class EntrepriseEntretienRepository implements RepositoryBase<EntrepriseE
 
         var res = jdbcTemplate.query(sql, (rs, rowNum) -> mapRow(rs), email, password);
         return res.isEmpty() ? null : res.get(0);
+    }
+
+    public EntrepriseEntretien trouverParId(int id) {
+        return get((long) id);
+    }
+
+    public List<Tarif> trouverTarifs(int idEntreprise) {
+        String sql = "SELECT * FROM TARIF_ENTRETIEN WHERE idEntreprise = ?";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Tarif.class), idEntreprise);
+    }
+
+    public void ajouterTarif(Tarif tarif) {
+        String sql = "INSERT INTO TARIF_ENTRETIEN (idEntreprise, typeVehicule, modele, prixForfait) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, tarif.getIdEntreprise(), tarif.getTypeVehicule(), tarif.getModele(), tarif.getPrixForfait());
     }
 }

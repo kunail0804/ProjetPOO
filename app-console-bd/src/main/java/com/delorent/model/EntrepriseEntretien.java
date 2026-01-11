@@ -45,6 +45,10 @@ public class EntrepriseEntretien extends Utilisateur {
         this.noSiret = noSiret;
     }
 
+    public EntrepriseEntretien() {
+        super();
+    }
+
     public String getNomEntreprise() {
         return nomEntreprise;
     }

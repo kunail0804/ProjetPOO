@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Tarifs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body">
+            <h2 class="text-primary" th:text="${entreprise.nomEntreprise}">Nom Entreprise</h2>
+            <p class="text-muted mb-0">SIRET : <span th:text="${entreprise.noSiret}"></span></p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">Ajouter un prix</div>
+                <div class="card-body">
+                    <form action="/entreprise/tarifs/ajouter" method="post" th:object="${nouveauTarif}">
+                        <div class="mb-3">
+                            <label class="form-label">Type Véhicule</label>
+                            <select class="form-select" th:field="*{typeVehicule}">
+                                <option value="Citadine">Citadine</option>
+                                <option value="Berline">Berline</option>
+                                <option value="SUV">SUV</option>
+                                <option value="Utilitaire">Utilitaire</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Modèle (Optionnel)</label>
+                            <input type="text" class="form-control" th:field="*{modele}" placeholder="Ex: Clio 5">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Prix (€)</label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{prixForfait}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">Mes Tarifs Actuels</div>
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Type</th>
+                            <th>Modèle</th>
+                            <th class="text-end">Prix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="t : ${tarifs}">
+                            <td><span class="badge bg-info text-dark" th:text="${t.typeVehicule}">Type</span></td>
+                            <td th:text="${t.modele} ?: 'Tous modèles'">Modèle</td>
+                            <td class="text-end fw-bold" th:text="${t.prixForfait} + ' €'">Prix</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
