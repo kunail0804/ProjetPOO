@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Catalogue des véhicules</title>
+    <style>
+        .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
+        .muted { color: #666; font-size: 0.9em; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #e5e5e5; padding: 8px; text-align: left; }
+        th { background: #f7f7f7; }
+        .ok { color: green; }
+        .err { color: red; }
+        .btn { display:inline-block; padding:6px 10px; border:1px solid #ccc; border-radius:6px; text-decoration:none; }
+    </style>
+</head>
+<body>
+
+<h1>Véhicules disponibles</h1>
+
+<p class="muted">
+    Sélectionne un véhicule pour accéder à sa page et lancer une demande de location.
+</p>
+
+<div th:if="${succes}">
+    <p class="ok" th:text="${succes}">Succès</p>
+</div>
+<div th:if="${erreur}">
+    <p class="err" th:text="${erreur}">Erreur</p>
+</div>
+
+<div class="box">
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Prix/jour</th>
+            <th>Statut</th>
+            <th>Lieu principal</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:if="${louables == null || #lists.isEmpty(louables)}">
+            <td colspan="8" class="muted">Aucun véhicule disponible pour le moment.</td>
+        </tr>
+
+        <tr th:each="l : ${louables}">
+            <td th:text="${l.idLouable}">1</td>
+            <td th:text="${l.prixJour}">50</td>
+            <td th:text="${l.statut}">DISPONIBLE</td>
+            <td th:text="${l.lieuPrincipal}">Toulouse</td>
+            <td>
+                <a class="btn"
+                   th:href="@{/louables/{id}(id=${l.idLouable})}">
+                    Voir
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

@@ -6,11 +6,45 @@ public class Camion extends Vehicule {
     private double volumeUtileM3;
     private double hauteurM;
     private double longueurM;
-    private String permisRequis; // Exemple: "B", "C"
-    
-    public Camion(int id, String marque, String modele, double prixJour, String immatriculation, int chargeMaxKg,
+    private String permisRequis;
+
+    public Camion(int idLouable, double prixJour, String lieuPrincipal, String marque, String modele, int annee,
+            String couleur, String immatriculation, int kilometrage, int chargeMaxKg, double volumeUtileM3,
+            double hauteurM, double longueurM, String permisRequis) {
+        super(idLouable, prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        this.chargeMaxKg = chargeMaxKg;
+        this.volumeUtileM3 = volumeUtileM3;
+        this.hauteurM = hauteurM;
+        this.longueurM = longueurM;
+        this.permisRequis = permisRequis;
+    }
+
+    public Camion(double prixJour, String lieuPrincipal, String marque, String modele, int annee, String couleur,
+            String immatriculation, int kilometrage, int chargeMaxKg, double volumeUtileM3, double hauteurM,
+            double longueurM, String permisRequis) {
+        super(prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        this.chargeMaxKg = chargeMaxKg;
+        this.volumeUtileM3 = volumeUtileM3;
+        this.hauteurM = hauteurM;
+        this.longueurM = longueurM;
+        this.permisRequis = permisRequis;
+    }
+
+    public Camion(int idLouable, double prixJour, StatutLouable statut, String lieuPrincipal, String marque,
+            String modele, int annee, String couleur, String immatriculation, int kilometrage, int chargeMaxKg,
             double volumeUtileM3, double hauteurM, double longueurM, String permisRequis) {
-        super(id, marque, modele, prixJour, immatriculation);
+        super(idLouable, prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        this.chargeMaxKg = chargeMaxKg;
+        this.volumeUtileM3 = volumeUtileM3;
+        this.hauteurM = hauteurM;
+        this.longueurM = longueurM;
+        this.permisRequis = permisRequis;
+    }
+
+    public Camion(double prixJour, StatutLouable statut, String lieuPrincipal, String marque, String modele, int annee,
+            String couleur, String immatriculation, int kilometrage, int chargeMaxKg, double volumeUtileM3,
+            double hauteurM, double longueurM, String permisRequis) {
+        super(prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
         this.chargeMaxKg = chargeMaxKg;
         this.volumeUtileM3 = volumeUtileM3;
         this.hauteurM = hauteurM;

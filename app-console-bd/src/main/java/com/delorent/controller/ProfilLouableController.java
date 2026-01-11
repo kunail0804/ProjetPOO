@@ -1,23 +1,32 @@
 package com.delorent.controller;
 
+import com.delorent.repository.LouableRepository;
+import com.delorent.repository.LouableSummary;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
+@Controller
 public class ProfilLouableController {
-    public void getProfilLouable (int idLouable) {
-        return;
-    }
-    public boolean peutNoter(){
-        return false;
-    }
-    
-    public void noterLouable(int idLouable, int note){
-        return;
+
+    private final LouableRepository louableRepository;
+
+    public ProfilLouableController(LouableRepository louableRepository) {
+        this.louableRepository = louableRepository;
     }
 
-    public void louer (int idLouable){
-        return;
-    }
+    @GetMapping("/louables/{id}")
+    public String profilLouable(@PathVariable("id") int id, Model model) {
 
-    public void voirProfilAgent(int idUser){
-        return;
+        LouableSummary louable = louableRepository.get(id);
+
+        if (louable == null) {
+            model.addAttribute("erreur", "Louable introuvable (id=" + id + ").");
+            return "louable-profil"; // ou "redirect:/louables"
+        }
+
+        model.addAttribute("louable", louable);
+        return "louable-profil";
     }
 }

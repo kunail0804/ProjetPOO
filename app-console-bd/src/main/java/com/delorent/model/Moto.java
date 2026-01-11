@@ -7,9 +7,37 @@ public class Moto extends Vehicule {
     private TypeMoto typeMoto;
     private String permisRequis;
 
-    public Moto(int id, String marque, String modele, double prixJour, String immatriculation, int cylindreeCc,
+    public Moto(int idLouable, double prixJour, String lieuPrincipal, String marque, String modele, int annee,
+            String couleur, String immatriculation, int kilometrage, int cylindreeCc, int puissanceCh,
+            TypeMoto typeMoto, String permisRequis) {
+        super(idLouable, prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        this.cylindreeCc = cylindreeCc;
+        this.puissanceCh = puissanceCh;
+        this.typeMoto = typeMoto;
+        this.permisRequis = permisRequis;
+    }
+    public Moto(double prixJour, String lieuPrincipal, String marque, String modele, int annee, String couleur,
+            String immatriculation, int kilometrage, int cylindreeCc, int puissanceCh, TypeMoto typeMoto,
+            String permisRequis) {
+        super(prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        this.cylindreeCc = cylindreeCc;
+        this.puissanceCh = puissanceCh;
+        this.typeMoto = typeMoto;
+        this.permisRequis = permisRequis;
+    }
+    public Moto(int idLouable, double prixJour, StatutLouable statut, String lieuPrincipal, String marque,
+            String modele, int annee, String couleur, String immatriculation, int kilometrage, int cylindreeCc,
             int puissanceCh, TypeMoto typeMoto, String permisRequis) {
-        super(id, marque, modele, prixJour, immatriculation);
+        super(idLouable, prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        this.cylindreeCc = cylindreeCc;
+        this.puissanceCh = puissanceCh;
+        this.typeMoto = typeMoto;
+        this.permisRequis = permisRequis;
+    }
+    public Moto(double prixJour, StatutLouable statut, String lieuPrincipal, String marque, String modele, int annee,
+            String couleur, String immatriculation, int kilometrage, int cylindreeCc, int puissanceCh,
+            TypeMoto typeMoto, String permisRequis) {
+        super(prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
         this.cylindreeCc = cylindreeCc;
         this.puissanceCh = puissanceCh;
         this.typeMoto = typeMoto;

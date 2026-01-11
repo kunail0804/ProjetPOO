@@ -3,43 +3,41 @@ package com.delorent.model;
 
 public abstract class Louable {
 
-    private int id;
-    private String marque;
-    private String modele;
-    private int annee;
-    private String couleur;
+    private int idLouable;
     private double prixJour;
-    
     private StatutLouable statut;
-    
     private String lieuPrincipal;
 
-    public Louable(int id, String marque, String modele, double prixJour) {
-        this.id = id;
-        this.marque = marque;
-        this.modele = modele;
+    public Louable(int idLouable, double prixJour, String lieuPrincipal) {
+        this.idLouable = idLouable;
         this.prixJour = prixJour;
-        this.statut = StatutLouable.DISPONIBLE;
+        this.statut = StatutLouable.INDISPONIBLE;
+        this.lieuPrincipal = lieuPrincipal;
     }
 
-    public int getId() {
-        return id;
+    public Louable(double prixJour, String lieuPrincipal) {
+        this.prixJour = prixJour;
+        this.statut = StatutLouable.INDISPONIBLE;
+        this.lieuPrincipal = lieuPrincipal;
     }
 
-    public String getMarque() {
-        return marque;
+    public Louable(int idLouable, double prixJour, StatutLouable statut, String lieuPrincipal) {
+        this.idLouable = idLouable;
+        this.prixJour = prixJour;
+        this.statut = statut;
+        this.lieuPrincipal = lieuPrincipal;
     }
 
-    public String getModele() {
-        return modele;
+    public Louable(double prixJour, StatutLouable statut, String lieuPrincipal) {
+        this.prixJour = prixJour;
+        this.statut = statut;
+        this.lieuPrincipal = lieuPrincipal;
     }
 
-    public int getAnnee() {
-        return annee;
-    }
+     // Getters et Setters
 
-    public String getCouleur() {
-        return couleur;
+    public int getIdLouable() {
+        return idLouable;
     }
 
     public double getPrixJour() {
@@ -54,24 +52,8 @@ public abstract class Louable {
         return lieuPrincipal;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setMarque(String marque) {
-        this.marque = marque;
-    }
-
-    public void setModele(String modele) {
-        this.modele = modele;
-    }
-
-    public void setAnnee(int annee) {
-        this.annee = annee;
-    }
-
-    public void setCouleur(String couleur) {
-        this.couleur = couleur;
+    public void setIdLouable(int idLouable) {
+        this.idLouable = idLouable;
     }
 
     public void setPrixJour(double prixJour) {

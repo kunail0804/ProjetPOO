@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil véhicule</title>
+    <style>
+        .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
+        .muted { color: #666; font-size: 0.9em; }
+        .ok { color: green; }
+        .err { color: red; }
+        .row { display:flex; gap:24px; flex-wrap: wrap; }
+        .col { flex: 1 1 320px; }
+        .btn { display:inline-block; padding:8px 12px; border:1px solid #ccc; border-radius:8px; text-decoration:none; }
+        .btn-primary { border-color:#999; font-weight:600; }
+        .kv { margin: 0; }
+        .kv dt { font-weight: 600; margin-top: 10px; }
+        .kv dd { margin: 2px 0 0 0; }
+        .badge { display:inline-block; padding:2px 8px; border:1px solid #ddd; border-radius:999px; font-size: 0.85em; }
+    </style>
+</head>
+<body>
+
+<p><a th:href="@{/louables}">← Retour au catalogue</a></p>
+
+<h1>Profil du véhicule</h1>
+
+<div th:if="${succes}">
+    <p class="ok" th:text="${succes}">Succès</p>
+</div>
+<div th:if="${erreur}">
+    <p class="err" th:text="${erreur}">Erreur</p>
+</div>
+
+<!-- Cas louable introuvable -->
+<div th:if="${louable == null}" class="box">
+    <p class="err">Ce véhicule est introuvable.</p>
+    <p class="muted">Vérifie l’identifiant dans l’URL.</p>
+</div>
+
+<!-- Profil -->
+<div th:if="${louable != null}" class="row">
+    <div class="col box">
+
+        <p class="muted" style="margin-top:4px;">
+            ID louable :
+            <strong th:text="${louable.idLouable != null ? louable.idLouable : louable.id}">1</strong>
+        </p>
+
+        <dl class="kv">
+            <dt>Prix / jour</dt>
+            <dd>
+                <span th:text="${louable.prixJour != null ? (louable.prixJour + ' €') : '—'}">50 €</span>
+            </dd>
+
+            <dt>Statut</dt>
+            <dd>
+                <span class="badge" th:text="${louable.statut != null ? louable.statut : '—'}">DISPONIBLE</span>
+            </dd>
+
+            <dt>Lieu principal (prise)</dt>
+            <dd th:text="${louable.lieuPrincipal != null ? louable.lieuPrincipal : '—'}">Toulouse</dd>
+        </dl>
+
+        <hr>
+
+        <!-- Bouton louer : on envoie idLouable en query param -->
+        <a class="btn btn-primary"
+            th:href="@{/louables/{id}/louer(id=${louable.idLouable})}">
+            Louer ce véhicule
+        </a>
+
+        <p class="muted" style="margin-top:8px;">
+            Tu passeras ensuite au formulaire de location (dates, assurance, lieu de dépôt…).
+        </p>
+    </div>
+
+    <!-- Colonne “à venir” (contexte pour plus tard) -->
+    <div class="col box">
+        <h2 style="margin-top:0;">Informations (à venir)</h2>
+        <p class="muted">
+            Plus tard on mettra ici : photos, description, options, historiques, etc.
+        </p>
+        <ul class="muted">
+            <li>Résumé des disponibilités</li>
+            <li>Conditions / règles</li>
+            <li>Détails véhicule</li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

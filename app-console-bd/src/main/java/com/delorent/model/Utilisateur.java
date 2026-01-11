@@ -3,7 +3,7 @@ package com.delorent.model;
 
 //import java.time.LocalDate;
 
-public class Utilisateur {
+public abstract class Utilisateur {
 
    private int idUtilisateur;
    private String adresse;

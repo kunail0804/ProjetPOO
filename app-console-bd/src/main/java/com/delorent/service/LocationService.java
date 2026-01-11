@@ -1,94 +1,130 @@
 package com.delorent.service;
 
+import com.delorent.model.Contrat;
+import com.delorent.model.ContratEtat;
+import com.delorent.model.Assurance;
+import com.delorent.model.Disponibilite;
+import com.delorent.repository.AssuranceRepository;
+import com.delorent.repository.ContratRepository;
 import com.delorent.repository.DisponibiliteRepository;
-import com.delorent.repository.LocationRepository;
-import org.springframework.dao.DataAccessException;
+import com.delorent.repository.LouableRepository;
+import com.delorent.repository.LouableSummary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.List;
 
 @Service
 public class LocationService {
 
-    private final LocationRepository locationRepo;
+    private final LouableRepository louableRepo;
+    private final AssuranceRepository assuranceRepo;
+    private final ContratRepository contratRepo;
     private final DisponibiliteRepository dispoRepo;
 
-    public LocationService(LocationRepository locationRepo, DisponibiliteRepository dispoRepo) {
-        this.locationRepo = locationRepo;
+    public LocationService(LouableRepository louableRepo,
+                           AssuranceRepository assuranceRepo,
+                           ContratRepository contratRepo,
+                           DisponibiliteRepository dispoRepo) {
+        this.louableRepo = louableRepo;
+        this.assuranceRepo = assuranceRepo;
+        this.contratRepo = contratRepo;
         this.dispoRepo = dispoRepo;
     }
 
     @Transactional
-    public int creerContrat(int idLoueur, int idLouable, Integer idAssurance,
-                            LocalDate dateDebut, LocalDate dateFin, String lieuDepotOptionnel) {
+    public Contrat louer(int idLoueur,
+                         int idLouable,
+                         int idAssurance,
+                         LocalDate dateDebut,
+                         LocalDate dateFin,
+                         String lieuDepotOptionnel) {
 
         if (dateDebut == null || dateFin == null) {
             throw new IllegalArgumentException("Dates manquantes.");
         }
         if (!dateDebut.isBefore(dateFin)) {
-            throw new IllegalArgumentException("dateDebut doit être strictement avant dateFin.");
+            throw new IllegalArgumentException("La date de début doit être strictement avant la date de fin.");
         }
 
-        Map<String, Object> louable = locationRepo.getLouable(idLouable);
+        LouableSummary louable = louableRepo.get(idLouable);
         if (louable == null) {
             throw new IllegalArgumentException("Louable introuvable (id=" + idLouable + ").");
         }
 
-        String lieuPrise = (String) louable.get("lieuPrincipal");
-        if (lieuPrise == null || lieuPrise.isBlank()) {
-            lieuPrise = "Lieu principal non défini";
+        Assurance assurance = assuranceRepo.get(idAssurance);
+        if (assurance == null) {
+            throw new IllegalArgumentException("Assurance introuvable (id=" + idAssurance + ").");
         }
 
-        // Variante A : lieuDepot optionnel, si vide => lieuPrise
+        String lieuPrise = (louable.lieuPrincipal() == null) ? "" : louable.lieuPrincipal();
         String lieuDepot = (lieuDepotOptionnel == null || lieuDepotOptionnel.trim().isEmpty())
                 ? lieuPrise
                 : lieuDepotOptionnel.trim();
 
-        // 1) vérifier qu'il existe une dispo qui couvre toute la période
-        Map<String, Object> dispoCouvrante = dispoRepo.findOneCoveringRange(idLouable, dateDebut, dateFin);
+        // dispo couvrante
+        Disponibilite dispoCouvrante = dispoRepo.findOneCoveringRange(idLouable, dateDebut, dateFin);
         if (dispoCouvrante == null) {
             throw new IllegalArgumentException("Ce véhicule n'est pas disponible sur toute la période demandée.");
         }
 
-        // 2) vérifier qu'aucun contrat ne chevauche
-        if (locationRepo.contratChevauche(idLouable, dateDebut, dateFin)) {
+        // pas de chevauchement contrat
+        if (contratRepo.contratChevauche(idLouable, dateDebut, dateFin)) {
             throw new IllegalArgumentException("Conflit : un contrat existe déjà sur tout ou partie de ces dates.");
         }
 
-        // 3) créer le contrat
-        int idContrat = locationRepo.insertContrat(dateDebut, dateFin, lieuPrise, lieuDepot, idLoueur, idLouable, idAssurance);
+        // créer contrat
+        int idContrat = contratRepo.createContrat(
+                dateDebut, dateFin,
+                lieuPrise, lieuDepot,
+                idLoueur, idLouable, idAssurance
+        );
 
-        // 4) découper la dispo couvrante (comportement propre)
-        try {
-            int idDispo = ((Number) dispoCouvrante.get("idDisponibilite")).intValue();
-            LocalDate dispoDebut = ((java.sql.Date) dispoCouvrante.get("dateDebut")).toLocalDate();
-            LocalDate dispoFin = ((java.sql.Date) dispoCouvrante.get("dateFin")).toLocalDate();
+        // split dispo couvrante
+        int idDispo = dispoCouvrante.getIdDisponibilite();
+        LocalDate dispoDebut = dispoCouvrante.getDateDebut();
+        LocalDate dispoFin = dispoCouvrante.getDateFin();
 
-            dispoRepo.deleteById(idDispo);
+        dispoRepo.delete(idDispo);
 
-            // partie gauche : dispoDebut -> (dateDebut - 1)
-            if (dispoDebut.isBefore(dateDebut)) {
-                LocalDate leftEnd = dateDebut.minusDays(1);
-                if (dispoDebut.isBefore(leftEnd)) {
-                    dispoRepo.insert(idLouable, dispoDebut, leftEnd);
-                }
+        // gauche : dispoDebut -> (dateDebut - 1)
+        if (dispoDebut.isBefore(dateDebut)) {
+            LocalDate leftEnd = dateDebut.minusDays(1);
+            if (!leftEnd.isBefore(dispoDebut)) {
+                dispoRepo.add(new Disponibilite(idLouable, dispoDebut, leftEnd));
             }
-
-            // partie droite : (dateFin + 1) -> dispoFin
-            if (dateFin.isBefore(dispoFin)) {
-                LocalDate rightStart = dateFin.plusDays(1);
-                if (rightStart.isBefore(dispoFin)) {
-                    dispoRepo.insert(idLouable, rightStart, dispoFin);
-                }
-            }
-
-        } catch (DataAccessException e) {
-            // Si ça casse ici, on rollback toute la transaction (contrat inclus)
-            throw e;
         }
 
-        return idContrat;
+        // droite : (dateFin + 1) -> dispoFin
+        if (dateFin.isBefore(dispoFin)) {
+            LocalDate rightStart = dateFin.plusDays(1);
+            if (!dispoFin.isBefore(rightStart)) {
+                dispoRepo.add(new Disponibilite(idLouable, rightStart, dispoFin));
+            }
+        }
+
+        // renvoyer le Contrat (sans recharge BD, suffisant pour afficher)
+        return new Contrat(idContrat, dateDebut, dateFin, lieuPrise, lieuDepot);
+    }
+
+    @Transactional
+    public LouableSummary getLouable(int idLouable) {
+        return louableRepo.get(idLouable);
+    }
+
+    @Transactional
+    public List<Assurance> getAllAssurances() {
+        return assuranceRepo.getAll();
+    }
+
+    @Transactional
+    public List<Disponibilite> getByLouable(int idLouable) {
+        return dispoRepo.getByLouable(idLouable);
+    }
+
+    @Transactional
+    public Assurance getAssurance(int idAssurance) {
+        return assuranceRepo.get(idAssurance);
     }
 }

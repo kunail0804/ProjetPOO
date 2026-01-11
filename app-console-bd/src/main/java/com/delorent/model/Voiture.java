@@ -5,13 +5,14 @@ public class Voiture extends Vehicule {
     private int nbPortes;
     private int nbPlaces;
     private int volumeCoffreLitres;
-    private TypeBoite boite;     // Utilise l'Enum créé plus haut
-    private Carburant carburant; // Utilise l'Enum créé plus haut
+    private TypeBoite boite;
+    private Carburant carburant;
     private boolean climatisation;
     
-    public Voiture(int id, String marque, String modele, double prixJour, String immatriculation, int nbPortes,
-            int nbPlaces, int volumeCoffreLitres, TypeBoite boite, Carburant carburant, boolean climatisation) {
-        super(id, marque, modele, prixJour, immatriculation);
+    public Voiture(int idLouable, double prixJour, String lieuPrincipal, String marque, String modele, int annee,
+            String couleur, String immatriculation, int kilometrage, int nbPortes, int nbPlaces, int volumeCoffreLitres,
+            TypeBoite boite, Carburant carburant, boolean climatisation) {
+        super(idLouable, prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
         this.nbPortes = nbPortes;
         this.nbPlaces = nbPlaces;
         this.volumeCoffreLitres = volumeCoffreLitres;
@@ -19,6 +20,40 @@ public class Voiture extends Vehicule {
         this.carburant = carburant;
         this.climatisation = climatisation;
     }
+    public Voiture(double prixJour, String lieuPrincipal, String marque, String modele, int annee, String couleur,
+            String immatriculation, int kilometrage, int nbPortes, int nbPlaces, int volumeCoffreLitres,
+            TypeBoite boite, Carburant carburant, boolean climatisation) {
+        super(prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        this.nbPortes = nbPortes;
+        this.nbPlaces = nbPlaces;
+        this.volumeCoffreLitres = volumeCoffreLitres;
+        this.boite = boite;
+        this.carburant = carburant;
+        this.climatisation = climatisation;
+    }
+    public Voiture(int idLouable, double prixJour, StatutLouable statut, String lieuPrincipal, String marque,
+            String modele, int annee, String couleur, String immatriculation, int kilometrage, int nbPortes,
+            int nbPlaces, int volumeCoffreLitres, TypeBoite boite, Carburant carburant, boolean climatisation) {
+        super(idLouable, prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        this.nbPortes = nbPortes;
+        this.nbPlaces = nbPlaces;
+        this.volumeCoffreLitres = volumeCoffreLitres;
+        this.boite = boite;
+        this.carburant = carburant;
+        this.climatisation = climatisation;
+    }
+    public Voiture(double prixJour, StatutLouable statut, String lieuPrincipal, String marque, String modele, int annee,
+            String couleur, String immatriculation, int kilometrage, int nbPortes, int nbPlaces, int volumeCoffreLitres,
+            TypeBoite boite, Carburant carburant, boolean climatisation) {
+        super(prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        this.nbPortes = nbPortes;
+        this.nbPlaces = nbPlaces;
+        this.volumeCoffreLitres = volumeCoffreLitres;
+        this.boite = boite;
+        this.carburant = carburant;
+        this.climatisation = climatisation;
+    }
+
     public int getNbPortes() {
         return nbPortes;
     }

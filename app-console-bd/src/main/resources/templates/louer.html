@@ -17,13 +17,18 @@
         .legend { display:flex; gap:12px; align-items:center; margin-top:8px; }
         .chip { display:inline-flex; gap:6px; align-items:center; }
         .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+        .btn { padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; background: #fff; }
     </style>
 </head>
 <body>
 
 <h1>Louer un véhicule</h1>
 
-<p><a th:href="@{/}">← Retour accueil</a></p>
+<p>
+    <a th:href="@{/louables/{id}(id=${idLouable})}">← Retour au véhicule</a>
+    &nbsp;|&nbsp;
+    <a th:href="@{/louables}">← Retour au catalogue</a>
+</p>
 
 <div th:if="${succes}">
     <p class="ok" th:text="${succes}">Succès</p>
@@ -34,58 +39,57 @@
 
 <hr>
 
-<form th:action="@{/louer}" method="post" class="box">
+<!-- Résumé louable -->
+<div class="box" th:if="${louable != null}">
+    <h2 style="margin-top:0;">Véhicule sélectionné</h2>
 
-    <div>
-        <label for="idLoueur"><strong>Loueur</strong></label><br>
-        <select id="idLoueur" name="idLoueur" required>
-            <option value="" disabled selected>-- Choisir un loueur --</option>
-            <option th:each="u : ${loueurs}"
-                    th:value="${u.get('idUtilisateur')}"
-                    th:text="${'ID ' + u.get('idUtilisateur') + ' - ' + u.get('prenom') + ' ' + u.get('nom')}">
-                Loueur
-            </option>
-        </select>
-    </div>
+    <p class="muted" style="margin:0;">
+        ID louable :
+        <strong th:text="${idLouable}">1</strong>
+    </p>
 
-    <br>
-
-    <div>
-        <label for="idLouable"><strong>Véhicule (louable)</strong></label><br>
-        <select id="idLouable" name="idLouable" required>
-            <option value="" disabled selected>-- Choisir un véhicule --</option>
-            <option th:each="l : ${louables}"
-                    th:value="${l.get('idLouable')}"
-                    th:attr="data-lieu=${l.get('lieuPrincipal')}"
-                    th:text="${'ID ' + l.get('idLouable')
-                        + ' - ' + (l.get('marque') != null ? l.get('marque') : '')
-                        + ' ' + (l.get('modele') != null ? l.get('modele') : '')
-                        + ' (' + (l.get('immatriculation') != null ? l.get('immatriculation') : '') + ')'
-                        + ' - ' + (l.get('prixJour') != null ? l.get('prixJour') : '?') + '€/jour'
-                        + ' - ' + (l.get('statut') != null ? l.get('statut') : '')}">
-                Louable
-            </option>
-        </select>
-        <p class="muted">Quand tu sélectionnes un véhicule, les disponibilités s’affichent juste en dessous.</p>
-    </div>
-
-    <br>
-
-    <div>
+    <div style="margin-top:10px;">
         <label><strong>Lieu de prise (fixe)</strong></label><br>
-        <input id="lieuPriseAffiche" type="text" readonly value="">
-        <p class="muted">Ce champ vient de <code>LOUABLE.lieuPrincipal</code> et sera forcé dans le contrat.</p>
+        <input id="lieuPriseAffiche" type="text" readonly
+               th:value="${(louable.lieuPrincipal != null) ? louable.lieuPrincipal : ''}">
+        <p class="muted">Vient de <code>LOUABLE.lieuPrincipal</code> et sera forcé dans le contrat.</p>
+    </div>
+</div>
+
+<hr>
+
+<h2>Disponibilités</h2>
+<div class="box">
+    <div id="disposBox">
+        <p class="muted">Chargement des disponibilités…</p>
     </div>
 
-    <br>
+    <div id="calendarBox" style="margin-top:14px;"></div>
+
+    <div class="legend">
+        <span class="chip"><span class="dot" style="background:#e8fff0;"></span>Jours disponibles</span>
+        <span class="chip"><span class="dot" style="background:#fafafa;"></span>Hors mois</span>
+    </div>
+</div>
+
+<hr>
+
+<h2>Demande de location</h2>
+
+<form class="box"
+      th:action="@{/louables/{id}/louer(id=${idLouable})}"
+      method="post">
+
+    <!-- Id louable en hidden (sécurité côté serveur: tu peux vérifier cohérence avec path variable) -->
+    <input type="hidden" name="idLouable" th:value="${idLouable}">
 
     <div>
         <label for="idAssurance"><strong>Assurance</strong></label><br>
         <select id="idAssurance" name="idAssurance" required>
             <option value="" disabled selected>-- Choisir --</option>
             <option th:each="a : ${assurances}"
-                    th:value="${a.get('idAssurance')}"
-                    th:text="${a.get('nom') + ' - ' + a.get('tarifJournalier') + '€/jour'}">
+                    th:value="${a.getIdAssurance()}"
+                    th:text="${a.getNom() + ' - ' + a.getTarifJournalier() + '€/jour'}">
                 Assurance
             </option>
         </select>
@@ -110,62 +114,41 @@
     <div>
         <label for="lieuDepotOptionnel"><strong>Lieu de dépôt (optionnel)</strong></label><br>
         <input id="lieuDepotOptionnel" name="lieuDepotOptionnel" type="text" placeholder="Ex: Toulouse">
-        <p class="muted">Variante A : si vide, dépôt = lieu de prise.</p>
+        <p class="muted">Si vide, dépôt = lieu de prise.</p>
     </div>
 
     <br>
 
-    <button type="submit">Confirmer la location</button>
+    <button class="btn" type="submit">Confirmer la location</button>
 </form>
-
-<hr>
-
-<h2>Disponibilités</h2>
-
-<div class="box">
-    <div id="disposBox">
-        <p class="muted">Choisis un véhicule pour voir ses créneaux.</p>
-    </div>
-
-    <div id="calendarBox" style="margin-top:14px;"></div>
-
-    <div class="legend">
-        <span class="chip"><span class="dot" style="background:#e8fff0;"></span>Jours disponibles</span>
-        <span class="chip"><span class="dot" style="background:#fafafa;"></span>Hors mois</span>
-    </div>
-</div>
 
 <hr>
 
 <div th:if="${contrat != null}">
     <h2>Résumé contrat</h2>
     <ul>
-        <li>Date début : <span th:text="${contrat.get('dateDebut')}">dateDebut</span></li>
-        <li>Date fin : <span th:text="${contrat.get('dateFin')}">dateFin</span></li>
-        <li>Lieu prise : <span th:text="${contrat.get('lieuPrise')}">lieuPrise</span></li>
-        <li>Lieu dépôt : <span th:text="${contrat.get('lieuDepot')}">lieuDepot</span></li>
-        <li>Assurance : <span th:text="${contrat.get('assuranceNom')}">assurance</span></li>
+        <li>Date début : <span th:text="${contrat.dateDebut}">dateDebut</span></li>
+        <li>Date fin : <span th:text="${contrat.dateFin}">dateFin</span></li>
+        <li>Lieu prise : <span th:text="${contrat.lieuPrise}">lieuPrise</span></li>
+        <li>Lieu dépôt : <span th:text="${contrat.lieuDepot}">lieuDepot</span></li>
+        <li>Assurance : <span th:text="${contrat.assuranceNom}">assurance</span></li>
     </ul>
 </div>
 
-<script>
-    const selectLouable = document.getElementById('idLouable');
+<script th:inline="javascript">
     const disposBox = document.getElementById('disposBox');
     const calendarBox = document.getElementById('calendarBox');
-    const lieuPriseAffiche = document.getElementById('lieuPriseAffiche');
+
+    const idLouable = /*[[${idLouable}]]*/ 0;
 
     const fmt = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
     function normalizeToYMD(s) {
-        // Accepte:
-        // - "2026-01-05"
-        // - "2026-01-05 00:00:00"
-        // - "2026-01-05T00:00:00.000+00:00"
         if (!s) return '';
         let t = String(s).trim();
         if (t.includes('T')) t = t.split('T')[0];
         if (t.includes(' ')) t = t.split(' ')[0];
-        return t; // "YYYY-MM-DD"
+        return t;
     }
 
     function parseISODate(isoLike) {
@@ -192,7 +175,6 @@
         for (const r of ranges) {
             const start = parseISODate(r.dateDebut);
             const end = parseISODate(r.dateFin);
-
             const cur = new Date(start.getTime());
             while (cur <= end) {
                 const y = cur.getFullYear();
@@ -208,10 +190,8 @@
     function renderCalendarForMonth(year, monthIndex0, availSet) {
         const first = new Date(year, monthIndex0, 1);
         const last = new Date(year, monthIndex0 + 1, 0);
-
         const monthName = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(first);
-
-        const dayOfWeek = (d) => (d.getDay() + 6) % 7; // lundi=0
+        const dayOfWeek = (d) => (d.getDay() + 6) % 7;
 
         let html = `<h3 style="margin:0 0 8px 0; text-transform: capitalize;">${escapeHtml(monthName)}</h3>`;
         html += `<table class="cal"><thead><tr>
@@ -260,7 +240,6 @@
         const firstStart = parseISODate(ranges[0].dateDebut);
         const year = firstStart.getFullYear();
         const month = firstStart.getMonth();
-
         const availSet = buildAvailSet(ranges);
 
         const cal1 = renderCalendarForMonth(year, month, availSet);
@@ -270,7 +249,7 @@
         calendarBox.innerHTML = `<div class="grid">${cal1}${cal2}</div>`;
     }
 
-    async function loadDispos(idLouable) {
+    async function loadDispos() {
         disposBox.innerHTML = '<p>Chargement...</p>';
         calendarBox.innerHTML = '';
         try {
@@ -284,23 +263,9 @@
         }
     }
 
-    function initLieuPrise() {
-        const opt = selectLouable.options[selectLouable.selectedIndex];
-        if (!opt) return;
-        const lieu = opt.getAttribute('data-lieu') || '';
-        lieuPriseAffiche.value = lieu;
-    }
-
-    selectLouable.addEventListener('change', () => {
-        initLieuPrise();
-        const id = selectLouable.value;
-        if (id) loadDispos(id);
-    });
-
     window.addEventListener('DOMContentLoaded', () => {
-        initLieuPrise();
-        const id = selectLouable.value;
-        if (id) loadDispos(id);
+        if (idLouable) loadDispos();
+        else disposBox.innerHTML = '<p class="err">ID louable manquant.</p>';
     });
 </script>
 
