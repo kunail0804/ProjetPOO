@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div class="container py-5">
+        
+        <div class="card shadow-sm mb-5 border-0">
+            <div class="card-body p-5 text-center bg-white rounded">
+                <h1 class="display-5 fw-bold" th:text="${agent.nomComplet}">Nom Agent</h1>
+                <p class="text-muted fs-5">
+                    📍 <span th:text="${agent.ville}">Ville</span> | 
+                    ✉️ <span th:text="${agent.mail}">Email</span>
+                </p>
+            </div>
+        </div>
+
+        <h3 class="mb-4 ps-2 border-start border-4 border-primary">
+            Véhicules proposés (<span th:text="${vehicules.size()}">0</span>)
+        </h3>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col" th:each="v : ${vehicules}">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 180px;">
+                        <span>🚗 Photo Véhicule</span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold text-dark" th:text="${v.marque} + ' ' + ${v.modele}">Marque Modèle</h5>
+                            <span class="badge bg-success" th:text="${v.prixJour} + ' €/j'">Prix</span>
+                        </div>
+                        
+                        <p class="card-text text-muted small">
+                            <span th:text="${v.annee}">2022</span> • 
+                            <span th:text="${v.kilometrage} + ' km'">10000 km</span> • 
+                            <span th:text="${v.lieuPrincipal}">Paris</span>
+                        </p>
+                        
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary btn-sm">Voir Détails</button>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <small class="text-muted" th:text="'Statut : ' + ${v.statut}">Dispo</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(vehicules)}" class="alert alert-info text-center mt-3">
+            Cet agent ne propose aucun véhicule pour le moment.
+        </div>
+
+    </div>
+
+</body>
+</html>

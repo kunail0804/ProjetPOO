@@ -22,6 +22,10 @@ public abstract class Louable {
         this.statut = StatutLouable.DISPONIBLE;
     }
 
+    public Louable(){
+        super();
+    }
+
     public int getId() {
         return id;
     }

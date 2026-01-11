@@ -11,6 +11,10 @@ public abstract class Vehicule extends Louable {
         this.immatriculation = immatriculation;
     }
 
+    public Vehicule(){
+        super();
+    }
+
     // Getters et Setters
     public String getImmatriculation() { return immatriculation; }
     public void setImmatriculation(String immatriculation) { this.immatriculation = immatriculation; }

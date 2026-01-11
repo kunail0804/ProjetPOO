@@ -31,6 +31,10 @@ public class Utilisateur {
         //this.dateInscription = dateInscription;
     }
 
+    public Utilisateur (){
+        super();
+    }
+
     // Getters et Setters
 
     public int getIdUtilisateur() {
