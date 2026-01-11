@@ -114,6 +114,6 @@ public class ConnexionController {
     @GetMapping("/deconnexion")
     public String deconnexion() {
         connexionService.deconnecter();
-        return "redirect:/connexion";
+        return "redirect:/";
     }
 }
