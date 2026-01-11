@@ -1,32 +1,63 @@
 package com.delorent.controller;
 
+import com.delorent.dao.NoteDao;
+import com.delorent.dao.VehiculeVisiteurDao;
+import com.delorent.model.VehiculeVisiteur;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 @Controller
-@RequestMapping("/vehicule")
 public class VehiculeController {
-    
-    @GetMapping("/")
-    public String home(Model model) {
-        model.addAttribute("message", "Plateforme Autopartage");
-        model.addAttribute("nombreVehicule", 0);
-        return "vehicule-disponible";
+
+    private final VehiculeVisiteurDao vehiculeDao;
+    private final NoteDao noteDao;
+
+    public VehiculeController(VehiculeVisiteurDao vehiculeDao, NoteDao noteDao) {
+        this.vehiculeDao = vehiculeDao;
+        this.noteDao = noteDao;
     }
-    
-    @GetMapping("/disponibles")
+
+    @GetMapping("/vehicule/disponibles")
     public String afficherVehiculesDisponibles(Model model) {
+
+        List<VehiculeVisiteur> vehicules =
+                vehiculeDao.findVehiculesDisponibles();
+
+        enrichirAvecNotes(vehicules);
+
         model.addAttribute("message", "Véhicules disponibles");
-        model.addAttribute("nombreVehicule", 0);
-        return "vehicule-disponible";
+        model.addAttribute("nombreVehicules", vehicules.size());
+        model.addAttribute("vehicules", vehicules);
+
+        return "vehicules-disponibles";
     }
-    
-    @GetMapping("/tous")
+
+    @GetMapping("/vehicule/tous")
     public String afficherTousLesVehicules(Model model) {
+
+        List<VehiculeVisiteur> vehicules =
+                vehiculeDao.findTousLesVehicules();
+
+        enrichirAvecNotes(vehicules);
+
         model.addAttribute("message", "Tous les véhicules");
-        model.addAttribute("nombreVehicule", 0);
-        return "vehicule-disponible";
+        model.addAttribute("nombreVehicules", vehicules.size());
+        model.addAttribute("vehicules", vehicules);
+
+        return "vehicules-disponibles";
+    }
+
+    private void enrichirAvecNotes(List<VehiculeVisiteur> vehicules) {
+        for (VehiculeVisiteur v : vehicules) {
+            try {
+                Double note = noteDao.getNoteGlobalePourVehicule(v.getIdLouable());
+                v.setNoteGlobale(note != null ? note : 0.0);
+            } catch (Exception e) {
+                v.setNoteGlobale(0.0);
+            }
+        }
     }
 }
