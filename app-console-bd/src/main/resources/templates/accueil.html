@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Accueil - Delorent</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    .box { border: 1px solid #ddd; padding: 16px; border-radius: 10px; max-width: 720px; }
+    .btnrow { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .btn {
+      display: inline-block; padding: 10px 14px; border: 1px solid #ccc;
+      border-radius: 10px; background: #fff; text-decoration: none; color: #111;
+    }
+    .btn.primary { border-color: #111; }
+    .muted { color: #666; }
+  </style>
+</head>
+<body>
+
+<h1>Delorent</h1>
+<p class="muted">Plateforme d’autopartage : trouvez et louez un véhicule facilement.</p>
+
+<div class="box" th:if="${!estConnecte}">
+  <h2>Bienvenue 👋</h2>
+  <p>Pour accéder au catalogue et louer un véhicule, connectez-vous ou créez un compte.</p>
+
+  <div class="btnrow">
+    <!-- adapte les routes à ton projet -->
+    <a class="btn primary" th:href="@{/connexion}">Se connecter</a>
+    <a class="btn" th:href="@{/inscription}">Créer un compte</a>
+    <a class="btn" th:href="@{/louables}">Voir le catalogue (lecture seule)</a>
+  </div>
+</div>
+
+<div class="box" th:if="${estConnecte}">
+  <h2>Heureux de vous revoir</h2>
+
+  <!-- optionnel : afficher l’email si disponible -->
+  <p th:if="${utilisateur != null}" class="muted">
+    Connecté en tant que <strong th:text="${utilisateur.mail}">email</strong>
+  </p>
+
+  <div class="btnrow">
+    <a class="btn primary" th:href="@{/louables}">Rechercher un véhicule</a>
+    <a class="btn" th:href="@{/deconnexion}">Se déconnecter</a>
+  </div>
+</div>
+
+</body>
+</html>
