@@ -1,11 +1,12 @@
 package com.delorent.controller;
 
-import com.delorent.repository.LouableRepository;
-import com.delorent.repository.LouableSummary;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import com.delorent.repository.LouableRepository.LouableRepository;
+import com.delorent.repository.LouableRepository.LouableSummary;
 
 @Controller
 public class ProfilLouableController {

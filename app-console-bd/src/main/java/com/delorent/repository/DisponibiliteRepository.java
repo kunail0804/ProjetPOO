@@ -1,10 +1,11 @@
 package com.delorent.repository;
 
-import com.delorent.model.Disponibilite;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
+import com.delorent.model.Louable.Disponibilite;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;

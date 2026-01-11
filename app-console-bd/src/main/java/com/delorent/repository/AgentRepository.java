@@ -1,10 +1,11 @@
 package com.delorent.repository;
 
-import com.delorent.model.Agent;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
+import com.delorent.model.Utilisateur.Agent;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

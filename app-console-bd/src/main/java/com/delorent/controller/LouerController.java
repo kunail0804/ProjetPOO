@@ -1,13 +1,14 @@
 package com.delorent.controller;
 
 import com.delorent.service.ConnexionService;
-import com.delorent.model.Utilisateur;
-import com.delorent.model.Agent;
-import com.delorent.model.Loueur;
+import com.delorent.model.Utilisateur.Agent;
+import com.delorent.model.Utilisateur.Loueur;
+import com.delorent.model.Utilisateur.Utilisateur;
+import com.delorent.repository.LouableRepository.LouableSummary;
 import com.delorent.model.Contrat;
+import com.delorent.model.Louable.Disponibilite;
 import com.delorent.service.LocationService;
-import com.delorent.repository.LouableSummary;
-import com.delorent.model.Disponibilite;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;

@@ -1,6 +1,6 @@
 package com.delorent.service;
 
-import com.delorent.model.Utilisateur;
+import com.delorent.model.Utilisateur.Utilisateur;
 import com.delorent.repository.AgentRepository;
 import com.delorent.repository.EntrepriseEntretienRepository;
 import com.delorent.repository.LoueurRepository;
@@ -81,11 +81,11 @@ public class ConnexionService {
 
         Utilisateur refreshed = null;
 
-        if (utilisateurConnecte instanceof com.delorent.model.Agent) {
+        if (utilisateurConnecte instanceof com.delorent.model.Utilisateur.Agent) {
             refreshed = agentRepository.get(idUtilisateur);
-        } else if (utilisateurConnecte instanceof com.delorent.model.Loueur) {
+        } else if (utilisateurConnecte instanceof com.delorent.model.Utilisateur.Loueur) {
             refreshed = loueurRepository.get(idUtilisateur);
-        } else if (utilisateurConnecte instanceof com.delorent.model.EntrepriseEntretien) {
+        } else if (utilisateurConnecte instanceof com.delorent.model.Utilisateur.EntrepriseEntretien) {
             refreshed = entrepriseEntretienRepository.get(idUtilisateur);
         }
 

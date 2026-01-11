@@ -1,4 +1,4 @@
-package com.delorent.model;
+package com.delorent.model.Louable;
 
 import java.util.List;
 
@@ -15,6 +15,9 @@ public final class FiltrePrixMax extends AbstractLouableFiltre<Double> {
 
     @Override
     public SqlClause toSqlClause() {
+        if (valeur() == null) {
+            return new SqlClause("", List.of());
+        }
         return new SqlClause("l.prixJour <= ?", List.of(valeur()));
     }
 }

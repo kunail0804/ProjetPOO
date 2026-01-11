@@ -1,4 +1,4 @@
-package com.delorent.model;
+package com.delorent.model.Louable;
 
 public enum Carburant {
     ESSENCE,

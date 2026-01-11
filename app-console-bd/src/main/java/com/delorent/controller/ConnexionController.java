@@ -1,6 +1,6 @@
 package com.delorent.controller;
 
-import com.delorent.model.Utilisateur;
+import com.delorent.model.Utilisateur.Utilisateur;
 import com.delorent.service.ConnexionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

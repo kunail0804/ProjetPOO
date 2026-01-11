@@ -6,10 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.delorent.repository.AgentRepository;
 import com.delorent.repository.EntrepriseEntretienRepository;
 import com.delorent.repository.LoueurRepository;
-
-import com.delorent.model.Agent;
-import com.delorent.model.EntrepriseEntretien;
-import com.delorent.model.Loueur;
+import com.delorent.model.Utilisateur.Agent;
+import com.delorent.model.Utilisateur.EntrepriseEntretien;
+import com.delorent.model.Utilisateur.Loueur;
 
 @Service
 public class UtilisateurService {

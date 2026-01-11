@@ -5,6 +5,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.delorent.model.*;
+import com.delorent.model.Utilisateur.Agent;
+import com.delorent.model.Utilisateur.EntrepriseEntretien;
+import com.delorent.model.Utilisateur.Loueur;
+import com.delorent.model.Utilisateur.Utilisateur;
 import com.delorent.repository.ContratRepository;
 import com.delorent.service.ConnexionService;
 import com.delorent.service.UtilisateurService;

@@ -1,14 +1,13 @@
 package com.delorent.service;
 
 import com.delorent.model.Contrat;
-import com.delorent.model.ContratEtat;
+import com.delorent.model.Louable.Disponibilite;
 import com.delorent.model.Assurance;
-import com.delorent.model.Disponibilite;
 import com.delorent.repository.AssuranceRepository;
 import com.delorent.repository.ContratRepository;
 import com.delorent.repository.DisponibiliteRepository;
-import com.delorent.repository.LouableRepository;
-import com.delorent.repository.LouableSummary;
+import com.delorent.repository.LouableRepository.*;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

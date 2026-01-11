@@ -1,5 +1,4 @@
-package com.delorent.model;
-
+package com.delorent.model.Louable;
 
 public abstract class Louable {
 
