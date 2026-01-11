@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Options payantes</title>
+</head>
+<body>
+
+<h2>Options payantes</h2>
+
+<table border="1">
+    <tr>
+        <th>Nom</th>
+        <th>Description</th>
+        <th>Prix mensuel</th>
+        <th>Statut</th>
+        <th>Action</th>
+    </tr>
+
+    <tr th:each="o : ${options}">
+    <td th:text="${o.nomOption}"></td>
+    <td th:text="${o.description}"></td>
+    <td th:text="${o.prixMensuel} + ' €'"></td>
+    <td th:text="${o.status}"></td>
+    <td>
+        <form th:if="${o.status == 'INACTIVE'}"
+              th:action="@{/agent/options/activer}" method="post">
+            <input type="hidden" name="idOption" th:value="${o.idOption}" />
+            <button type="submit">Activer</button>
+        </form>
+
+        <form th:if="${o.status == 'ACTIVE'}"
+              th:action="@{/agent/options/desactiver}" method="post">
+            <input type="hidden" name="idOption" th:value="${o.idOption}" />
+            <button type="submit">Désactiver</button>
+        </form>
+    </td>
+</tr>
+
+</table>
+
+</body>
+</html>
