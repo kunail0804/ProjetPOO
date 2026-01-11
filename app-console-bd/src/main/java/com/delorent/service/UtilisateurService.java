@@ -166,6 +166,38 @@ public class UtilisateurService {
         return entrepriseEntretienRepository.add(new EntrepriseEntretien(e, passwordHash, a, v, cp, r, t, ne, rs, si));
     }
 
+    //TODO : corriger la suppression dans les repositorys
+
+    @Transactional
+    public void supprimerAgent(Long idAgent) {
+        agentRepository.delete(idAgent);
+    }
+
+    @Transactional
+    public void supprimerLoueur(Long idLoueur) {
+        loueurRepository.delete(idLoueur);
+    }
+
+    @Transactional
+    public void supprimerEntrepriseEntretien(Long idEntreprise) {
+        entrepriseEntretienRepository.delete(idEntreprise);
+    }
+
+    @Transactional
+    public void updateAgent(Agent agent) {
+        agentRepository.modify(agent);
+    }
+
+    @Transactional
+    public void updateLoueur(Loueur loueur) {
+        loueurRepository.modify(loueur);
+    }
+
+    @Transactional
+    public void updateEntrepriseEntretien(EntrepriseEntretien entrepriseEntretien) {
+        entrepriseEntretienRepository.modify(entrepriseEntretien);
+    }
+
     /** TODO:
      * @Transactional
      * public long ajouterAgentProfessionnel(...) { ... }

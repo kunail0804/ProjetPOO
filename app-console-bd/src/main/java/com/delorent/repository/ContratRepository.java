@@ -37,9 +37,10 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
 
     @Override
     public List<Contrat> getAll() {
-        String sql = "SELECT " + COL_ID + "," + COL_DEBUT + "," + COL_FIN + "," + COL_LIEU_PRISE + "," + COL_LIEU_DEPOT + "," +
+        String sql = "SELECT " + COL_ID + "," + COL_DEBUT + "," + COL_FIN + "," + COL_LIEU_PRISE + "," + COL_LIEU_DEPOT +
                 " FROM " + T_CONTRAT +
                 " ORDER BY " + COL_ID + " DESC";
+
 
         return jdbc.query(sql, (rs, i) -> new Contrat(
                 rs.getInt(COL_ID),
@@ -52,8 +53,9 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
 
     @Override
     public Contrat get(Integer id) {
-        String sql = "SELECT " + COL_ID + "," + COL_DEBUT + "," + COL_FIN + "," + COL_LIEU_PRISE + "," + COL_LIEU_DEPOT + "," +
+        String sql = "SELECT " + COL_ID + "," + COL_DEBUT + "," + COL_FIN + "," + COL_LIEU_PRISE + "," + COL_LIEU_DEPOT +
                 " FROM " + T_CONTRAT + " WHERE " + COL_ID + " = ?";
+
 
         var res = jdbc.query(sql, (rs, i) -> new Contrat(
                 rs.getInt(COL_ID),
@@ -76,7 +78,7 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
     @Override
     public boolean modify(Contrat entity) {
         String sql = "UPDATE " + T_CONTRAT + " SET " +
-                COL_DEBUT + "=?, " + COL_FIN + "=?, " + COL_LIEU_PRISE + "=?, " + COL_LIEU_DEPOT + "=?, " +
+                COL_DEBUT + "=?, " + COL_FIN + "=?, " + COL_LIEU_PRISE + "=?, " + COL_LIEU_DEPOT + "=? " +
                 "WHERE " + COL_ID + "=?";
 
         int u = jdbc.update(sql,
@@ -131,5 +133,20 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
         Number key = kh.getKey();
         if (key == null) throw new IllegalStateException("Impossible de récupérer l'idContrat généré");
         return key.intValue();
+    }
+
+    public List<Contrat> getByLoueurId(int idLoueur) {
+        String sql = "SELECT " + COL_ID + "," + COL_DEBUT + "," + COL_FIN + "," + COL_LIEU_PRISE + "," + COL_LIEU_DEPOT +
+                " FROM " + T_CONTRAT +
+                " WHERE " + COL_ID_LOUEUR + " = ?" +
+                " ORDER BY " + COL_DEBUT + " DESC";
+
+        return jdbc.query(sql, (rs, i) -> new Contrat(
+                rs.getInt(COL_ID),
+                rs.getDate(COL_DEBUT).toLocalDate(),
+                rs.getDate(COL_FIN).toLocalDate(),
+                rs.getString(COL_LIEU_PRISE),
+                rs.getString(COL_LIEU_DEPOT)
+        ), idLoueur);
     }
 }

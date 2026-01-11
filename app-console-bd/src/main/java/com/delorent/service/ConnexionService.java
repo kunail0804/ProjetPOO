@@ -70,4 +70,27 @@ public class ConnexionService {
         utilisateurConnecte = found;
         return found;
     }
+
+    /**
+     * Rafraîchit l'utilisateur connecté en mémoire après une modification.
+     */
+    public void refreshConnexion(Long idUtilisateur) {
+        if (utilisateurConnecte == null || utilisateurConnecte.getIdUtilisateur() != idUtilisateur.intValue()) {
+            return; // pas connecté ou pas le bon utilisateur
+        }
+
+        Utilisateur refreshed = null;
+
+        if (utilisateurConnecte instanceof com.delorent.model.Agent) {
+            refreshed = agentRepository.get(idUtilisateur);
+        } else if (utilisateurConnecte instanceof com.delorent.model.Loueur) {
+            refreshed = loueurRepository.get(idUtilisateur);
+        } else if (utilisateurConnecte instanceof com.delorent.model.EntrepriseEntretien) {
+            refreshed = entrepriseEntretienRepository.get(idUtilisateur);
+        }
+
+        if (refreshed != null) {
+            utilisateurConnecte = refreshed;
+        }
+    }
 }
