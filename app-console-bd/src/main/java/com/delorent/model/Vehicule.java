@@ -1,6 +1,6 @@
 package com.delorent.model;
 
-public abstract class Vehicule extends Louable {
+public class Vehicule extends Louable {
 
     private String immatriculation;
     private int kilometrage;
