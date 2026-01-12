@@ -1,4 +1,4 @@
-package com.delorent.controller;
+package com.delorent.vue;
 
 
 import java.time.LocalDate;

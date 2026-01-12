@@ -8,6 +8,7 @@ import com.delorent.repository.LouableRepository.LouableSummary;
 import com.delorent.model.Contrat;
 import com.delorent.model.Louable.Disponibilite;
 import com.delorent.service.LocationService;
+import com.delorent.vue.ContratView;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

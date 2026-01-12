@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Contrat', ~{::section})}">
+
+<section>
+  <div class="panel soft">
+
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Contrat</h1>
+        <div class="muted small" th:if="${contrat != null}">
+          Contrat #<strong th:text="${contrat.idContrat()}">0</strong>
+          · Louable #<strong th:text="${contrat.idLouable()}">0</strong>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <a class="btn" th:href="@{/profil}">← Retour profil</a>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="alert err" th:if="${erreur}" th:text="${erreur}">Erreur</div>
+    <div class="alert ok" th:if="${succes}" th:text="${succes}">Succès</div>
+
+    <div th:if="${contrat != null}" class="grid">
+
+      <article class="card">
+        <div class="card-title">Détails</div>
+
+        <div class="kv">
+          <div class="kv-row">
+            <div class="k">Période</div>
+            <div class="v">
+              <span th:text="${#temporals.format(contrat.dateDebut(), 'dd/MM/yyyy')}">01/01/2026</span>
+              → <span th:text="${#temporals.format(contrat.dateFin(), 'dd/MM/yyyy')}">02/01/2026</span>
+            </div>
+          </div>
+
+          <div class="kv-row">
+            <div class="k">Lieu prise</div>
+            <div class="v" th:text="${contrat.lieuPrise()}">Lieu</div>
+          </div>
+
+          <div class="kv-row">
+            <div class="k">Lieu dépôt</div>
+            <div class="v" th:text="${contrat.lieuDepot()}">Lieu</div>
+          </div>
+
+          <div class="kv-row">
+            <div class="k">Véhicule</div>
+            <div class="v">
+              <span th:text="${contrat.marque()}">Marque</span>
+              <span th:text="${contrat.modele()}">Modèle</span>
+              <span class="muted small" th:if="${contrat.annee() != null}">
+                · <span th:text="${contrat.annee()}">2020</span>
+              </span>
+              <span class="muted small" th:if="${contrat.immatriculation() != null}">
+                · <span th:text="${contrat.immatriculation()}">AA-000-AA</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title">Relevés kilométrage</div>
+
+        <!-- PRISE -->
+        <div class="alert warn" th:if="${relevePrise == null}">
+          Relevé PRISE non saisi.
+        </div>
+
+        <div class="alert ok" th:if="${relevePrise != null}">
+          PRISE : <strong th:text="${relevePrise.kilometrage()}">0</strong> km
+        </div>
+
+        <div class="spacer"></div>
+
+        <div th:if="${relevePrise != null}" class="img-frame">
+          <img th:src="${relevePrise.photoPath()}" alt="Photo relevé prise" class="img-fluid"/>
+        </div>
+
+        <div class="hr"></div>
+
+        <!-- RETOUR -->
+        <div class="alert warn" th:if="${releveRetour == null}">
+          Relevé RETOUR non saisi.
+        </div>
+
+        <div class="alert ok" th:if="${releveRetour != null}">
+          RETOUR : <strong th:text="${releveRetour.kilometrage()}">0</strong> km
+        </div>
+
+        <div class="spacer"></div>
+
+        <div th:if="${releveRetour != null}" class="img-frame">
+          <img th:src="${releveRetour.photoPath()}" alt="Photo relevé retour" class="img-fluid"/>
+        </div>
+
+        <div class="spacer"></div>
+
+        <!-- état 2/2 -->
+        <div class="alert ok" th:if="${relevePrise != null and releveRetour != null}">
+          Deux relevés enregistrés (PRISE + RETOUR). Aucun autre relevé possible.
+        </div>
+      </article>
+
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- Formulaire: visible seulement si pas encore 2 relevés -->
+    <div class="panel"
+         th:if="${contrat != null and (relevePrise == null or releveRetour == null)}">
+
+      <div class="panel-head">
+        <div>
+          <div class="h2">Saisir un relevé</div>
+          <div class="muted small">
+            <span th:if="${relevePrise == null}">Il faut commencer par PRISE.</span>
+            <span th:if="${relevePrise != null and releveRetour == null}">PRISE déjà saisi, il reste RETOUR.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <form class="form"
+            th:action="@{/contrats/{idContrat}/releves(idContrat=${contrat.idContrat()})}"
+            method="post"
+            enctype="multipart/form-data">
+
+        <div class="row">
+          <div class="col field">
+            <div class="label">Type</div>
+
+            <!-- Si PRISE manquant => on force PRISE -->
+            <select name="typeReleve" required th:if="${relevePrise == null}">
+              <option value="PRISE" selected>PRISE</option>
+            </select>
+
+            <!-- Si PRISE présent et RETOUR manquant => on force RETOUR -->
+            <select name="typeReleve" required th:if="${relevePrise != null and releveRetour == null}">
+              <option value="RETOUR" selected>RETOUR</option>
+            </select>
+          </div>
+
+          <div class="col field">
+            <div class="label">Kilométrage</div>
+            <input class="input" type="number" name="kilometrage" min="1" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label">Photo</div>
+          <input class="input" type="file" name="photo" accept="image/*" required />
+          <p class="help">jpg / png / webp.</p>
+        </div>
+
+        <div class="btnrow">
+          <button class="btn primary" type="submit">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</section>
+</html>

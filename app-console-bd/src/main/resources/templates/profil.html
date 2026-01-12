@@ -1,195 +1,180 @@
-<!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Mon Profil</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+<!-- FICHIER: src/main/resources/templates/profil.html -->
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Profil', ~{::section})}">
 
-<body class="bg-light">
+<section>
 
-<nav class="navbar navbar-dark bg-primary mb-5">
-  <div class="container d-flex justify-content-between align-items-center">
-    <span class="navbar-brand mb-0 h1">🚗 Mon Profil</span>
-
-    <div class="d-flex gap-2">
-      <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
-      <a href="/deconnexion" class="btn btn-outline-light btn-sm">Déconnexion</a>
-    </div>
-  </div>
-</nav>
-
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-
-      <div class="card shadow">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-          <h4 class="mb-0 text-primary">Informations Personnelles</h4>
-          <span class="badge bg-secondary" th:text="${role}">ROLE</span>
-        </div>
-
-        <div class="card-body">
-          <div class="row mb-4 align-items-center">
-            <div class="col-md-3 text-center">
-              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto"
-                   style="width: 100px; height: 100px; font-size: 2em;">
-                <span th:text="${initiale}">A</span>
-              </div>
-            </div>
-            <div class="col-md-9">
-              <h2 th:text="${nomComplet}">Jean Dupont</h2>
-              <span class="badge bg-success">Compte Vérifié</span>
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="small text-muted">Email</label>
-              <p class="fw-bold" th:text="${utilisateur.mail}">email@test.com</p>
-            </div>
-            <div class="col-md-6">
-              <label class="small text-muted">Téléphone</label>
-              <p class="fw-bold" th:text="${utilisateur.telephone} ?: 'Non renseigné'">06...</p>
-            </div>
-            <div class="col-md-6">
-              <label class="small text-muted">Ville</label>
-              <p class="fw-bold" th:text="${utilisateur.ville} ?: 'Non renseignée'">Paris</p>
-            </div>
-            <div class="col-md-6">
-              <label class="small text-muted">Code Postal</label>
-              <p class="fw-bold" th:text="${utilisateur.codePostal} ?: 'Non renseigné'">75000</p>
-            </div>
-          </div>
-
-          <!-- Actions communes -->
-          <div class="mt-4 d-flex justify-content-between">
-            <a class="btn btn-outline-primary" th:href="@{/profil/edition}">
-              Modifier mes informations ✏️
-            </a>
-
-            <form th:action="@{/profil/suppression}" method="post"
-                  onsubmit="return confirm('Confirmer la suppression définitive du compte ?');">
-              <button type="submit" class="btn btn-outline-danger">
-                Supprimer mon compte 🗑️
-              </button>
-            </form>
-          </div>
-
-          <hr class="my-4">
-
-          <!-- Actions par rôle (préparé pour la suite) -->
-            <div th:if="${isLoueur}">
-                <h5 class="text-primary mb-3">Actions Loueur</h5>
-                <a class="btn btn-primary" th:href="@{/louables}">
-                    Rechercher un véhicule
-                </a>
-            </div>
-
-            <div th:if="${isAgent}">
-                <h5 class="text-primary mb-3">Actions Agent</h5>
-                <a class="btn btn-outline-secondary" th:href="@{/ajouter_louable}">Ajouter un Louable</a>
-            </div>
-
-            <div th:if="${isEntretien}">
-                <h5 class="text-primary mb-3">Entreprise d’entretien</h5>
-                <a class="btn btn-outline-secondary disabled">Demandes d’entretien (à venir)</a>
-            </div>
-
-            <div th:if="${isLoueur}" class="mt-4">
-              <h5 class="text-primary mb-3">Mes contrats</h5>
-
-              <div th:if="${#lists.isEmpty(contrats)}" class="alert alert-secondary mb-0">
-                Aucun contrat pour le moment.
-              </div>
-
-              <div th:if="${!#lists.isEmpty(contrats)}" class="table-responsive">
-                <table class="table table-sm align-middle">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Début</th>
-                      <th>Fin</th>
-                      <th>Lieu prise</th>
-                      <th>Lieu dépôt</th>
-                      <th>Statut</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr th:each="c : ${contrats}">
-                      <td th:text="${c.id}">1</td>
-                      <td th:text="${c.dateDebut}">2026-01-01</td>
-                      <td th:text="${c.dateFin}">2026-01-05</td>
-                      <td th:text="${c.lieuPrise}">Paris</td>
-                      <td th:text="${c.lieuDepot}">Toulouse</td>
-                      <td>
-                        <span class="badge bg-secondary"
-                              th:if="${c.dateFin.isBefore(T(java.time.LocalDate).now())}">
-                          Terminé
-                        </span>
-                        <span class="badge bg-primary"
-                              th:if="${!c.dateFin.isBefore(T(java.time.LocalDate).now())}">
-                          À venir / en cours
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div th:if="${isAgent}" class="mt-4">
-              <h5 class="text-primary mb-3">Mes louables</h5>
-
-              <div th:if="${#lists.isEmpty(louables)}" class="alert alert-secondary mb-0">
-                Aucun louable ajouté pour le moment.
-              </div>
-
-              <div th:if="${!#lists.isEmpty(louables)}" class="table-responsive">
-                <table class="table table-sm align-middle">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Type</th>
-                      <th>PrixJour</th>
-                      <th>lieuPrincipal</th>
-                      <th>Statut</th>
-                      <th class="text-end">Action</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr th:each="l : ${louables}">
-                      <td th:text="${l.idLouable}">1</td>
-                      <td th:text="${l.type}">Voiture</td>
-                      <td th:text="${l.prixJour}">prixJour</td>
-                      <td th:text="${l.lieuPrincipal}">lieuPrincipal</td>
-
-                      <td>
-                        <span class="badge bg-success" th:if="${l.statut.name() == 'DISPONIBLE'}">Disponible</span>
-                        <span class="badge bg-warning text-dark" th:if="${l.statut.name() == 'EN_LOCATION'}">En location</span>
-                        <span class="badge bg-danger" th:if="${l.statut.name() == 'EN_ENTRETIEN'}">En entretien</span>
-                      </td>
-
-                      <td class="text-end">
-                        <a class="btn btn-sm btn-outline-primary"
-                          th:href="@{/louables/{id}(id=${l.idLouable})}">
-                          Voir
-                        </a>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
+  <!-- ===== Header profil (TOUJOURS au-dessus des listes) ===== -->
+  <div class="panel soft">
+    <div class="panel-head">
+      <div>
+        <h1 class="h1" style="margin-bottom:6px;">Mon profil</h1>
+        <div class="muted small">
+          <span class="badge cyan" th:if="${isAgent}">AGENT</span>
+          <span class="badge magenta" th:if="${isLoueur}">LOUEUR</span>
+          <span class="badge yellow" th:if="${isEntretien}">ENTRETIEN</span>
         </div>
       </div>
 
+      <div class="btnrow">
+        <a class="btn" th:href="@{/profil/edition}">Modifier</a>
+        <form th:action="@{/profil/suppression}" method="post" style="margin:0;"
+              onsubmit="return confirm('Supprimer définitivement le compte ?');">
+          <button class="btn danger" type="submit">Supprimer</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="row">
+      <div class="col">
+        <div class="h2" style="margin-top:0;">Identité</div>
+        <div class="kv">
+          <div class="kv-row">
+            <div class="k">Nom</div>
+            <div class="v" th:text="${nomComplet}">Nom Prénom</div>
+          </div>
+          <div class="kv-row">
+            <div class="k">Email</div>
+            <div class="v" th:text="${utilisateur.mail}">email</div>
+          </div>
+          <div class="kv-row">
+            <div class="k">Téléphone</div>
+            <div class="v" th:text="${utilisateur.telephone}">tel</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="h2" style="margin-top:0;">Adresse</div>
+        <div class="kv">
+          <div class="kv-row">
+            <div class="k">Adresse</div>
+            <div class="v" th:text="${utilisateur.adresse}">adresse</div>
+          </div>
+          <div class="kv-row">
+            <div class="k">Ville</div>
+            <div class="v" th:text="${utilisateur.ville}">ville</div>
+          </div>
+          <div class="kv-row">
+            <div class="k">Code postal</div>
+            <div class="v" th:text="${utilisateur.codePostal}">cp</div>
+          </div>
+          <div class="kv-row">
+            <div class="k">Région</div>
+            <div class="v" th:text="${utilisateur.region}">region</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- infos entreprise entretien -->
+    <div class="spacer"></div>
+    <div class="alert" th:if="${isEntretien}">
+      <div class="kv">
+        <div class="kv-row">
+          <div class="k">Entreprise</div>
+          <div class="v" th:text="${utilisateur.nomEntreprise}">Nom entreprise</div>
+        </div>
+        <div class="kv-row">
+          <div class="k">Raison sociale</div>
+          <div class="v" th:text="${utilisateur.raisonSoc}">Raison</div>
+        </div>
+        <div class="kv-row">
+          <div class="k">SIRET</div>
+          <div class="v" th:text="${utilisateur.noSiret}">Siret</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="spacer"></div>
+
+  <!-- ===== Contrats (loueur) ===== -->
+  <div class="panel soft" th:if="${isLoueur}">
+    <div class="panel-head">
+      <div>
+        <div class="h2" style="margin:0;">Mes contrats</div>
+        <div class="muted small">Clique sur une ligne (pas seulement le numéro).</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="tablewrap" th:if="${contrats != null and contrats.size() > 0}">
+      <table>
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Début</th>
+          <th>Fin</th>
+          <th>Lieu prise</th>
+          <th>Lieu dépôt</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="c : ${contrats}"
+            th:onclick="|window.location='@{/contrats/{id}(id=${c.id})}'|"
+            style="cursor:pointer;">
+          <td><strong th:text="${c.id}">0</strong></td>
+          <td th:text="${#temporals.format(c.dateDebut,'dd/MM/yyyy')}">01/01/2026</td>
+          <td th:text="${#temporals.format(c.dateFin,'dd/MM/yyyy')}">02/01/2026</td>
+          <td th:text="${c.lieuPrise}">Lieu</td>
+          <td th:text="${c.lieuDepot}">Lieu</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert warn" th:if="${contrats == null or contrats.size() == 0}">
+      Aucun contrat.
     </div>
   </div>
-</div>
 
-</body>
+  <!-- ===== Louables (agent) ===== -->
+  <div class="panel soft" th:if="${isAgent}">
+    <div class="panel-head">
+      <div>
+        <div class="h2" style="margin:0;">Mes louables</div>
+        <div class="muted small">Gestion via la fiche louable.</div>
+      </div>
+      <div class="btnrow">
+        <a class="btn primary" th:href="@{/ajouter_louable}">Ajouter</a>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="grid" th:if="${louables != null and louables.size() > 0}">
+      <article class="card" th:each="l : ${louables}">
+        <div class="panel-head">
+          <div>
+            <span class="badge cyan" th:text="${l.type}">Type</span>
+            <div class="card-title" th:text="'Louable #' + ${l.idLouable}">Louable #</div>
+            <div class="muted small" th:text="${l.lieuPrincipal}">Lieu</div>
+          </div>
+
+          <div class="text-right">
+            <div class="h3" style="margin:0;" th:text="${l.prixJour} + ' € / jour'">0 €</div>
+            <div class="muted small" th:text="${l.statut}">STATUT</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="btnrow">
+          <a class="btn primary" th:href="@{/louables/{id}(id=${l.idLouable})}">Voir</a>
+        </div>
+      </article>
+    </div>
+
+    <div class="alert warn" th:if="${louables == null or louables.size() == 0}">
+      Aucun louable.
+    </div>
+  </div>
+
+</section>
 </html>

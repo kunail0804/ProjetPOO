@@ -1,3 +1,4 @@
+// FICHIER: src/main/java/com/delorent/repository/LouableRepository/MotoRepository.java
 package com.delorent.repository.LouableRepository;
 
 import org.springframework.stereotype.Repository;
@@ -25,8 +26,8 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
     @Override
     public List<Moto> getAll() {
         String sql = "SELECT * FROM LOUABLE" +
-                     " JOIN VEHICULE ON LOUABLE.id = VEHICULE.id" +
-                     " JOIN MOTO ON VEHICULE.id = MOTO.id";
+                " JOIN VEHICULE ON LOUABLE.id = VEHICULE.id" +
+                " JOIN MOTO ON VEHICULE.id = MOTO.id";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Moto(
                 rs.getInt("id"),
                 rs.getInt("idProprietaire"),
@@ -49,14 +50,14 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
     @Override
     public Moto get(Integer id) {
         String sql = "SELECT * FROM LOUABLE" +
-                     " JOIN VEHICULE ON LOUABLE.id = VEHICULE.id" +
-                     " JOIN MOTO ON VEHICULE.id = MOTO.id" +
-                     " WHERE LOUABLE.id = ?";
+                " JOIN VEHICULE ON LOUABLE.id = VEHICULE.id" +
+                " JOIN MOTO ON VEHICULE.id = MOTO.id" +
+                " WHERE LOUABLE.id = ?";
         return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> new Moto(
                 rs.getInt("id"),
                 rs.getInt("idProprietaire"),
                 rs.getDouble("prixJour"),
-                StatutLouable.valueOf(rs.getString("statut")),
+                StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                 rs.getString("lieuPrincipal"),
                 rs.getString("marque"),
                 rs.getString("modele"),
@@ -73,13 +74,15 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
 
     @Override
     public Integer add(Moto entity) {
-        String sqlLouable = "INSERT INTO LOUABLE (idProprietaire, prixJour, statut, lieuPrincipal) VALUES (?, ?, ?)";
+        // FIX: il manquait un "?" (4 colonnes -> 4 params)
+        String sqlLouable = "INSERT INTO LOUABLE (idProprietaire, prixJour, statut, lieuPrincipal) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sqlLouable, entity.getIdAgent(), entity.getPrixJour(), entity.getStatut().name(), entity.getLieuPrincipal());
 
         Integer idLouable = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
 
         String sqlVehicule = "INSERT INTO VEHICULE (id, marque, modele, annee, couleur, immatriculation, kilometrage) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sqlVehicule, idLouable, entity.getMarque(), entity.getModele(), entity.getAnnee(), entity.getCouleur(), entity.getImmatriculation(), entity.getKilometrage());
+        jdbcTemplate.update(sqlVehicule, idLouable, entity.getMarque(), entity.getModele(), entity.getAnnee(),
+                entity.getCouleur(), entity.getImmatriculation(), entity.getKilometrage());
 
         String sqlMoto = "INSERT INTO MOTO (id, cylindreeCc, puissanceCh, typeMoto, permisRequis) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sqlMoto, idLouable, entity.getCylindreeCc(), entity.getPuissanceCh(), entity.getTypeMoto().name(), entity.getPermisRequis());
@@ -93,10 +96,12 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
         jdbcTemplate.update(sqlLouable, entity.getPrixJour(), entity.getStatut().name(), entity.getLieuPrincipal(), entity.getIdLouable());
 
         String sqlVehicule = "UPDATE VEHICULE SET marque = ?, modele = ?, annee = ?, couleur = ?, immatriculation = ?, kilometrage = ? WHERE id = ?";
-        jdbcTemplate.update(sqlVehicule, entity.getMarque(), entity.getModele(), entity.getAnnee(), entity.getCouleur(), entity.getImmatriculation(), entity.getKilometrage(), entity.getIdLouable());
+        jdbcTemplate.update(sqlVehicule, entity.getMarque(), entity.getModele(), entity.getAnnee(), entity.getCouleur(),
+                entity.getImmatriculation(), entity.getKilometrage(), entity.getIdLouable());
 
         String sqlMoto = "UPDATE MOTO SET cylindreeCc = ?, puissanceCh = ?, typeMoto = ?, permisRequis = ? WHERE id = ?";
-        jdbcTemplate.update(sqlMoto, entity.getCylindreeCc(), entity.getPuissanceCh(), entity.getTypeMoto().name(), entity.getPermisRequis(), entity.getIdLouable());
+        jdbcTemplate.update(sqlMoto, entity.getCylindreeCc(), entity.getPuissanceCh(), entity.getTypeMoto().name(),
+                entity.getPermisRequis(), entity.getIdLouable());
 
         return true;
     }
@@ -115,8 +120,18 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
         return true;
     }
 
+    /**
+     * CHANGEMENT :
+     * Avant: WHERE l.statut = 'DISPONIBLE'
+     * Maintenant: on renvoie TOUT, et l'UI affiche DISPONIBLE si dispo aujourd'hui.
+     */
     public List<Moto> getDisponibles(List<LouableFiltre> filtres) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM LOUABLE l JOIN VEHICULE v ON l.id = v.id JOIN MOTO m ON v.id = m.id WHERE l.statut = 'DISPONIBLE'");
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM LOUABLE l " +
+                        "JOIN VEHICULE v ON l.id = v.id " +
+                        "JOIN MOTO m ON v.id = m.id " +
+                        "WHERE 1=1"
+        );
         List<Object> params = new ArrayList<>();
 
         for (LouableFiltre filtre : filtres) {
@@ -126,6 +141,7 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
                 params.addAll(clause.getParams());
             }
         }
+
         return jdbcTemplate.query(sql.toString(), params.toArray(), (rs, rowNum) -> new Moto(
                 rs.getInt("id"),
                 rs.getInt("idProprietaire"),
@@ -147,9 +163,9 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
 
     public List<Moto> getByProprietaire(int idProprietaire) {
         String sql = "SELECT * FROM LOUABLE l " +
-                     "JOIN VEHICULE v ON l.id = v.id " +
-                     "JOIN MOTO m ON v.id = m.id " +
-                     "WHERE l.idProprietaire = ?";
+                "JOIN VEHICULE v ON l.id = v.id " +
+                "JOIN MOTO m ON v.id = m.id " +
+                "WHERE l.idProprietaire = ?";
         return jdbcTemplate.query(sql, new Object[]{idProprietaire}, (rs, rowNum) -> new Moto(
                 rs.getInt("id"),
                 rs.getInt("idProprietaire"),

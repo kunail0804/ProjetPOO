@@ -1,340 +1,120 @@
-<!doctype html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Inscription</title>
-</head>
-<body>
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Inscription', ~{::section})}">
+<section class="stack">
+  <div class="card">
+    <h1 class="h1">Inscription</h1>
 
-<h1>Inscription</h1>
-
-<!-- Affichage erreur si le controller renvoie "inscription" avec error -->
-<div th:if="${error}">
-    <p style="color: red;" th:text="${error}">Erreur</p>
-</div>
-
-<!-- Sélection du type de compte -->
-<div>
-    <label for="role">Type de compte</label><br>
-    <select id="role" name="role" onchange="onRoleChange()" required>
-        <option value="">-- Sélectionner un rôle --</option>
-        <option value="AGENT" th:selected="${role == 'AGENT'}">Agent</option>
-        <option value="LOUEUR" th:selected="${role == 'LOUEUR'}">Loueur</option>
-        <option value="ENTRETIEN" th:selected="${role == 'ENTRETIEN'}">Entreprise d'entretien</option>
-        <!-- Agent pro non pris en compte pour l'instant -->
-        <!-- <option value="AGENT_PRO" th:selected="${role == 'AGENT_PRO'}">Agent professionnel</option> -->
-    </select>
-</div>
-
-<br>
-
-<form th:action="@{/inscription}" method="post">
-    <!-- Champ caché pour envoyer le rôle au controller -->
-    <input type="hidden" id="roleHidden" name="role" th:value="${role}">
-
-    <!-- Tout le formulaire (hors select) est caché tant qu'aucun rôle n'est sélectionné -->
-    <div id="formFields" style="display:none;">
-
-        <!-- Champs communs -->
-        <h2>Compte</h2>
-
-        <div>
-            <label for="email">Email</label><br>
-            <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="email@exemple.com"
-                    required
-                    th:value="${email}"
-            >
+    <form class="form" th:action="@{/inscription}" method="post" id="formInscription">
+      <div class="grid grid--2">
+        <div class="field">
+          <label for="role">Type de compte</label>
+          <select id="role" name="role" required>
+            <option value="" th:selected="${role == null || role == ''}">— Sélectionner —</option>
+            <option value="AGENT" th:selected="${role == 'AGENT'}">Agent</option>
+            <option value="LOUEUR" th:selected="${role == 'LOUEUR'}">Loueur</option>
+            <option value="ENTRETIEN" th:selected="${role == 'ENTRETIEN'}">Entreprise d’entretien</option>
+          </select>
         </div>
 
-        <br>
-
-        <div>
-            <label for="password">Mot de passe</label><br>
-            <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Mot de passe"
-                    required
-            >
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" th:value="${email}" required />
         </div>
 
-        <br>
-
-        <!-- Champs AGENT / LOUEUR (nom, prenom + adresse) -->
-        <div id="personFields" style="display:none;">
-            <h2>Informations personnelles</h2>
-
-            <div>
-                <label for="nom">Nom</label><br>
-                <input
-                        type="text"
-                        id="nom"
-                        name="nom"
-                        placeholder="Nom"
-                        th:value="${nom}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="prenom">Prénom</label><br>
-                <input
-                        type="text"
-                        id="prenom"
-                        name="prenom"
-                        placeholder="Prénom"
-                        th:value="${prenom}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="telephone">Téléphone</label><br>
-                <input
-                        type="tel"
-                        id="telephone"
-                        name="telephone"
-                        placeholder="0612345678"
-                        th:value="${telephone}"
-                >
-            </div>
-
-            <br>
-
-            <h3>Adresse</h3>
-
-            <div>
-                <label for="adresse">Adresse</label><br>
-                <input
-                        type="text"
-                        id="adresse"
-                        name="adresse"
-                        placeholder="12 rue Exemple"
-                        th:value="${adresse}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="ville">Ville</label><br>
-                <input
-                        type="text"
-                        id="ville"
-                        name="ville"
-                        placeholder="Toulouse"
-                        th:value="${ville}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="codePostal">Code postal</label><br>
-                <input
-                        type="text"
-                        id="codePostal"
-                        name="codePostal"
-                        placeholder="31000"
-                        th:value="${codePostal}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="region">Région</label><br>
-                <input
-                        type="text"
-                        id="region"
-                        name="region"
-                        placeholder="Occitanie"
-                        th:value="${region}"
-                >
-            </div>
-
-            <br>
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <input id="password" type="password" name="password" required />
         </div>
 
-        <!-- Champs ENTRETIEN (entreprise + adresse) -->
-        <div id="entrepriseFields" style="display:none;">
-            <h2>Informations entreprise</h2>
+        <div class="field">
+          <label for="telephone">Téléphone</label>
+          <input id="telephone" type="text" name="telephone" th:value="${telephone}" required />
+        </div>
+      </div>
 
-            <div>
-                <label for="nomEntreprise">Nom de l'entreprise</label><br>
-                <input
-                        type="text"
-                        id="nomEntreprise"
-                        name="nomEntreprise"
-                        placeholder="Nom de l'entreprise"
-                        th:value="${nomEntreprise}"
-                >
-            </div>
+      <hr class="sep" />
 
-            <br>
-
-            <div>
-                <label for="raisonSociale">Raison sociale</label><br>
-                <input
-                        type="text"
-                        id="raisonSociale"
-                        name="raisonSociale"
-                        placeholder="Raison sociale"
-                        th:value="${raisonSociale}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="siret">Numéro SIRET</label><br>
-                <input
-                        type="text"
-                        id="siret"
-                        name="siret"
-                        placeholder="12345678900000"
-                        th:value="${siret}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="telephoneEntreprise">Téléphone</label><br>
-                <input
-                        type="tel"
-                        id="telephoneEntreprise"
-                        name="telephone"
-                        placeholder="0512345678"
-                        th:value="${telephone}"
-                >
-            </div>
-
-            <br>
-
-            <h3>Adresse</h3>
-
-            <div>
-                <label for="adresseEntreprise">Adresse</label><br>
-                <input
-                        type="text"
-                        id="adresseEntreprise"
-                        name="adresse"
-                        placeholder="12 rue Exemple"
-                        th:value="${adresse}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="villeEntreprise">Ville</label><br>
-                <input
-                        type="text"
-                        id="villeEntreprise"
-                        name="ville"
-                        placeholder="Toulouse"
-                        th:value="${ville}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="codePostalEntreprise">Code postal</label><br>
-                <input
-                        type="text"
-                        id="codePostalEntreprise"
-                        name="codePostal"
-                        placeholder="31000"
-                        th:value="${codePostal}"
-                >
-            </div>
-
-            <br>
-
-            <div>
-                <label for="regionEntreprise">Région</label><br>
-                <input
-                        type="text"
-                        id="regionEntreprise"
-                        name="region"
-                        placeholder="Occitanie"
-                        th:value="${region}"
-                >
-            </div>
-
-            <br>
+      <h2 class="h2">Adresse</h2>
+      <div class="grid grid--2">
+        <div class="field grid--full">
+          <label for="adresse">Adresse</label>
+          <input id="adresse" type="text" name="adresse" th:value="${adresse}" required />
         </div>
 
-        <button type="submit">S'inscrire</button>
-    </div>
-</form>
+        <div class="field">
+          <label for="ville">Ville</label>
+          <input id="ville" type="text" name="ville" th:value="${ville}" required />
+        </div>
 
-<script>
-    function setEnabled(containerId, enabled) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        const inputs = container.querySelectorAll("input, select, textarea, button");
-        inputs.forEach(i => i.disabled = !enabled);
-    }
+        <div class="field">
+          <label for="codePostal">Code postal</label>
+          <input id="codePostal" type="text" name="codePostal" th:value="${codePostal}" required />
+        </div>
 
-    function onRoleChange() {
-        const selectedRole = document.getElementById("role").value;
+        <div class="field">
+          <label for="region">Région</label>
+          <input id="region" type="text" name="region" th:value="${region}" required />
+        </div>
+      </div>
 
-        // Sync rôle dans le hidden
-        const roleHidden = document.getElementById("roleHidden");
-        roleHidden.value = selectedRole;
+      <hr class="sep" />
 
-        const formFields = document.getElementById("formFields");
-        const personFields = document.getElementById("personFields");
-        const entrepriseFields = document.getElementById("entrepriseFields");
+      <div id="blocPersonne">
+        <h2 class="h2">Identité (Agent / Loueur)</h2>
+        <div class="grid grid--2">
+          <div class="field">
+            <label for="prenom">Prénom</label>
+            <input id="prenom" type="text" name="prenom" th:value="${prenom}" />
+          </div>
+          <div class="field">
+            <label for="nom">Nom</label>
+            <input id="nom" type="text" name="nom" th:value="${nom}" />
+          </div>
+        </div>
+      </div>
 
-        // Si aucun rôle => on cache tout le formulaire (hors select) et on désactive
-        if (!selectedRole) {
-            formFields.style.display = "none";
-            setEnabled("formFields", false);
-            personFields.style.display = "none";
-            entrepriseFields.style.display = "none";
-            return;
-        }
+      <div id="blocEntretien">
+        <h2 class="h2">Entreprise d’entretien</h2>
+        <div class="grid grid--2">
+          <div class="field">
+            <label for="nomEntreprise">Nom d’entreprise</label>
+            <input id="nomEntreprise" type="text" name="nomEntreprise" th:value="${nomEntreprise}" />
+          </div>
+          <div class="field">
+            <label for="raisonSociale">Raison sociale</label>
+            <input id="raisonSociale" type="text" name="raisonSociale" th:value="${raisonSociale}" />
+          </div>
+          <div class="field">
+            <label for="siret">SIRET</label>
+            <input id="siret" type="text" name="siret" th:value="${siret}" />
+          </div>
+        </div>
+      </div>
 
-        // Rôle sélectionné => on montre le formulaire de base (email/mdp)
-        formFields.style.display = "block";
-        setEnabled("formFields", true);
+      <div class="actions">
+        <button class="btn btn--primary" type="submit">Créer le compte</button>
+        <a class="btn" th:href="@{/connexion}">Déjà un compte</a>
+      </div>
+    </form>
+  </div>
 
-        // Reset sections spécifiques
-        personFields.style.display = "none";
-        entrepriseFields.style.display = "none";
-        setEnabled("personFields", false);
-        setEnabled("entrepriseFields", false);
+  <script>
+    (function () {
+      const role = document.getElementById('role');
+      const blocPersonne = document.getElementById('blocPersonne');
+      const blocEntretien = document.getElementById('blocEntretien');
 
-        // Afficher selon rôle
-        if (selectedRole === "AGENT" || selectedRole === "LOUEUR") {
-            personFields.style.display = "block";
-            setEnabled("personFields", true);
-        } else if (selectedRole === "ENTRETIEN") {
-            entrepriseFields.style.display = "block";
-            setEnabled("entrepriseFields", true);
-        }
-    }
+      function update() {
+        const v = role.value;
+        const isEntretien = (v === 'ENTRETIEN');
+        blocEntretien.style.display = isEntretien ? '' : 'none';
+        blocPersonne.style.display = isEntretien ? 'none' : '';
+      }
 
-    // Au chargement : appliquer l'état si le role est déjà présent (retour erreur)
-    (function initRole() {
-        const roleHidden = document.getElementById("roleHidden");
-        if (roleHidden && roleHidden.value) {
-            document.getElementById("role").value = roleHidden.value;
-        }
-        onRoleChange();
+      role.addEventListener('change', update);
+      update();
     })();
-</script>
-
-</body>
+  </script>
+</section>
 </html>

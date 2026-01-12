@@ -1,3 +1,4 @@
+// FICHIER: src/main/java/com/delorent/repository/LouableRepository/VoitureRepository.java
 package com.delorent.repository.LouableRepository;
 
 import com.delorent.model.Louable.Voiture;
@@ -25,8 +26,8 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
     @Override
     public List<Voiture> getAll() {
         String sql = "SELECT * FROM LOUABLE" +
-                     " JOIN VEHICULE ON LOUABLE.id = VEHICULE.id" +
-                     " JOIN VOITURE ON VEHICULE.id = VOITURE.id";
+                " JOIN VEHICULE ON LOUABLE.id = VEHICULE.id" +
+                " JOIN VOITURE ON VEHICULE.id = VOITURE.id";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Voiture(
                 rs.getInt("id"),
                 rs.getInt("idProprietaire"),
@@ -51,9 +52,9 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
     @Override
     public Voiture get(Integer id) {
         String sql = "SELECT * FROM LOUABLE" +
-                     " JOIN VEHICULE ON LOUABLE.id = VEHICULE.id" +
-                     " JOIN VOITURE ON VEHICULE.id = VOITURE.id" +
-                     " WHERE LOUABLE.id = ?";
+                " JOIN VEHICULE ON LOUABLE.id = VEHICULE.id" +
+                " JOIN VOITURE ON VEHICULE.id = VOITURE.id" +
+                " WHERE LOUABLE.id = ?";
         return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> new Voiture(
                 rs.getInt("id"),
                 rs.getInt("idProprietaire"),
@@ -86,7 +87,8 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
         jdbcTemplate.update(sqlVehicule, idLouable, entity.getMarque(), entity.getModele(), entity.getAnnee(), entity.getCouleur(), entity.getImmatriculation(), entity.getKilometrage());
 
         String sqlVoiture = "INSERT INTO VOITURE (id, nbPortes, nbPlaces, volumeCoffreLitres, boite, carburant, climatisation) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sqlVoiture, idLouable, entity.getNbPortes(), entity.getNbPlaces(), entity.getVolumeCoffreLitres(), entity.getBoite().name(), entity.getCarburant().name(), entity.isClimatisation());
+        jdbcTemplate.update(sqlVoiture, idLouable, entity.getNbPortes(), entity.getNbPlaces(), entity.getVolumeCoffreLitres(),
+                entity.getBoite().name(), entity.getCarburant().name(), entity.isClimatisation());
 
         return idLouable;
     }
@@ -97,10 +99,12 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
         int rowsLouable = jdbcTemplate.update(sqlLouable, entity.getPrixJour(), entity.getStatut().name(), entity.getLieuPrincipal(), entity.getIdLouable());
 
         String sqlVehicule = "UPDATE VEHICULE SET marque = ?, modele = ?, annee = ?, couleur = ?, immatriculation = ?, kilometrage = ? WHERE id = ?";
-        int rowsVehicule = jdbcTemplate.update(sqlVehicule, entity.getMarque(), entity.getModele(), entity.getAnnee(), entity.getCouleur(), entity.getImmatriculation(), entity.getKilometrage(), entity.getIdLouable());
+        int rowsVehicule = jdbcTemplate.update(sqlVehicule, entity.getMarque(), entity.getModele(), entity.getAnnee(), entity.getCouleur(),
+                entity.getImmatriculation(), entity.getKilometrage(), entity.getIdLouable());
 
         String sqlVoiture = "UPDATE VOITURE SET nbPortes = ?, nbPlaces = ?, volumeCoffreLitres = ?, boite = ?, carburant = ?, climatisation = ? WHERE id = ?";
-        int rowsVoiture = jdbcTemplate.update(sqlVoiture, entity.getNbPortes(), entity.getNbPlaces(), entity.getVolumeCoffreLitres(), entity.getBoite().name(), entity.getCarburant().name(), entity.isClimatisation(), entity.getIdLouable());
+        int rowsVoiture = jdbcTemplate.update(sqlVoiture, entity.getNbPortes(), entity.getNbPlaces(), entity.getVolumeCoffreLitres(),
+                entity.getBoite().name(), entity.getCarburant().name(), entity.isClimatisation(), entity.getIdLouable());
 
         return (rowsLouable > 0) && (rowsVehicule > 0) && (rowsVoiture > 0);
     }
@@ -119,8 +123,18 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
         return (rowsVoiture > 0) && (rowsVehicule > 0) && (rowsLouable > 0);
     }
 
+    /**
+     * CHANGEMENT :
+     * Avant: WHERE l.statut = 'DISPONIBLE'
+     * Maintenant: on renvoie TOUT, et on laissera l'UI afficher DISPONIBLE seulement si dispo aujourd'hui.
+     */
     public List<Voiture> getDisponibles(List<LouableFiltre> filtres) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM LOUABLE l JOIN VEHICULE v ON l.id = v.id JOIN VOITURE vo ON v.id = vo.id WHERE l.statut = 'DISPONIBLE'");
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM LOUABLE l " +
+                        "JOIN VEHICULE v ON l.id = v.id " +
+                        "JOIN VOITURE vo ON v.id = vo.id " +
+                        "WHERE 1=1"
+        );
         List<Object> params = new ArrayList<>();
 
         for (LouableFiltre filtre : filtres) {
@@ -154,9 +168,9 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
 
     public List<Voiture> getByProprietaire(int idProprietaire) {
         String sql = "SELECT * FROM LOUABLE l" +
-                     " JOIN VEHICULE v ON l.id = v.id" +
-                     " JOIN VOITURE vo ON v.id = vo.id" +
-                     " WHERE l.idProprietaire = ?";
+                " JOIN VEHICULE v ON l.id = v.id" +
+                " JOIN VOITURE vo ON v.id = vo.id" +
+                " WHERE l.idProprietaire = ?";
         return jdbcTemplate.query(sql, new Object[]{idProprietaire}, (rs, rowNum) -> new Voiture(
                 rs.getInt("id"),
                 rs.getInt("idProprietaire"),

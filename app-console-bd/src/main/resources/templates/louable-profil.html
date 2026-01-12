@@ -1,190 +1,102 @@
 <!doctype html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Mon louable</title>
-  <style>
-    .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
-    .muted { color: #666; font-size: 0.9em; }
-    .ok { color: green; }
-    .err { color: red; }
-    .row { display:flex; gap:24px; flex-wrap: wrap; }
-    .col { flex: 1 1 320px; }
-    .btn { display:inline-block; padding:8px 12px; border:1px solid #ccc; border-radius:8px; text-decoration:none; }
-    .btn-primary { border-color:#999; font-weight:600; }
-    .kv { margin: 0; }
-    .kv dt { font-weight: 600; margin-top: 10px; }
-    .kv dd { margin: 2px 0 0 0; }
-    .badge { display:inline-block; padding:2px 8px; border:1px solid #ddd; border-radius:999px; font-size: 0.85em; }
-    hr { border:0; border-top:1px solid #eee; margin: 12px 0; }
-  </style>
-</head>
-<body>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Louable', ~{::section})}">
 
-<p>
-  <a th:if="${backToProfile}" th:href="@{/profil}">← Retour au profil</a>
-  <a th:if="${!backToProfile}" th:href="@{/louables}">← Retour au catalogue</a>
-</p>
+<section>
+  <div class="panel soft">
 
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Détail louable</h1>
+        <div class="muted small" th:if="${louableSummary != null}">
+          ID #<strong th:text="${louableSummary.idLouable()}">0</strong>
+          <span th:if="${louableSummary.type != null}">
+            · <span th:text="${louableSummary.type()}">Type</span>
+          </span>
+        </div>
+      </div>
 
-<h1>Détails de mon louable</h1>
+      <div class="btnrow">
+        <a class="btn" th:href="@{/profil}" th:if="${backToProfile}">← Retour profil</a>
+        <a class="btn" th:href="@{/louables}" th:unless="${backToProfile}">← Retour catalogue</a>
+      </div>
+    </div>
 
-<div th:if="${succes}">
-  <p class="ok" th:text="${succes}">Succès</p>
-</div>
-<div th:if="${erreur}">
-  <p class="err" th:text="${erreur}">Erreur</p>
-</div>
+    <div class="hr"></div>
 
-<!-- Cas louable introuvable -->
-<div th:if="${louable == null}" class="box">
-  <p class="err">Ce louable est introuvable.</p>
-  <p class="muted">Vérifie l’identifiant dans l’URL.</p>
-</div>
+    <div class="alert err" th:if="${louableSummary == null}">
+      Louable introuvable.
+    </div>
 
-<!-- Profil -->
-<div th:if="${louable != null}" class="row">
+    <div th:if="${louableSummary != null}">
+      <div class="grid">
 
-  <!-- Colonne principale -->
-  <div class="col box">
-    <p class="muted" style="margin-top:4px;">
-      Type :
-      <strong th:text="${type}">VOITURE</strong>
-      &nbsp;•&nbsp;
-      ID :
-      <strong th:text="${louable.idLouable}">1</strong>
-    </p>
+        <article class="card">
+          <div class="card-title">Informations</div>
 
-    <dl class="kv">
-      <dt>Prix / jour</dt>
-      <dd th:text="${louable.prixJour + ' €'}">50 €</dd>
+          <div class="kv">
+            <div class="kv-row">
+              <div class="k">Type</div>
+              <div class="v" th:text="${louableSummary.type()}">Type</div>
+            </div>
 
-      <dt>Statut</dt>
-      <dd>
-        <span class="badge" th:text="${louable.statut}">DISPONIBLE</span>
-      </dd>
+            <div class="kv-row">
+              <div class="k">Prix / jour</div>
+              <div class="v" th:text="${louableSummary.prixJour()} + ' €'">0 €</div>
+            </div>
 
-      <dt>Lieu principal</dt>
-      <dd th:text="${louable.lieuPrincipal}">Toulouse</dd>
-    </dl>
+            <div class="kv-row">
+              <div class="k">Lieu principal</div>
+              <div class="v" th:text="${louableSummary.lieuPrincipal()}">Lieu</div>
+            </div>
 
-    <hr>
+            <div class="kv-row">
+              <div class="k">Statut</div>
+              <div class="v" th:text="${louableSummary.statut()}">Statut</div>
+            </div>
+          </div>
 
-    <h2 style="margin: 0 0 8px 0;">Informations véhicule</h2>
-    <dl class="kv">
-      <dt>Marque</dt>
-      <dd th:text="${louable.marque}">Renault</dd>
+          <div class="spacer"></div>
 
-      <dt>Modèle</dt>
-      <dd th:text="${louable.modele}">Clio</dd>
+          <div class="btnrow">
+            <a class="btn primary"
+               th:href="@{/louables/{id}/louer(id=${louableSummary.idLouable()})}">
+              Louer
+            </a>
 
-      <dt>Année</dt>
-      <dd th:text="${louable.annee}">2020</dd>
+            <a class="btn"
+               th:href="@{/louables/{id}/modifier(id=${louableSummary.idLouable()})}"
+               th:if="${canManage}">
+              Modifier
+            </a>
 
-      <dt>Couleur</dt>
-      <dd th:text="${louable.couleur}">Gris</dd>
+            <a class="btn danger"
+               th:href="@{/louables/{id}/supprimer(id=${louableSummary.idLouable()})}"
+               th:if="${canManage}"
+               onclick="return confirm('Supprimer ce louable ?');">
+              Supprimer
+            </a>
+          </div>
+        </article>
 
-      <dt>Immatriculation</dt>
-      <dd th:text="${louable.immatriculation}">AB-123-CD</dd>
+        <article class="card" th:if="${louable != null}">
+          <div class="card-title">Détails techniques</div>
+          <div class="muted small">
+            Affichage brut (utile pour debug). Remplace par des champs dédiés quand tu veux.
+          </div>
 
-      <dt>Kilométrage</dt>
-      <dd th:text="${louable.kilometrage + ' km'}">45000 km</dd>
-    </dl>
+          <div class="hr"></div>
+
+          <div class="alert warn">
+            <div class="muted small" th:text="${louable}">
+              Louable
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+
   </div>
-
-  <!-- Colonne champs spécifiques -->
-  <div class="col box">
-    <h2 style="margin-top:0;">Champs spécifiques</h2>
-
-    <!-- VOITURE -->
-    <div th:if="${isVoiture}">
-      <h3 style="margin: 8px 0;">Voiture</h3>
-      <dl class="kv">
-        <dt>Nombre de portes</dt>
-        <dd th:text="${louable.nbPortes}">5</dd>
-
-        <dt>Nombre de places</dt>
-        <dd th:text="${louable.nbPlaces}">5</dd>
-
-        <dt>Volume coffre</dt>
-        <dd th:text="${louable.volumeCoffreLitres + ' L'}">300 L</dd>
-
-        <dt>Boîte</dt>
-        <dd th:text="${louable.boite}">MANUELLE</dd>
-
-        <dt>Carburant</dt>
-        <dd th:text="${louable.carburant}">ESSENCE</dd>
-
-        <dt>Climatisation</dt>
-        <dd th:text="${louable.climatisation ? 'Oui' : 'Non'}">Oui</dd>
-      </dl>
-    </div>
-
-    <!-- MOTO -->
-    <div th:if="${isMoto}">
-      <h3 style="margin: 8px 0;">Moto</h3>
-      <dl class="kv">
-        <dt>Cylindrée</dt>
-        <dd th:text="${louable.cylindreeCc + ' cc'}">650 cc</dd>
-
-        <dt>Puissance</dt>
-        <dd th:text="${louable.puissanceCh + ' ch'}">70 ch</dd>
-
-        <dt>Type de moto</dt>
-        <dd th:text="${louable.typeMoto}">ROADSTER</dd>
-
-        <dt>Permis requis</dt>
-        <dd th:text="${louable.permisRequis}">A2</dd>
-      </dl>
-    </div>
-
-    <!-- CAMION -->
-    <div th:if="${isCamion}">
-      <h3 style="margin: 8px 0;">Camion</h3>
-      <dl class="kv">
-        <dt>Charge max</dt>
-        <dd th:text="${louable.chargeMaxKg + ' kg'}">1200 kg</dd>
-
-        <dt>Volume utile</dt>
-        <dd th:text="${louable.volumeUtileM3 + ' m³'}">10 m³</dd>
-
-        <dt>Hauteur</dt>
-        <dd th:text="${louable.hauteurM + ' m'}">2.2 m</dd>
-
-        <dt>Longueur</dt>
-        <dd th:text="${louable.longueurM + ' m'}">4.5 m</dd>
-
-        <dt>Permis requis</dt>
-        <dd th:text="${louable.permisRequis}">B</dd>
-      </dl>
-    </div>
-
-<hr>
-
-<div th:if="${!canManage}">
-  <a class="btn" th:href="@{/louables/{id}/louer(id=${louable.idLouable})}">Louer ce Louable</a>
-</div>
-
-<div th:if="${canManage}">
-  <p class="muted">
-    Actions (Agent propriétaire)
-  </p>
-
-  <!-- Exemples (à brancher plus tard) -->
-  <div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <!-- placeholders: adapte les routes quand tu les créeras -->
-    <a class="btn" th:href="@{/louables/{id}/modifier(id=${louable.idLouable})}">Modifier</a>
-    <a class="btn" th:href="@{/louables/{id}/supprimer(id=${louable.idLouable})}">Supprimer</a>
-
-    <form th:action="@{/louables/{id}/supprimer(id=${louable.idLouable})}" method="post"
-          onsubmit="return confirm('Supprimer définitivement ce louable ?');" style="display:inline;">
-    </form>
-  </div>
-</div>
-
-<!-- si pas canManage : rien à afficher -->
-
-</div>
-
-</body>
+</section>
 </html>

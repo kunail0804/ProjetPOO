@@ -1,3 +1,4 @@
+// src/main/java/com/delorent/repository/LouableRepository/LouableRepository.java
 package com.delorent.repository.LouableRepository;
 
 import org.springframework.stereotype.Repository;
@@ -5,8 +6,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.delorent.repository.RepositoryBase;
 import com.delorent.model.Louable.LouableFiltre;
+
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 @Repository
 public class LouableRepository implements RepositoryBase<LouableSummary, Integer> {
@@ -31,7 +37,7 @@ public class LouableRepository implements RepositoryBase<LouableSummary, Integer
     @Override
     public LouableSummary get(Integer id) {
         VehiculeSummary vehicule = vehiculeRepository.get(id);
-        return vehicule.louable();
+        return vehicule == null ? null : vehicule.louable();
     }
 
     @Override
@@ -65,5 +71,30 @@ public class LouableRepository implements RepositoryBase<LouableSummary, Integer
             summaries.add(vehicule.louable());
         }
         return summaries;
+    }
+
+    /**
+     * Renvoie les idLouable disponibles pour une date donnée (jour).
+     * Règle : au moins une disponibilité NON réservée couvrant cette date.
+     */
+    public Set<Integer> getIdsDisponiblesA(LocalDate date) {
+        if (date == null) date = LocalDate.now();
+
+        String sql = """
+            SELECT DISTINCT d.idLouable
+            FROM DISPONIBILITE d
+            WHERE d.estReservee = 0
+              AND DATE(d.dateDebut) <= ?
+              AND DATE(d.dateFin)   >= ?
+        """;
+
+        List<Integer> ids = jdbcTemplate.queryForList(
+                sql,
+                Integer.class,
+                Date.valueOf(date),
+                Date.valueOf(date)
+        );
+
+        return new HashSet<>(ids);
     }
 }

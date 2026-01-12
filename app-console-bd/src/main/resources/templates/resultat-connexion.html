@@ -1,18 +1,15 @@
-<!doctype html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Connexion réussie</title>
-</head>
-<body>
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Connexion', ~{::section})}">
+<section class="stack">
+  <div class="card">
+    <h1 class="h1">Connexion</h1>
+    <p th:text="${message}">Connecté.</p>
 
-<h1>Résultat de la connexion</h1>
-
-<p th:text="${message}">
-    Connexion réussie
-</p>
-
-<a th:href="@{/}">Retour à l'accueil</a>
-
-</body>
+    <div class="actions">
+      <a class="btn btn--primary" th:href="@{/louables}">Aller au catalogue</a>
+      <a class="btn" th:href="@{/profil}">Mon profil</a>
+    </div>
+  </div>
+</section>
 </html>

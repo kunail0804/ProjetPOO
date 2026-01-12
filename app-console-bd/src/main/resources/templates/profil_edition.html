@@ -1,119 +1,115 @@
-<!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Éditer mon profil</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Édition profil', ~{::main})}">
 
-<body class="bg-light">
-
-<nav class="navbar navbar-dark bg-primary mb-5">
-  <div class="container d-flex justify-content-between align-items-center">
-    <span class="navbar-brand mb-0 h1">✏️ Édition du Profil</span>
-    <div class="d-flex gap-2">
-      <a href="/profil" class="btn btn-outline-light btn-sm">Retour profil</a>
-      <a href="/" class="btn btn-outline-light btn-sm">Accueil</a>
+<main>
+  <div class="panel" style="max-width: 980px; margin: 0 auto;">
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Édition du profil</h1>
+        <p class="muted small">Rôle actuel : <strong th:text="${roleActuel}">ROLE</strong></p>
+      </div>
+      <span class="badge magenta">Edit</span>
     </div>
-  </div>
-</nav>
 
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="hr"></div>
 
-      <div class="card shadow">
-        <div class="card-header bg-white py-3">
-          <h4 class="mb-0 text-primary">Mes informations</h4>
-          <div class="text-muted small">
-            Rôle actuel : <span th:text="${roleActuel}">ROLE</span>
+    <form th:action="@{/profil/edition}" th:object="${form}" method="post" class="form">
+
+      <!-- Identité (Agent/Loueur) -->
+      <div th:if="${isAgent || isLoueur}" class="panel soft">
+        <span class="badge cyan">Identité</span>
+        <div class="spacer"></div>
+
+        <div class="row">
+          <div class="col field">
+            <label class="label">Prénom</label>
+            <input class="input" type="text" th:field="*{prenom}" required>
           </div>
-        </div>
-
-        <div class="card-body">
-          <form th:action="@{/profil/edition}" th:object="${form}" method="post">
-
-            <div class="text-muted small">
-                Rôle actuel : <span th:text="${roleActuel}">ROLE</span>
-            </div>
-
-            <!-- Identité (Agent/Loueur) -->
-            <div class="row g-3" th:if="${isAgent || isLoueur}">
-              <div class="col-md-6">
-                <label class="form-label">Prénom</label>
-                <input class="form-control" type="text" th:field="*{prenom}" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Nom</label>
-                <input class="form-control" type="text" th:field="*{nom}" required>
-              </div>
-            </div>
-
-            <!-- Identité (EntrepriseEntretien) -->
-            <div class="row g-3" th:if="${isEntretien}">
-              <div class="col-md-6">
-                <label class="form-label">Nom de l’entreprise</label>
-                <input class="form-control" type="text" th:field="*{nomEntreprise}" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Raison sociale</label>
-                <input class="form-control" type="text" th:field="*{raisonSoc}">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">N° SIRET</label>
-                <input class="form-control" type="text" th:field="*{noSiret}">
-              </div>
-            </div>
-
-            <hr class="my-4">
-
-            <!-- Champs communs -->
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Email</label>
-                <input class="form-control" type="email" th:field="*{mail}" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Téléphone</label>
-                <input class="form-control" type="text" th:field="*{telephone}">
-              </div>
-
-              <div class="col-md-12">
-                <label class="form-label">Adresse</label>
-                <input class="form-control" type="text" th:field="*{adresse}">
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Ville</label>
-                <input class="form-control" type="text" th:field="*{ville}">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Code postal</label>
-                <input class="form-control" type="text" th:field="*{codePostal}">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Région</label>
-                <input class="form-control" type="text" th:field="*{region}">
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Nouveau mot de passe</label>
-                <input class="form-control" type="password" th:field="*{motDePasse}" placeholder="Laisser vide pour ne pas changer">
-              </div>
-            </div>
-
-            <div class="mt-4 d-flex justify-content-between">
-              <a href="/profil" class="btn btn-outline-secondary">Annuler</a>
-              <button type="submit" class="btn btn-primary">Enregistrer ✅</button>
-            </div>
-
-          </form>
+          <div class="col field">
+            <label class="label">Nom</label>
+            <input class="input" type="text" th:field="*{nom}" required>
+          </div>
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
+      <!-- Identité (EntrepriseEntretien) -->
+      <div th:if="${isEntretien}" class="panel soft">
+        <span class="badge yellow">Entreprise</span>
+        <div class="spacer"></div>
 
-</body>
+        <div class="row">
+          <div class="col field">
+            <label class="label">Nom de l’entreprise</label>
+            <input class="input" type="text" th:field="*{nomEntreprise}" required>
+          </div>
+          <div class="col field">
+            <label class="label">Raison sociale</label>
+            <input class="input" type="text" th:field="*{raisonSoc}">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col field">
+            <label class="label">N° SIRET</label>
+            <input class="input" type="text" th:field="*{noSiret}">
+          </div>
+        </div>
+      </div>
+
+      <!-- Champs communs -->
+      <div class="panel soft">
+        <span class="badge cyan">Contact</span>
+        <div class="spacer"></div>
+
+        <div class="row">
+          <div class="col field">
+            <label class="label">Email</label>
+            <input class="input" type="email" th:field="*{mail}" required>
+          </div>
+          <div class="col field">
+            <label class="label">Téléphone</label>
+            <input class="input" type="text" th:field="*{telephone}">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col field">
+            <label class="label">Adresse</label>
+            <input class="input" type="text" th:field="*{adresse}">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col field">
+            <label class="label">Ville</label>
+            <input class="input" type="text" th:field="*{ville}">
+          </div>
+          <div class="col field">
+            <label class="label">Code postal</label>
+            <input class="input" type="text" th:field="*{codePostal}">
+          </div>
+          <div class="col field">
+            <label class="label">Région</label>
+            <input class="input" type="text" th:field="*{region}">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col field">
+            <label class="label">Nouveau mot de passe</label>
+            <input class="input" type="password" th:field="*{motDePasse}" placeholder="Laisser vide pour ne pas changer">
+            <p class="help">Si vide, le mot de passe n’est pas modifié.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <a class="btn" th:href="@{/profil}">Annuler</a>
+        <button class="btn primary" type="submit">Enregistrer ✅</button>
+      </div>
+
+    </form>
+  </div>
+</main>
 </html>

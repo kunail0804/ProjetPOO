@@ -1,18 +1,15 @@
-<!doctype html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Inscription réussie</title>
-</head>
-<body>
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Inscription', ~{::section})}">
+<section class="stack">
+  <div class="card">
+    <h1 class="h1">Inscription</h1>
+    <p th:text="${message}">Inscription OK.</p>
 
-<h1>Résultat</h1>
-
-<p th:text="${message}">
-    Message par défaut
-</p>
-
-<a th:href="@{/}">Retour à l'accueil</a>
-
-</body>
+    <div class="actions">
+      <a class="btn btn--primary" th:href="@{/connexion}">Se connecter</a>
+      <a class="btn" th:href="@{/accueil}">Retour accueil</a>
+    </div>
+  </div>
+</section>
 </html>

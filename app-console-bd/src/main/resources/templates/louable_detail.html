@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Détails louable', ~{::main})}">
+
+<main>
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Détails du louable</h1>
+        <p class="muted small">
+          <a class="nav-link" style="display:inline-flex; padding:8px 10px;"
+             th:if="${backToProfile}" th:href="@{/profil}">← Profil</a>
+          <a class="nav-link" style="display:inline-flex; padding:8px 10px;"
+             th:if="${backToProfile != true}" th:href="@{/louables}">← Catalogue</a>
+        </p>
+      </div>
+      <span class="badge yellow" th:text="${type}">TYPE</span>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="alert ok" th:if="${succes}">
+      <span th:text="${succes}">Succès</span>
+    </div>
+    <div class="alert err" th:if="${erreur}">
+      <span th:text="${erreur}">Erreur</span>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="alert err" th:if="${louable == null}">
+      Louable introuvable. Vérifiez l’identifiant dans l’URL.
+    </div>
+
+    <div th:if="${louable != null}" class="row">
+      <div class="col panel soft">
+        <div class="muted small">
+          Type : <strong th:text="${type}">VOITURE</strong>
+          &nbsp;•&nbsp; ID : <strong th:text="${louable.idLouable}">1</strong>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="kv">
+          <div class="kv-row">
+            <div class="k">Prix / jour</div>
+            <div class="v" th:text="${louable.prixJour + ' €'}">50 €</div>
+          </div>
+          <div class="kv-row">
+            <div class="k">Statut</div>
+            <div class="v"><span class="badge" th:text="${louable.statut}">DISPONIBLE</span></div>
+          </div>
+          <div class="kv-row">
+            <div class="k">Lieu principal</div>
+            <div class="v" th:text="${louable.lieuPrincipal}">Toulouse</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 class="h2">Véhicule</h2>
+        <div class="kv">
+          <div class="kv-row"><div class="k">Marque</div><div class="v" th:text="${louable.marque}">Renault</div></div>
+          <div class="kv-row"><div class="k">Modèle</div><div class="v" th:text="${louable.modele}">Clio</div></div>
+          <div class="kv-row"><div class="k">Année</div><div class="v" th:text="${louable.annee}">2020</div></div>
+          <div class="kv-row"><div class="k">Couleur</div><div class="v" th:text="${louable.couleur}">Gris</div></div>
+          <div class="kv-row"><div class="k">Immatriculation</div><div class="v" th:text="${louable.immatriculation}">AB-123-CD</div></div>
+          <div class="kv-row"><div class="k">Kilométrage</div><div class="v" th:text="${louable.kilometrage + ' km'}">45000 km</div></div>
+        </div>
+      </div>
+
+      <div class="col panel soft">
+        <h2 class="h2">Champs spécifiques</h2>
+
+        <div th:if="${isVoiture}">
+          <span class="badge cyan">Voiture</span>
+          <div class="spacer"></div>
+          <div class="kv">
+            <div class="kv-row"><div class="k">Portes</div><div class="v" th:text="${louable.nbPortes}">5</div></div>
+            <div class="kv-row"><div class="k">Places</div><div class="v" th:text="${louable.nbPlaces}">5</div></div>
+            <div class="kv-row"><div class="k">Coffre</div><div class="v" th:text="${louable.volumeCoffreLitres + ' L'}">300 L</div></div>
+            <div class="kv-row"><div class="k">Boîte</div><div class="v" th:text="${louable.boite}">MANUELLE</div></div>
+            <div class="kv-row"><div class="k">Carburant</div><div class="v" th:text="${louable.carburant}">ESSENCE</div></div>
+            <div class="kv-row"><div class="k">Clim</div><div class="v" th:text="${louable.climatisation ? 'Oui' : 'Non'}">Oui</div></div>
+          </div>
+        </div>
+
+        <div th:if="${isMoto}">
+          <span class="badge magenta">Moto</span>
+          <div class="spacer"></div>
+          <div class="kv">
+            <div class="kv-row"><div class="k">Cylindrée</div><div class="v" th:text="${louable.cylindreeCc + ' cc'}">650 cc</div></div>
+            <div class="kv-row"><div class="k">Puissance</div><div class="v" th:text="${louable.puissanceCh + ' ch'}">70 ch</div></div>
+            <div class="kv-row"><div class="k">Type</div><div class="v" th:text="${louable.typeMoto}">ROADSTER</div></div>
+            <div class="kv-row"><div class="k">Permis</div><div class="v" th:text="${louable.permisRequis}">A2</div></div>
+          </div>
+        </div>
+
+        <div th:if="${isCamion}">
+          <span class="badge yellow">Camion</span>
+          <div class="spacer"></div>
+          <div class="kv">
+            <div class="kv-row"><div class="k">Charge max</div><div class="v" th:text="${louable.chargeMaxKg + ' kg'}">1200 kg</div></div>
+            <div class="kv-row"><div class="k">Volume</div><div class="v" th:text="${louable.volumeUtileM3 + ' m³'}">10 m³</div></div>
+            <div class="kv-row"><div class="k">Hauteur</div><div class="v" th:text="${louable.hauteurM + ' m'}">2.2 m</div></div>
+            <div class="kv-row"><div class="k">Longueur</div><div class="v" th:text="${louable.longueurM + ' m'}">4.5 m</div></div>
+            <div class="kv-row"><div class="k">Permis</div><div class="v" th:text="${louable.permisRequis}">B</div></div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div th:if="${canManage != true}">
+          <a class="btn primary" th:href="@{/louables/{id}/louer(id=${louable.idLouable})}">Louer ce louable</a>
+        </div>
+
+        <div th:if="${canManage == true}">
+          <p class="muted small">Actions (Agent propriétaire)</p>
+          <div class="btnrow">
+            <a class="btn" th:href="@{/louables/{id}/modifier(id=${louable.idLouable})}">Modifier</a>
+            <a class="btn danger" th:href="@{/louables/{id}/supprimer(id=${louable.idLouable})}">Supprimer</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</html>

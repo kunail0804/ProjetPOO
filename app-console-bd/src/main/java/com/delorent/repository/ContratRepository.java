@@ -149,4 +149,50 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
                 rs.getString(COL_LIEU_DEPOT)
         ), idLoueur);
     }
+
+     public record ContratDetailView(
+            int idContrat,
+            LocalDate dateDebut,
+            LocalDate dateFin,
+            String lieuPrise,
+            String lieuDepot,
+            int prix,
+            String etat,
+            int idLoueur,
+            int idLouable,
+            String marque,
+            String modele,
+            Integer annee,
+            String immatriculation
+    ) {}
+
+    public ContratDetailView getDetailByIdAndLoueur(int idContrat, int idLoueur) {
+        String sql = """
+            SELECT c.idContrat, c.dateDebut, c.dateFin, c.lieuPrise, c.lieuDepot, c.prix, c.etat,
+                   c.idLoueur, c.idLouable,
+                   v.marque, v.modele, v.annee, v.immatriculation
+            FROM CONTRAT c
+            JOIN LOUABLE l ON l.id = c.idLouable
+            JOIN VEHICULE v ON v.id = l.id
+            WHERE c.idContrat = ? AND c.idLoueur = ?
+        """;
+
+        var res = jdbc.query(sql, (rs, i) -> new ContratDetailView(
+                rs.getInt("idContrat"),
+                rs.getDate("dateDebut") != null ? rs.getDate("dateDebut").toLocalDate() : null,
+                rs.getDate("dateFin") != null ? rs.getDate("dateFin").toLocalDate() : null,
+                rs.getString("lieuPrise"),
+                rs.getString("lieuDepot"),
+                rs.getInt("prix"),
+                rs.getString("etat"),
+                rs.getInt("idLoueur"),
+                rs.getInt("idLouable"),
+                rs.getString("marque"),
+                rs.getString("modele"),
+                (Integer) rs.getObject("annee"),
+                rs.getString("immatriculation")
+        ), idContrat, idLoueur);
+
+        return res.isEmpty() ? null : res.get(0);
+    }
 }

@@ -1,120 +1,154 @@
 <!doctype html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="utf-8" />
-  <title>Ajouter Louable</title>
-  <style>
-    .type-fields { display:none; padding: 8px 0; }
-    .type-fields.active { display:block; }
-    label { display:inline-block; width: 160px; }
-    .row { margin: 6px 0; }
-  </style>
-</head>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Ajouter louable', ~{::main})}">
 
-<body>
-<h1>Ajouter un Louable</h1>
-
-<form method="post" th:action="@{/ajouter_louable}">
-  <div class="row">
-    <label for="type">Type :</label>
-    <select id="type" name="type">
-      <option value="" disabled selected>-- Choisir un type --</option>
-      <option th:each="t : ${typesLouable}"
-              th:value="${t.name()}"
-              th:text="${t.label}">
-      </option>
-    </select>
-  </div>
-
-  <h3>Champs communs</h3>
-
-  <div class="row"><label for="prixJour">prixJour:</label> <input id="prixJour" name="prixJour" type="number" step="0.01" /></div>
-
-  <div class="row">
-    <label for="statut">statut:</label>
-    <select id="statut" name="statut">
-      <option value="DISPONIBLE">DISPONIBLE</option>
-      <option value="INDISPONIBLE">INDISPONIBLE</option>
-    </select>
-  </div>
-
-  <div class="row"><label for="lieuPrincipal">lieuPrincipal:</label> <input id="lieuPrincipal" name="lieuPrincipal" /></div>
-
-  <div class="row"><label for="marque">marque:</label> <input id="marque" name="marque" /></div>
-  <div class="row"><label for="modele">modele:</label> <input id="modele" name="modele" /></div>
-  <div class="row"><label for="annee">annee:</label> <input id="annee" name="annee" type="number" /></div>
-  <div class="row"><label for="couleur">couleur:</label> <input id="couleur" name="couleur" /></div>
-  <div class="row"><label for="immatriculation">immatriculation:</label> <input id="immatriculation" name="immatriculation" /></div>
-  <div class="row"><label for="kilometrage">kilometrage:</label> <input id="kilometrage" name="kilometrage" type="number" /></div>
-
-  <h3>Champs spécifiques</h3>
-
-  <!-- VOITURE -->
-  <div id="voitureFields" class="type-fields" data-type="VOITURE">
-    <h4>Voiture</h4>
-    <div class="row"><label for="nbPortes">nbPortes:</label> <input id="nbPortes" name="nbPortes" type="number" /></div>
-    <div class="row"><label for="nbPlaces">nbPlaces:</label> <input id="nbPlaces" name="nbPlaces" type="number" /></div>
-    <div class="row"><label for="volumeCoffreLitres">volumeCoffreLitres:</label> <input id="volumeCoffreLitres" name="volumeCoffreLitres" type="number" /></div>
-    <div class="row"><label for="boite">boite:</label> <input id="boite" name="boite" placeholder="MANUELLE" /></div>
-    <div class="row"><label for="carburant">carburant:</label> <input id="carburant" name="carburant" placeholder="ESSENCE" /></div>
-    <div class="row">
-      <label for="climatisation">climatisation:</label>
-      <select id="climatisation" name="climatisation">
-        <option value="">(null)</option>
-        <option value="true">true</option>
-        <option value="false">false</option>
-      </select>
+<main>
+  <div class="panel" style="max-width: 980px; margin: 0 auto;">
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Ajouter un louable</h1>
+        <p class="muted">Choisissez un type, puis complétez les champs.</p>
+      </div>
+      <span class="badge cyan">New entry</span>
     </div>
+
+    <div class="hr"></div>
+
+    <form method="post" th:action="@{/ajouter_louable}" class="form">
+      <div class="field">
+        <label class="label" for="type">Type</label>
+        <select id="type" name="type">
+          <option value="" disabled selected>-- Choisir un type --</option>
+          <option th:each="t : ${typesLouable}"
+                  th:value="${t.name()}"
+                  th:text="${t.label}">
+          </option>
+        </select>
+      </div>
+
+      <div class="hr"></div>
+      <h2 class="h2">Champs communs</h2>
+
+      <div class="row">
+        <div class="col field">
+          <label class="label" for="prixJour">Prix / jour</label>
+          <input class="input" id="prixJour" name="prixJour" type="number" step="0.01" />
+        </div>
+
+        <div class="col field">
+          <label class="label" for="statut">Statut</label>
+          <select id="statut" name="statut">
+            <option value="DISPONIBLE">DISPONIBLE</option>
+            <option value="INDISPONIBLE">INDISPONIBLE</option>
+          </select>
+        </div>
+
+        <div class="col field">
+          <label class="label" for="lieuPrincipal">Lieu principal</label>
+          <input class="input" id="lieuPrincipal" name="lieuPrincipal" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col field"><label class="label" for="marque">Marque</label><input class="input" id="marque" name="marque" /></div>
+        <div class="col field"><label class="label" for="modele">Modèle</label><input class="input" id="modele" name="modele" /></div>
+        <div class="col field"><label class="label" for="annee">Année</label><input class="input" id="annee" name="annee" type="number" /></div>
+      </div>
+
+      <div class="row">
+        <div class="col field"><label class="label" for="couleur">Couleur</label><input class="input" id="couleur" name="couleur" /></div>
+        <div class="col field"><label class="label" for="immatriculation">Immatriculation</label><input class="input" id="immatriculation" name="immatriculation" /></div>
+        <div class="col field"><label class="label" for="kilometrage">Kilométrage</label><input class="input" id="kilometrage" name="kilometrage" type="number" /></div>
+      </div>
+
+      <div class="hr"></div>
+      <h2 class="h2">Champs spécifiques</h2>
+
+      <!-- VOITURE -->
+      <div id="voitureFields" class="panel soft type-fields" data-type="VOITURE" style="display:none;">
+        <span class="badge cyan">Voiture</span>
+        <div class="spacer"></div>
+
+        <div class="row">
+          <div class="col field"><label class="label" for="nbPortes">Portes</label><input class="input" id="nbPortes" name="nbPortes" type="number" /></div>
+          <div class="col field"><label class="label" for="nbPlaces">Places</label><input class="input" id="nbPlaces" name="nbPlaces" type="number" /></div>
+          <div class="col field"><label class="label" for="volumeCoffreLitres">Coffre (L)</label><input class="input" id="volumeCoffreLitres" name="volumeCoffreLitres" type="number" /></div>
+        </div>
+
+        <div class="row">
+          <div class="col field"><label class="label" for="boite">Boîte</label><input class="input" id="boite" name="boite" placeholder="MANUELLE" /></div>
+          <div class="col field"><label class="label" for="carburant">Carburant</label><input class="input" id="carburant" name="carburant" placeholder="ESSENCE" /></div>
+          <div class="col field">
+            <label class="label" for="climatisation">Climatisation</label>
+            <select id="climatisation" name="climatisation">
+              <option value="">(null)</option>
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOTO -->
+      <div id="motoFields" class="panel soft type-fields" data-type="MOTO" style="display:none;">
+        <span class="badge magenta">Moto</span>
+        <div class="spacer"></div>
+
+        <div class="row">
+          <div class="col field"><label class="label" for="cylindreeCc">Cylindrée (cc)</label><input class="input" id="cylindreeCc" name="cylindreeCc" type="number" /></div>
+          <div class="col field"><label class="label" for="puissanceCh">Puissance (ch)</label><input class="input" id="puissanceCh" name="puissanceCh" type="number" /></div>
+          <div class="col field"><label class="label" for="typeMoto">Type</label><input class="input" id="typeMoto" name="typeMoto" placeholder="ROADSTER" /></div>
+        </div>
+
+        <div class="row">
+          <div class="col field"><label class="label" for="permisRequisMoto">Permis requis</label><input class="input" id="permisRequisMoto" name="permisRequisMoto" placeholder="A2" /></div>
+        </div>
+      </div>
+
+      <!-- CAMION -->
+      <div id="camionFields" class="panel soft type-fields" data-type="CAMION" style="display:none;">
+        <span class="badge yellow">Camion</span>
+        <div class="spacer"></div>
+
+        <div class="row">
+          <div class="col field"><label class="label" for="chargeMaxKg">Charge max (kg)</label><input class="input" id="chargeMaxKg" name="chargeMaxKg" type="number" /></div>
+          <div class="col field"><label class="label" for="volumeUtileM3">Volume (m³)</label><input class="input" id="volumeUtileM3" name="volumeUtileM3" type="number" /></div>
+          <div class="col field"><label class="label" for="hauteurM">Hauteur (m)</label><input class="input" id="hauteurM" name="hauteurM" type="number" /></div>
+        </div>
+
+        <div class="row">
+          <div class="col field"><label class="label" for="longueurM">Longueur (m)</label><input class="input" id="longueurM" name="longueurM" type="number" /></div>
+          <div class="col field"><label class="label" for="permisRequisCamion">Permis requis</label><input class="input" id="permisRequisCamion" name="permisRequisCamion" /></div>
+        </div>
+      </div>
+
+      <div class="btnrow" style="margin-top: 6px;">
+        <button class="btn primary" type="submit">Enregistrer</button>
+        <a class="btn" th:href="@{/profil}">Retour profil</a>
+      </div>
+    </form>
   </div>
 
-  <!-- MOTO -->
-  <div id="motoFields" class="type-fields" data-type="MOTO">
-    <h4>Moto</h4>
-    <div class="row"><label for="cylindreeCc">cylindreeCc:</label> <input id="cylindreeCc" name="cylindreeCc" type="number" /></div>
-    <div class="row"><label for="puissanceCh">puissanceCh:</label> <input id="puissanceCh" name="puissanceCh" type="number" /></div>
-    <div class="row"><label for="typeMoto">typeMoto:</label> <input id="typeMoto" name="typeMoto" placeholder="ROADSTER" /></div>
-    <div class="row"><label for="permisRequisMoto">permisRequis:</label> <input id="permisRequisMoto" name="permisRequisMoto" placeholder="A2" /></div>
-  </div>
+  <script>
+    (function () {
+      const select = document.getElementById('type');
+      const blocks = Array.from(document.querySelectorAll('.type-fields'));
 
-  <!-- CAMION -->
-  <div id="camionFields" class="type-fields" data-type="CAMION">
-    <h4>Camion</h4>
-    <div class="row"><label for="chargeMaxKg">chargeMaxKg:</label> <input id="chargeMaxKg" name="chargeMaxKg" type="number" /></div>
-    <div class="row"><label for="volumeUtileM3">volumeUtileM3:</label> <input id="volumeUtileM3" name="volumeUtileM3" type="number" /></div>
-    <div class="row"><label for="hauteurM">hauteurM:</label> <input id="hauteurM" name="hauteurM" type="number" /></div>
-    <div class="row"><label for="longueurM">longueurM:</label> <input id="longueurM" name="longueurM" type="number" /></div>
-    <div class="row"><label for="permisRequisCamion">permisRequis:</label> <input id="permisRequisCamion" name="permisRequisCamion" /></div>
-  </div>
-
-  <div class="row" style="margin-top:14px;">
-    <button type="submit">Enregistrer</button>
-  </div>
-</form>
-
-<script>
-  (function () {
-    const select = document.getElementById('type');
-    const blocks = Array.from(document.querySelectorAll('.type-fields'));
-
-    function updateVisibility() {
-      const selected = select.value; // "VOITURE" | "MOTO" | "CAMION" | ""
-      blocks.forEach(b => {
-        const match = b.dataset.type === selected;
-        b.classList.toggle('active', match);
-
-        // Optionnel mais recommandé : désactiver les inputs cachés pour éviter d'envoyer des champs inutiles
-        b.querySelectorAll('input, select, textarea').forEach(el => {
-          el.disabled = !match;
+      function setBlockActive(block, active) {
+        block.style.display = active ? "block" : "none";
+        block.querySelectorAll('input, select, textarea').forEach(el => {
+          el.disabled = !active;
         });
-      });
-    }
+      }
 
-    select.addEventListener('change', updateVisibility);
+      function updateVisibility() {
+        const selected = select.value;
+        blocks.forEach(b => setBlockActive(b, b.dataset.type === selected));
+      }
 
-    // Au chargement (utile si tu reviens sur la page avec une valeur déjà sélectionnée)
-    updateVisibility();
-  })();
-</script>
-
-</body>
+      select.addEventListener('change', updateVisibility);
+      updateVisibility();
+    })();
+  </script>
+</main>
 </html>

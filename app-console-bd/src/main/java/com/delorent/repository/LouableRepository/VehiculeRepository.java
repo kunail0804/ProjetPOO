@@ -1,9 +1,9 @@
+// FICHIER: src/main/java/com/delorent/repository/LouableRepository/VehiculeRepository.java
 package com.delorent.repository.LouableRepository;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.delorent.model.Louable.Vehicule;
 import com.delorent.model.Louable.Camion;
 import com.delorent.model.Louable.Voiture;
 import com.delorent.model.Louable.Moto;
@@ -15,8 +15,6 @@ import com.delorent.repository.RepositoryBase;
 import java.util.List;
 import java.util.ArrayList;
 
-// TODO: gérer les notes
-
 @Repository
 public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integer> {
     private final JdbcTemplate jdbcTemplate;
@@ -24,11 +22,40 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
     private final CamionRepository camionRepository;
     private final MotoRepository motoRepository;
 
-    public VehiculeRepository(JdbcTemplate jdbcTemplate, VoitureRepository voitureRepository, CamionRepository camionRepository, MotoRepository motoRepository) {
+    public VehiculeRepository(JdbcTemplate jdbcTemplate,
+                              VoitureRepository voitureRepository,
+                              CamionRepository camionRepository,
+                              MotoRepository motoRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.voitureRepository = voitureRepository;
         this.camionRepository = camionRepository;
         this.motoRepository = motoRepository;
+    }
+
+    // ---------------------------
+    // Disponibilité AUJOURD'HUI
+    // ---------------------------
+    private boolean isDisponibleAujourdhui(int idLouable, StatutLouable statut) {
+        if (statut == null || statut != StatutLouable.DISPONIBLE) return false;
+
+        Integer exists = jdbcTemplate.queryForObject(
+                "SELECT CASE WHEN EXISTS (" +
+                        " SELECT 1 FROM DISPONIBILITE d" +
+                        " WHERE d.idLouable = ?" +
+                        "   AND d.estReservee = 0" +
+                        "   AND CURDATE() BETWEEN DATE(d.dateDebut) AND DATE(d.dateFin)" +
+                        ") THEN 1 ELSE 0 END",
+                Integer.class,
+                idLouable
+        );
+
+        return exists != null && exists == 1;
+    }
+
+    private LouableSummary toLouableSummary(int idLouable, int idAgent, StatutLouable statut,
+                                           double prixJour, String lieuPrincipal, String type) {
+        boolean dispoToday = isDisponibleAujourdhui(idLouable, statut);
+        return new LouableSummary(idLouable, idAgent, statut, prixJour, lieuPrincipal, type, dispoToday);
     }
 
     @Override
@@ -40,38 +67,41 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         List<VehiculeSummary> summaries = new ArrayList<>();
         for (Voiture voiture : voitures) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
-                voiture.getMarque(),
-                voiture.getModele(),
-                voiture.getAnnee(),
-                voiture.getCouleur(),
-                voiture.getImmatriculation(),
-                voiture.getKilometrage(),
-                "Voiture"
+                    toLouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(),
+                            voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                    voiture.getMarque(),
+                    voiture.getModele(),
+                    voiture.getAnnee(),
+                    voiture.getCouleur(),
+                    voiture.getImmatriculation(),
+                    voiture.getKilometrage(),
+                    "Voiture"
             ));
         }
         for (Camion camion : camions) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
-                camion.getMarque(),
-                camion.getModele(),
-                camion.getAnnee(),
-                camion.getCouleur(),
-                camion.getImmatriculation(),
-                camion.getKilometrage(),
-                "Camion"
+                    toLouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(),
+                            camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                    camion.getMarque(),
+                    camion.getModele(),
+                    camion.getAnnee(),
+                    camion.getCouleur(),
+                    camion.getImmatriculation(),
+                    camion.getKilometrage(),
+                    "Camion"
             ));
         }
         for (Moto moto : motos) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
-                moto.getMarque(),
-                moto.getModele(),
-                moto.getAnnee(),
-                moto.getCouleur(),
-                moto.getImmatriculation(),
-                moto.getKilometrage(),
-                "Moto"
+                    toLouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(),
+                            moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                    moto.getMarque(),
+                    moto.getModele(),
+                    moto.getAnnee(),
+                    moto.getCouleur(),
+                    moto.getImmatriculation(),
+                    moto.getKilometrage(),
+                    "Moto"
             ));
         }
         return summaries;
@@ -82,50 +112,47 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Voiture voiture = voitureRepository.get(id);
             return new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
-                voiture.getMarque(),
-                voiture.getModele(),
-                voiture.getAnnee(),
-                voiture.getCouleur(),
-                voiture.getImmatriculation(),
-                voiture.getKilometrage(),
-                "Voiture"
+                    toLouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(),
+                            voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                    voiture.getMarque(),
+                    voiture.getModele(),
+                    voiture.getAnnee(),
+                    voiture.getCouleur(),
+                    voiture.getImmatriculation(),
+                    voiture.getKilometrage(),
+                    "Voiture"
             );
-        } catch (Exception e) {
-            // Not a Voiture
-        }
+        } catch (Exception ignored) {}
 
         try {
             Camion camion = camionRepository.get(id);
             return new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
-                camion.getMarque(),
-                camion.getModele(),
-                camion.getAnnee(),
-                camion.getCouleur(),
-                camion.getImmatriculation(),
-                camion.getKilometrage(),
-                "Camion"
+                    toLouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(),
+                            camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                    camion.getMarque(),
+                    camion.getModele(),
+                    camion.getAnnee(),
+                    camion.getCouleur(),
+                    camion.getImmatriculation(),
+                    camion.getKilometrage(),
+                    "Camion"
             );
-        } catch (Exception e) {
-            // Not a Camion
-        }
+        } catch (Exception ignored) {}
 
         try {
             Moto moto = motoRepository.get(id);
             return new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
-                moto.getMarque(),
-                moto.getModele(),
-                moto.getAnnee(),
-                moto.getCouleur(),
-                moto.getImmatriculation(),
-                moto.getKilometrage(),
-                "Moto"
+                    toLouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(),
+                            moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                    moto.getMarque(),
+                    moto.getModele(),
+                    moto.getAnnee(),
+                    moto.getCouleur(),
+                    moto.getImmatriculation(),
+                    moto.getKilometrage(),
+                    "Moto"
             );
-        } catch (Exception e) {
-            // Not a Moto
-        }
+        } catch (Exception ignored) {}
 
         return null;
     }
@@ -145,49 +172,58 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         throw new UnsupportedOperationException("Use specific repositories to delete vehicles.");
     }
 
+    /**
+     * IMPORTANT :
+     * Avant, tu ne sortais que les l.statut='DISPONIBLE' (dans les sous-repos).
+     * Maintenant, on renvoie TOUS les véhicules (selon filtres), et l'affichage décidera "DISPONIBLE" si dispo today.
+     */
     public List<VehiculeSummary> getDisponibles(List<LouableFiltre> filtres) {
         List<Voiture> voitures = voitureRepository.getDisponibles(filtres);
         List<Camion> camions = camionRepository.getDisponibles(filtres);
         List<Moto> motos = motoRepository.getDisponibles(filtres);
-        List<VehiculeSummary> disponibles = new ArrayList<>();
+
+        List<VehiculeSummary> res = new ArrayList<>();
         for (Voiture voiture : voitures) {
-            disponibles.add(new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
-                voiture.getMarque(),
-                voiture.getModele(),
-                voiture.getAnnee(),
-                voiture.getCouleur(),
-                voiture.getImmatriculation(),
-                voiture.getKilometrage(),
-                "Voiture"
+            res.add(new VehiculeSummary(
+                    toLouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(),
+                            voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                    voiture.getMarque(),
+                    voiture.getModele(),
+                    voiture.getAnnee(),
+                    voiture.getCouleur(),
+                    voiture.getImmatriculation(),
+                    voiture.getKilometrage(),
+                    "Voiture"
             ));
         }
         for (Camion camion : camions) {
-            disponibles.add(new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
-                camion.getMarque(),
-                camion.getModele(),
-                camion.getAnnee(),
-                camion.getCouleur(),
-                camion.getImmatriculation(),
-                camion.getKilometrage(),
-                "Camion"
+            res.add(new VehiculeSummary(
+                    toLouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(),
+                            camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                    camion.getMarque(),
+                    camion.getModele(),
+                    camion.getAnnee(),
+                    camion.getCouleur(),
+                    camion.getImmatriculation(),
+                    camion.getKilometrage(),
+                    "Camion"
             ));
         }
         for (Moto moto : motos) {
-            disponibles.add(new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
-                moto.getMarque(),
-                moto.getModele(),
-                moto.getAnnee(),
-                moto.getCouleur(),
-                moto.getImmatriculation(),
-                moto.getKilometrage(),
-                "Moto"
+            res.add(new VehiculeSummary(
+                    toLouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(),
+                            moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                    moto.getMarque(),
+                    moto.getModele(),
+                    moto.getAnnee(),
+                    moto.getCouleur(),
+                    moto.getImmatriculation(),
+                    moto.getKilometrage(),
+                    "Moto"
             ));
         }
 
-        return disponibles;
+        return res;
     }
 
     public List<VehiculeSummary> getByProprietaire(int idProprietaire) {
@@ -198,38 +234,41 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         List<VehiculeSummary> summaries = new ArrayList<>();
         for (Voiture voiture : voitures) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
-                voiture.getMarque(),
-                voiture.getModele(),
-                voiture.getAnnee(),
-                voiture.getCouleur(),
-                voiture.getImmatriculation(),
-                voiture.getKilometrage(),
-                "Voiture"
+                    toLouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(),
+                            voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                    voiture.getMarque(),
+                    voiture.getModele(),
+                    voiture.getAnnee(),
+                    voiture.getCouleur(),
+                    voiture.getImmatriculation(),
+                    voiture.getKilometrage(),
+                    "Voiture"
             ));
         }
         for (Camion camion : camions) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
-                camion.getMarque(),
-                camion.getModele(),
-                camion.getAnnee(),
-                camion.getCouleur(),
-                camion.getImmatriculation(),
-                camion.getKilometrage(),
-                "Camion"
+                    toLouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(),
+                            camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                    camion.getMarque(),
+                    camion.getModele(),
+                    camion.getAnnee(),
+                    camion.getCouleur(),
+                    camion.getImmatriculation(),
+                    camion.getKilometrage(),
+                    "Camion"
             ));
         }
         for (Moto moto : motos) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
-                moto.getMarque(),
-                moto.getModele(),
-                moto.getAnnee(),
-                moto.getCouleur(),
-                moto.getImmatriculation(),
-                moto.getKilometrage(),
-                "Moto"
+                    toLouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(),
+                            moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                    moto.getMarque(),
+                    moto.getModele(),
+                    moto.getAnnee(),
+                    moto.getCouleur(),
+                    moto.getImmatriculation(),
+                    moto.getKilometrage(),
+                    "Moto"
             ));
         }
         return summaries;

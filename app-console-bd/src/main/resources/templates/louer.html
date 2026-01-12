@@ -1,273 +1,276 @@
 <!doctype html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Louer un véhicule</title>
-    <style>
-        .ok { color: green; }
-        .err { color: red; }
-        .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
-        .muted { color: #666; font-size: 0.9em; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .cal { border-collapse: collapse; width: 100%; }
-        .cal th, .cal td { border: 1px solid #e5e5e5; padding: 8px; text-align: center; }
-        .cal th { background: #f7f7f7; }
-        .day-off { background: #fafafa; color: #bbb; }
-        .day-avail { background: #e8fff0; }
-        .legend { display:flex; gap:12px; align-items:center; margin-top:8px; }
-        .chip { display:inline-flex; gap:6px; align-items:center; }
-        .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
-        .btn { padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; background: #fff; }
-    </style>
-</head>
-<body>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Louer', ~{::section})}">
 
-<h1>Louer un véhicule</h1>
+<section>
 
-<p>
-    <a th:href="@{/louables/{id}(id=${idLouable})}">← Retour au véhicule</a>
-    &nbsp;|&nbsp;
-    <a th:href="@{/louables}">← Retour au catalogue</a>
-</p>
+  <div class="panel soft">
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Louer</h1>
+        <div class="muted small" th:if="${louable != null}">
+          Louable #<strong th:text="${idLouable}">0</strong>
+          · <strong th:text="${louable.type()}">Type</strong>
+          · <span th:text="${louable.lieuPrincipal()}">Lieu</span>
+          · <span class="badge" th:text="${louable.statut()}">STATUT</span>
+        </div>
+      </div>
 
-<div th:if="${succes}">
-    <p class="ok" th:text="${succes}">Succès</p>
-</div>
-<div th:if="${erreur}">
-    <p class="err" th:text="${erreur}">Erreur</p>
-</div>
-
-<hr>
-
-<!-- Résumé louable -->
-<div class="box" th:if="${louable != null}">
-    <h2 style="margin-top:0;">Véhicule sélectionné</h2>
-
-    <p class="muted" style="margin:0;">
-        ID louable :
-        <strong th:text="${idLouable}">1</strong>
-    </p>
-
-    <div style="margin-top:10px;">
-        <label><strong>Lieu de prise (fixe)</strong></label><br>
-        <input id="lieuPriseAffiche" type="text" readonly
-               th:value="${(louable.lieuPrincipal != null) ? louable.lieuPrincipal : ''}">
-        <p class="muted">Vient de <code>LOUABLE.lieuPrincipal</code> et sera forcé dans le contrat.</p>
-    </div>
-</div>
-
-<hr>
-
-<h2>Disponibilités</h2>
-<div class="box">
-    <div id="disposBox">
-        <p class="muted">Chargement des disponibilités…</p>
+      <div class="btnrow">
+        <a class="btn" th:href="@{/louables/{id}(id=${idLouable})}">← Retour</a>
+      </div>
     </div>
 
-    <div id="calendarBox" style="margin-top:14px;"></div>
+    <div class="hr"></div>
 
-    <div class="legend">
-        <span class="chip"><span class="dot" style="background:#e8fff0;"></span>Jours disponibles</span>
-        <span class="chip"><span class="dot" style="background:#fafafa;"></span>Hors mois</span>
-    </div>
-</div>
+    <!-- Messages -->
+    <div class="alert err" th:if="${erreur}" th:text="${erreur}">Erreur</div>
+    <div class="alert ok" th:if="${succes}" th:text="${succes}">OK</div>
 
-<hr>
+    <div class="spacer"></div>
 
-<h2>Demande de location</h2>
+    <div class="louer-grid" th:if="${louable != null}">
 
-<form class="box"
-      th:action="@{/louables/{id}/louer(id=${idLouable})}"
-      method="post">
+      <!-- Disponibilités -->
+      <article class="card">
+        <div class="panel-head">
+          <div>
+            <div class="h2">Disponibilités</div>
+            <div class="muted small">
+              Jours en vert = au moins une disponibilité non réservée couvre la date.
+            </div>
+          </div>
+        </div>
 
-    <!-- Id louable en hidden (sécurité côté serveur: tu peux vérifier cohérence avec path variable) -->
-    <input type="hidden" name="idLouable" th:value="${idLouable}">
+        <div class="spacer"></div>
 
-    <div>
-        <label for="idAssurance"><strong>Assurance</strong></label><br>
-        <select id="idAssurance" name="idAssurance" required>
-            <option value="" disabled selected>-- Choisir --</option>
-            <option th:each="a : ${assurances}"
-                    th:value="${a.getIdAssurance()}"
-                    th:text="${a.getNom() + ' - ' + a.getTarifJournalier() + '€/jour'}">
+        <!-- Navigation mois -->
+        <div class="cal-head">
+          <div class="btnrow">
+            <button type="button" class="btn" id="prevMonth">←</button>
+            <button type="button" class="btn" id="nextMonth">→</button>
+          </div>
+
+          <div class="cal-title">
+            <div class="h3" style="margin:0;" id="calLabel">Mois</div>
+            <div class="muted small">Change de mois si besoin</div>
+          </div>
+
+          <div class="cal-picker">
+            <input class="input" type="month" id="monthPicker" />
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="cal-wrap">
+          <table class="cal" aria-label="Calendrier des disponibilités">
+            <thead>
+            <tr>
+              <th>LUN</th><th>MAR</th><th>MER</th><th>JEU</th><th>VEN</th><th>SAM</th><th>DIM</th>
+            </tr>
+            </thead>
+            <tbody id="calBody">
+            <!-- rempli en JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="legend">
+          <span class="chip"><span class="dot" style="background: rgba(53,247,166,.9)"></span> Disponible</span>
+          <span class="chip"><span class="dot" style="background: rgba(255,255,255,.25)"></span> Hors mois</span>
+        </div>
+
+        <input type="hidden" id="idLouable" th:value="${idLouable}" />
+      </article>
+
+      <!-- Formulaire location -->
+      <article class="card">
+        <div class="h2">Créer une location</div>
+
+        <form class="form" method="post" th:action="@{/louables/{id}/louer(id=${idLouable})}">
+          <!-- cohérence URL vs hidden -->
+          <input type="hidden" name="idLouable" th:value="${idLouable}" />
+
+          <div class="field">
+            <div class="label">Assurance</div>
+            <select name="idAssurance" required>
+              <option value="" disabled selected>Choisir…</option>
+              <option th:each="a : ${assurances}"
+                      th:value="${a.idAssurance}"
+                      th:text="${a.nom}">
                 Assurance
-            </option>
-        </select>
-    </div>
+              </option>
+            </select>
+          </div>
 
-    <br>
+          <div class="row">
+            <div class="col field">
+              <div class="label">Date début</div>
+              <input class="input" type="date" name="dateDebut" required />
+            </div>
+            <div class="col field">
+              <div class="label">Date fin</div>
+              <input class="input" type="date" name="dateFin" required />
+            </div>
+          </div>
 
-    <div class="grid">
-        <div>
-            <label for="dateDebut"><strong>Date début</strong></label><br>
-            <input id="dateDebut" name="dateDebut" type="date" required>
+          <div class="field">
+            <div class="label">Lieu de dépôt (optionnel)</div>
+            <input class="input" type="text" name="lieuDepotOptionnel" placeholder="Ex: Toulouse centre" />
+          </div>
+
+          <div class="btnrow">
+            <button class="btn primary" type="submit">Valider la location</button>
+            <a class="btn ghost" th:href="@{/louables/{id}(id=${idLouable})}">Annuler</a>
+          </div>
+        </form>
+
+        <!-- Résumé contrat (quand location créée) -->
+        <div class="spacer"></div>
+        <div class="alert ok" th:if="${contrat != null}">
+          Contrat #<strong th:text="${contrat.id}">0</strong>
+          · du <strong th:text="${#temporals.format(contrat.dateDebut, 'dd/MM/yyyy')}">01/01/2026</strong>
+          au <strong th:text="${#temporals.format(contrat.dateFin, 'dd/MM/yyyy')}">02/01/2026</strong>
+          · Prise: <strong th:text="${contrat.lieuPrise}">X</strong>
+          · Dépôt: <strong th:text="${contrat.lieuDepot}">Y</strong>
+          · Assurance: <strong th:text="${contrat.assuranceNom}">Assurance</strong>
         </div>
+      </article>
 
-        <div>
-            <label for="dateFin"><strong>Date fin</strong></label><br>
-            <input id="dateFin" name="dateFin" type="date" required>
-        </div>
     </div>
+  </div>
 
-    <br>
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    (function(){
+      const idLouable = document.getElementById('idLouable')?.value;
+      const calBody = document.getElementById('calBody');
+      const calLabel = document.getElementById('calLabel');
+      const monthPicker = document.getElementById('monthPicker');
+      const prevBtn = document.getElementById('prevMonth');
+      const nextBtn = document.getElementById('nextMonth');
 
-    <div>
-        <label for="lieuDepotOptionnel"><strong>Lieu de dépôt (optionnel)</strong></label><br>
-        <input id="lieuDepotOptionnel" name="lieuDepotOptionnel" type="text" placeholder="Ex: Toulouse">
-        <p class="muted">Si vide, dépôt = lieu de prise.</p>
-    </div>
+      if(!idLouable || !calBody) return;
 
-    <br>
+      const monthsFR = [
+        "janvier","février","mars","avril","mai","juin",
+        "juillet","août","septembre","octobre","novembre","décembre"
+      ];
 
-    <button class="btn" type="submit">Confirmer la location</button>
-</form>
+      // ---- utilities ----
+      const pad2 = (n)=> (n<10?("0"+n):(""+n));
+      const ymd = (d)=> `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 
-<hr>
+      // Monday-based index (Mon=0..Sun=6)
+      const mondayIndex = (d)=>{
+        const js = d.getDay(); // Sun=0..Sat=6
+        return (js === 0) ? 6 : (js - 1);
+      };
 
-<div th:if="${contrat != null}">
-    <h2>Résumé contrat</h2>
-    <ul>
-        <li>Date début : <span th:text="${contrat.dateDebut}">dateDebut</span></li>
-        <li>Date fin : <span th:text="${contrat.dateFin}">dateFin</span></li>
-        <li>Lieu prise : <span th:text="${contrat.lieuPrise}">lieuPrise</span></li>
-        <li>Lieu dépôt : <span th:text="${contrat.lieuDepot}">lieuDepot</span></li>
-        <li>Assurance : <span th:text="${contrat.assuranceNom}">assurance</span></li>
-    </ul>
-</div>
+      // Parse date safely from API strings
+      const parseDate = (s)=>{
+        if(!s) return null;
+        // expects yyyy-mm-dd (from Jackson)
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s));
+        if(!m) return null;
+        return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      };
 
-<script th:inline="javascript">
-    const disposBox = document.getElementById('disposBox');
-    const calendarBox = document.getElementById('calendarBox');
+      // Disponibilites => Set of available days (yyyy-mm-dd)
+      async function loadAvailableSet(){
+        const res = await fetch(`/louer/disponibilites?idLouable=${encodeURIComponent(idLouable)}`, {
+          headers: { "Accept": "application/json" }
+        });
+        if(!res.ok) throw new Error("Erreur chargement disponibilités");
+        const arr = await res.json();
 
-    const idLouable = /*[[${idLouable}]]*/ 0;
-
-    const fmt = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-    function normalizeToYMD(s) {
-        if (!s) return '';
-        let t = String(s).trim();
-        if (t.includes('T')) t = t.split('T')[0];
-        if (t.includes(' ')) t = t.split(' ')[0];
-        return t;
-    }
-
-    function parseISODate(isoLike) {
-        const iso = normalizeToYMD(isoLike);
-        const [y, m, d] = (iso || '').split('-').map(Number);
-        return new Date(y || 1970, (m || 1) - 1, d || 1);
-    }
-
-    function formatISO(isoLike) {
-        return fmt.format(parseISODate(isoLike));
-    }
-
-    function escapeHtml(str) {
-        return (str || '')
-            .replaceAll('&','&amp;')
-            .replaceAll('<','&lt;')
-            .replaceAll('>','&gt;')
-            .replaceAll('"','&quot;')
-            .replaceAll("'","&#039;");
-    }
-
-    function buildAvailSet(ranges) {
         const set = new Set();
-        for (const r of ranges) {
-            const start = parseISODate(r.dateDebut);
-            const end = parseISODate(r.dateFin);
-            const cur = new Date(start.getTime());
-            while (cur <= end) {
-                const y = cur.getFullYear();
-                const m = String(cur.getMonth() + 1).padStart(2, '0');
-                const d = String(cur.getDate()).padStart(2, '0');
-                set.add(`${y}-${m}-${d}`);
-                cur.setDate(cur.getDate() + 1);
-            }
+
+        for(const item of (Array.isArray(arr) ? arr : [])){
+          // try common keys
+          const d1 = parseDate(item.dateDebut ?? item.date_debut ?? item.debut ?? item.startDate);
+          const d2 = parseDate(item.dateFin ?? item.date_fin ?? item.fin ?? item.endDate);
+          const reservedRaw = (item.estReservee ?? item.reservee ?? item.isReserved ?? item.reserved);
+          const reserved = String(reservedRaw).toLowerCase() === "true" || reservedRaw === 1;
+
+          // only non-reserved ranges
+          if(reserved) continue;
+          if(!d1 || !d2) continue;
+
+          // inclusive fill (dateDebut..dateFin)
+          const cur = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
+          const end = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate());
+          while(cur <= end){
+            set.add(ymd(cur));
+            cur.setDate(cur.getDate() + 1);
+          }
         }
         return set;
-    }
+      }
 
-    function renderCalendarForMonth(year, monthIndex0, availSet) {
-        const first = new Date(year, monthIndex0, 1);
-        const last = new Date(year, monthIndex0 + 1, 0);
-        const monthName = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(first);
-        const dayOfWeek = (d) => (d.getDay() + 6) % 7;
+      let availableSet = new Set();
+      let view = new Date(); // today
+      view = new Date(view.getFullYear(), view.getMonth(), 1);
 
-        let html = `<h3 style="margin:0 0 8px 0; text-transform: capitalize;">${escapeHtml(monthName)}</h3>`;
-        html += `<table class="cal"><thead><tr>
-            <th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th><th>Sam</th><th>Dim</th>
-        </tr></thead><tbody>`;
+      function updateLabel(){
+        calLabel.textContent = `${monthsFR[view.getMonth()]} ${view.getFullYear()}`;
+        monthPicker.value = `${view.getFullYear()}-${pad2(view.getMonth()+1)}`;
+      }
 
-        let cur = new Date(year, monthIndex0, 1 - dayOfWeek(first));
-        for (let week = 0; week < 6; week++) {
-            html += "<tr>";
-            for (let i = 0; i < 7; i++) {
-                const inMonth = cur.getMonth() === monthIndex0;
-                const y = cur.getFullYear();
-                const m = String(cur.getMonth() + 1).padStart(2, '0');
-                const d = String(cur.getDate()).padStart(2, '0');
-                const key = `${y}-${m}-${d}`;
+      function render(){
+        updateLabel();
 
-                let cls = "";
-                if (!inMonth) cls = "day-off";
-                else if (availSet.has(key)) cls = "day-avail";
+        // first day of month
+        const first = new Date(view.getFullYear(), view.getMonth(), 1);
+        const startOffset = mondayIndex(first); // 0..6
+        const gridStart = new Date(first);
+        gridStart.setDate(first.getDate() - startOffset);
 
-                html += `<td class="${cls}">${cur.getDate()}</td>`;
-                cur.setDate(cur.getDate() + 1);
-            }
-            html += "</tr>";
-            if (cur.getMonth() !== monthIndex0 && cur > last) break;
+        // render 6 weeks (42 cells)
+        calBody.innerHTML = "";
+        const cur = new Date(gridStart);
+
+        for(let week=0; week<6; week++){
+          const tr = document.createElement("tr");
+          for(let i=0; i<7; i++){
+            const td = document.createElement("td");
+            const key = ymd(cur);
+
+            const inMonth = cur.getMonth() === view.getMonth();
+            if(!inMonth) td.classList.add("day-off");
+            if(inMonth && availableSet.has(key)) td.classList.add("day-avail");
+
+            td.textContent = String(cur.getDate());
+            tr.appendChild(td);
+            cur.setDate(cur.getDate()+1);
+          }
+          calBody.appendChild(tr);
         }
+      }
 
-        html += "</tbody></table>";
-        return html;
-    }
+      function addMonths(delta){
+        view = new Date(view.getFullYear(), view.getMonth() + delta, 1);
+        render();
+      }
 
-    function renderDispos(ranges) {
-        if (!ranges || ranges.length === 0) {
-            disposBox.innerHTML = '<p>Aucun créneau de disponibilité pour ce véhicule.</p>';
-            calendarBox.innerHTML = '';
-            return;
-        }
+      prevBtn?.addEventListener("click", ()=> addMonths(-1));
+      nextBtn?.addEventListener("click", ()=> addMonths(1));
+      monthPicker?.addEventListener("change", ()=>{
+        const v = monthPicker.value; // yyyy-mm
+        const m = /^(\d{4})-(\d{2})$/.exec(v);
+        if(!m) return;
+        view = new Date(Number(m[1]), Number(m[2]) - 1, 1);
+        render();
+      });
 
-        let html = '<ul>';
-        for (const d of ranges) {
-            html += `<li><strong>Du ${escapeHtml(formatISO(d.dateDebut))}</strong> au <strong>${escapeHtml(formatISO(d.dateFin))}</strong></li>`;
-        }
-        html += '</ul>';
-        disposBox.innerHTML = html;
+      // init: load availability then render
+      loadAvailableSet()
+        .then((set)=>{ availableSet = set; render(); })
+        .catch(()=>{ availableSet = new Set(); render(); });
+    })();
+    /*]]>*/
+  </script>
 
-        const firstStart = parseISODate(ranges[0].dateDebut);
-        const year = firstStart.getFullYear();
-        const month = firstStart.getMonth();
-        const availSet = buildAvailSet(ranges);
-
-        const cal1 = renderCalendarForMonth(year, month, availSet);
-        const nextDate = new Date(year, month + 1, 1);
-        const cal2 = renderCalendarForMonth(nextDate.getFullYear(), nextDate.getMonth(), availSet);
-
-        calendarBox.innerHTML = `<div class="grid">${cal1}${cal2}</div>`;
-    }
-
-    async function loadDispos() {
-        disposBox.innerHTML = '<p>Chargement...</p>';
-        calendarBox.innerHTML = '';
-        try {
-            const res = await fetch(`/louer/disponibilites?idLouable=${encodeURIComponent(idLouable)}`);
-            if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
-            const data = await res.json();
-            renderDispos(data);
-        } catch (e) {
-            disposBox.innerHTML = `<p class="err">Impossible de charger les disponibilités : ${escapeHtml(e.message)}</p>`;
-            calendarBox.innerHTML = '';
-        }
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        if (idLouable) loadDispos();
-        else disposBox.innerHTML = '<p class="err">ID louable manquant.</p>';
-    });
-</script>
-
-</body>
+</section>
 </html>

@@ -1,0 +1,77 @@
+<!-- src/main/resources/templates/fragments/layout.html -->
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(pageTitle, content)">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title th:text="${pageTitle} + ' - DeloRent'">DeloRent</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <header class="topbar">
+      <div class="container">
+        <div class="nav">
+          <a class="brand" th:href="@{/}">
+            <span class="brand-badge" aria-hidden="true"></span>
+            <span class="brand-title">
+              <span class="name">DeloRent</span>
+            </span>
+          </a>
+
+          <nav class="nav-links" aria-label="Navigation">
+            <a class="nav-link primary" th:href="@{/louables}">Catalogue</a>
+
+            <a class="nav-link"
+               th:if="${estConnecte == true}"
+               th:href="@{/profil}">Profil</a>
+
+            <a class="nav-link"
+               th:if="${isAgent == true}"
+               th:href="@{/ajouter_louable}">Ajouter</a>
+
+            <a class="nav-link"
+            th:if="${estConnecte != true}"
+            th:href="@{/connexion}">Connexion</a>
+
+            <a class="nav-link"
+            th:if="${estConnecte != true}"
+            th:href="@{/inscription}">Inscription</a>
+
+            <a class="nav-link danger"
+               th:if="${estConnecte == true}"
+               th:href="@{/deconnexion}">Déconnexion</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="container" th:replace="${content}">
+        <!-- content -->
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="panel soft">
+          <div class="panel-head">
+            <div>
+              <div class="h3" style="margin:0;">DeloRent</div>
+              <div class="muted small">“Roads? Where we're going, we don't need roads.”</div>
+            </div>
+            <div class="muted small">
+              © <span th:text="${T(java.time.Year).now()}">2026</span>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

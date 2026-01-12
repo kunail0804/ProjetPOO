@@ -1,44 +1,39 @@
 <!doctype html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Résultat - Ajout Louable</title>
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
-    .card { max-width: 720px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; }
-    .ok { background: #ecfdf5; border-color: #10b98155; }
-    .err { background: #fef2f2; border-color: #ef444455; }
-    .title { margin: 0 0 10px; }
-    .muted { color: #6b7280; }
-    .row { margin: 6px 0; }
-    .btns { display: flex; gap: 10px; margin-top: 14px; }
-    a.btn { display: inline-block; padding: 10px 12px; border-radius: 10px; text-decoration: none; border: 1px solid #d1d5db; color: #111827; }
-    a.primary { border-color: #2563eb; background: #2563eb; color: white; }
-  </style>
-</head>
-<body>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Ajout louable', ~{::section})}">
 
-  <!-- Si tu arrives ici, ton controller met normalement "message".
-       (En cas d'erreur, il renvoie ajouter_louable, donc cette page est "succès".) -->
+<section>
+  <div class="panel soft">
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Louable ajouté</h1>
+        <div class="muted small">Création effectuée avec succès.</div>
+      </div>
+      <span class="badge green">OK</span>
+    </div>
 
-  <div class="card ok">
-    <h1 class="title">Louable ajouté ✅</h1>
+    <div class="hr"></div>
 
-    <p class="row" th:if="${message}" th:text="${message}">
-      Louable ajouté (id=...).
-    </p>
+    <div class="alert ok" th:if="${message}">
+      <strong th:text="${message}">Louable ajouté (id=...).</strong>
+    </div>
 
-    <p class="muted row">
-      Type :
-      <strong th:text="${selectedType}">VOITURE</strong>
-    </p>
+    <div class="spacer"></div>
 
-    <div class="btns">
-      <a class="btn primary" th:href="@{/profil}">Retour à mon profil</a>
+    <div class="kv">
+      <div class="kv-row">
+        <div class="k">Type</div>
+        <div class="v" th:text="${selectedType}">VOITURE</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="btnrow">
+      <a class="btn primary" th:href="@{/profil}">Retour profil</a>
       <a class="btn" th:href="@{/ajouter_louable}">Ajouter un autre louable</a>
+      <a class="btn ghost" th:href="@{/louables}">Voir le catalogue</a>
     </div>
   </div>
-
-</body>
+</section>
 </html>

@@ -1,110 +1,36 @@
-<!doctype html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Connexion</title>
-</head>
-<body>
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Connexion', ~{::section})}">
+<section class="stack">
+  <div class="card card--narrow">
+    <h1 class="h1">Connexion</h1>
 
-<h1>Connexion</h1>
+    <form class="form" th:action="@{/connexion}" method="post">
+      <div class="field">
+        <label for="role">Type de compte</label>
+        <select id="role" name="role" required>
+          <option value="" th:selected="${role == null || role == ''}">— Sélectionner —</option>
+          <option value="AGENT" th:selected="${role == 'AGENT'}">Agent</option>
+          <option value="LOUEUR" th:selected="${role == 'LOUEUR'}">Loueur</option>
+          <option value="ENTRETIEN" th:selected="${role == 'ENTRETIEN'}">Entreprise d’entretien</option>
+        </select>
+      </div>
 
-<!-- Affichage erreur si le controller renvoie "connexion" avec error -->
-<div th:if="${error}">
-  <p style="color: red;" th:text="${error}">Erreur</p>
-</div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" th:value="${email}" autocomplete="email" required />
+      </div>
 
-<!-- Sélection du type de compte -->
-<div>
-  <label for="role">Type de compte</label><br>
-  <select id="role" name="role" onchange="onRoleChange()" required>
-    <option value="">-- Sélectionner un rôle --</option>
-    <option value="AGENT" th:selected="${role == 'AGENT'}">Agent</option>
-    <option value="LOUEUR" th:selected="${role == 'LOUEUR'}">Loueur</option>
-    <option value="ENTRETIEN" th:selected="${role == 'ENTRETIEN'}">Entreprise d'entretien</option>
-    <!-- <option value="AGENT_PRO" th:selected="${role == 'AGENT_PRO'}">Agent professionnel</option> -->
-  </select>
-</div>
+      <div class="field">
+        <label for="password">Mot de passe</label>
+        <input id="password" type="password" name="password" autocomplete="current-password" required />
+      </div>
 
-<br>
-
-<form th:action="@{/connexion}" method="post">
-  <!-- Champ caché pour envoyer le rôle au controller -->
-  <input type="hidden" id="roleHidden" name="role" th:value="${role}">
-
-  <!-- Formulaire caché tant qu'aucun rôle n'est sélectionné -->
-  <div id="formFields" style="display:none;">
-
-    <h2>Identifiants</h2>
-
-    <div>
-      <label for="email">Email</label><br>
-      <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="email@exemple.com"
-              required
-              th:value="${email}"
-      >
-    </div>
-
-    <br>
-
-    <div>
-      <label for="password">Mot de passe</label><br>
-      <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Mot de passe"
-              required
-      >
-    </div>
-
-    <br>
-
-    <button type="submit">Se connecter</button>
+      <div class="actions">
+        <button class="btn btn--primary" type="submit">Se connecter</button>
+        <a class="btn" th:href="@{/inscription}">Créer un compte</a>
+      </div>
+    </form>
   </div>
-</form>
-
-<script>
-  function setEnabled(containerId, enabled) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const inputs = container.querySelectorAll("input, select, textarea, button");
-    inputs.forEach(i => i.disabled = !enabled);
-  }
-
-  function onRoleChange() {
-    const selectedRole = document.getElementById("role").value;
-
-    // Sync rôle dans le hidden
-    const roleHidden = document.getElementById("roleHidden");
-    roleHidden.value = selectedRole;
-
-    const formFields = document.getElementById("formFields");
-
-    // Si aucun rôle => on cache le formulaire et on désactive
-    if (!selectedRole) {
-      formFields.style.display = "none";
-      setEnabled("formFields", false);
-      return;
-    }
-
-    // Rôle sélectionné => on montre le formulaire (email/mdp)
-    formFields.style.display = "block";
-    setEnabled("formFields", true);
-  }
-
-  // Au chargement : appliquer l'état si le role est déjà présent (retour erreur)
-  (function initRole() {
-    const roleHidden = document.getElementById("roleHidden");
-    if (roleHidden && roleHidden.value) {
-      document.getElementById("role").value = roleHidden.value;
-    }
-    onRoleChange();
-  })();
-</script>
-
-</body>
+</section>
 </html>
