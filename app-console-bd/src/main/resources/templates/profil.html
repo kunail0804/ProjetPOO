@@ -90,7 +90,7 @@
 
             <div th:if="${isAgent}">
                 <h5 class="text-primary mb-3">Actions Agent</h5>
-                <a class="btn btn-outline-secondary disabled">Gestion contrats (à venir)</a>
+                <a class="btn btn-outline-secondary" th:href="@{/ajouter_louable}">Ajouter un Louable</a>
             </div>
 
             <div th:if="${isEntretien}">
@@ -139,6 +139,50 @@
                 </table>
               </div>
             </div>
+
+            <div th:if="${isAgent}" class="mt-4">
+              <h5 class="text-primary mb-3">Mes louables</h5>
+
+              <div th:if="${#lists.isEmpty(louables)}" class="alert alert-secondary mb-0">
+                Aucun louable ajouté pour le moment.
+              </div>
+
+              <div th:if="${!#lists.isEmpty(louables)}" class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Type</th>
+                      <th>PrixJour</th>
+                      <th>lieuPrincipal</th>
+                      <th>Statut</th>
+                      <th class="text-end">Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr th:each="l : ${louables}">
+                      <td th:text="${l.idLouable}">1</td>
+                      <td th:text="${l.type}">Voiture</td>
+                      <td th:text="${l.prixJour}">prixJour</td>
+                      <td th:text="${l.lieuPrincipal}">lieuPrincipal</td>
+
+                      <td>
+                        <span class="badge bg-success" th:if="${l.statut.name() == 'DISPONIBLE'}">Disponible</span>
+                        <span class="badge bg-warning text-dark" th:if="${l.statut.name() == 'EN_LOCATION'}">En location</span>
+                        <span class="badge bg-danger" th:if="${l.statut.name() == 'EN_ENTRETIEN'}">En entretien</span>
+                      </td>
+
+                      <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary"
+                          th:href="@{/louables/{id}(id=${l.idLouable})}">
+                          Voir
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
         </div>
       </div>

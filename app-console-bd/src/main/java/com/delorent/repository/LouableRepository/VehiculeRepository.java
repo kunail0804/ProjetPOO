@@ -38,7 +38,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         List<VehiculeSummary> summaries = new ArrayList<>();
         for (Voiture voiture : voitures) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                new LouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
                 voiture.getMarque(),
                 voiture.getModele(),
                 voiture.getAnnee(),
@@ -50,7 +50,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         }
         for (Camion camion : camions) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                new LouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
                 camion.getMarque(),
                 camion.getModele(),
                 camion.getAnnee(),
@@ -62,7 +62,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         }
         for (Moto moto : motos) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                new LouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
                 moto.getMarque(),
                 moto.getModele(),
                 moto.getAnnee(),
@@ -80,7 +80,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Voiture voiture = voitureRepository.get(id);
             return new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                new LouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
                 voiture.getMarque(),
                 voiture.getModele(),
                 voiture.getAnnee(),
@@ -96,7 +96,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Camion camion = camionRepository.get(id);
             return new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                new LouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
                 camion.getMarque(),
                 camion.getModele(),
                 camion.getAnnee(),
@@ -112,7 +112,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Moto moto = motoRepository.get(id);
             return new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                new LouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
                 moto.getMarque(),
                 moto.getModele(),
                 moto.getAnnee(),
@@ -150,7 +150,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         List<VehiculeSummary> disponibles = new ArrayList<>();
         for (Voiture voiture : voitures) {
             disponibles.add(new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                new LouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
                 voiture.getMarque(),
                 voiture.getModele(),
                 voiture.getAnnee(),
@@ -162,7 +162,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         }
         for (Camion camion : camions) {
             disponibles.add(new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                new LouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
                 camion.getMarque(),
                 camion.getModele(),
                 camion.getAnnee(),
@@ -174,7 +174,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         }
         for (Moto moto : motos) {
             disponibles.add(new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                new LouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
                 moto.getMarque(),
                 moto.getModele(),
                 moto.getAnnee(),
@@ -196,7 +196,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         List<VehiculeSummary> summaries = new ArrayList<>();
         for (Voiture voiture : voitures) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                new LouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
                 voiture.getMarque(),
                 voiture.getModele(),
                 voiture.getAnnee(),
@@ -208,7 +208,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         }
         for (Camion camion : camions) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                new LouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
                 camion.getMarque(),
                 camion.getModele(),
                 camion.getAnnee(),
@@ -220,7 +220,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         }
         for (Moto moto : motos) {
             summaries.add(new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                new LouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
                 moto.getMarque(),
                 moto.getModele(),
                 moto.getAnnee(),

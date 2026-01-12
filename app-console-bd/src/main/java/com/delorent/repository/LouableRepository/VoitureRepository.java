@@ -29,6 +29,7 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
                      " JOIN VOITURE ON VEHICULE.id = VOITURE.id";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Voiture(
                 rs.getInt("id"),
+                rs.getInt("idProprietaire"),
                 rs.getDouble("prixJour"),
                 StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                 rs.getString("lieuPrincipal"),
@@ -55,6 +56,7 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
                      " WHERE LOUABLE.id = ?";
         return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> new Voiture(
                 rs.getInt("id"),
+                rs.getInt("idProprietaire"),
                 rs.getDouble("prixJour"),
                 StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                 rs.getString("lieuPrincipal"),
@@ -75,8 +77,8 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
 
     @Override
     public Integer add(Voiture entity) {
-        String sqlLouable = "INSERT INTO LOUABLE (prixJour, statut, lieuPrincipal) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sqlLouable, entity.getPrixJour(), entity.getStatut().name(), entity.getLieuPrincipal());
+        String sqlLouable = "INSERT INTO LOUABLE (idProprietaire, prixJour, statut, lieuPrincipal) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sqlLouable, entity.getIdAgent(), entity.getPrixJour(), entity.getStatut().name(), entity.getLieuPrincipal());
 
         Integer idLouable = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
 
@@ -131,6 +133,7 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
 
         return jdbcTemplate.query(sql.toString(), params.toArray(), (rs, rowNum) -> new Voiture(
                 rs.getInt("id"),
+                rs.getInt("idProprietaire"),
                 rs.getDouble("prixJour"),
                 StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                 rs.getString("lieuPrincipal"),
@@ -156,6 +159,7 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
                      " WHERE l.idProprietaire = ?";
         return jdbcTemplate.query(sql, new Object[]{idProprietaire}, (rs, rowNum) -> new Voiture(
                 rs.getInt("id"),
+                rs.getInt("idProprietaire"),
                 rs.getDouble("prixJour"),
                 StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                 rs.getString("lieuPrincipal"),

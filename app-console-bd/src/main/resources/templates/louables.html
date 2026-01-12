@@ -69,6 +69,7 @@
         <thead>
         <tr>
             <th>ID</th>
+            <th>Propriétaire</th>
             <th>Type</th>
             <th>Prix/jour</th>
             <th>Statut</th>
@@ -84,6 +85,7 @@
 
         <tr th:each="l : ${louables}">
             <td th:text="${l.idLouable}">1</td>
+            <td th:text="${l.idAgent}">pas de propriétaire</td>
             <td th:text="${l.type}">VOITURE</td>
             <td th:text="${l.prixJour}">50</td>
             <td th:text="${l.statut}">DISPONIBLE</td>
@@ -101,6 +103,7 @@
         <thead>
         <tr>
             <th>ID</th>
+            <th>Propriétaire</th>
             <th>Type</th>
             <th>Marque</th>
             <th>Modèle</th>
@@ -122,6 +125,7 @@
 
         <tr th:each="v : ${vehicules}">
             <td th:text="${v.louable().idLouable()}">1</td>
+            <td th:text="${v.louable().idAgent()}">pas de propriétaire</td>
             <td th:text="${v.type()}">VOITURE</td>
             <td th:text="${v.marque()}">Peugeot</td>
             <td th:text="${v.modele()}">208</td>

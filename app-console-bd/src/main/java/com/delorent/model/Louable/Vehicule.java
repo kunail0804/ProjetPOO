@@ -9,9 +9,9 @@ public abstract class Vehicule extends Louable {
     private String immatriculation;
     private int kilometrage;
 
-    public Vehicule(int idLouable, double prixJour, String lieuPrincipal, String marque, String modele, int annee,
+    public Vehicule(int idLouable, int idAgent, double prixJour, String lieuPrincipal, String marque, String modele, int annee,
             String couleur, String immatriculation, int kilometrage) {
-        super(idLouable, prixJour, lieuPrincipal);
+        super(idLouable, idAgent, prixJour, lieuPrincipal);
         this.marque = marque;
         this.modele = modele;
         this.annee = annee;
@@ -19,9 +19,9 @@ public abstract class Vehicule extends Louable {
         this.immatriculation = immatriculation;
         this.kilometrage = kilometrage;
     }
-    public Vehicule(double prixJour, String lieuPrincipal, String marque, String modele, int annee, String couleur,
+    public Vehicule(int idAgent, double prixJour, String lieuPrincipal, String marque, String modele, int annee, String couleur,
             String immatriculation, int kilometrage) {
-        super(prixJour, lieuPrincipal);
+        super(idAgent, prixJour, lieuPrincipal);
         this.marque = marque;
         this.modele = modele;
         this.annee = annee;
@@ -29,9 +29,9 @@ public abstract class Vehicule extends Louable {
         this.immatriculation = immatriculation;
         this.kilometrage = kilometrage;
     }
-    public Vehicule(int idLouable, double prixJour, StatutLouable statut, String lieuPrincipal, String marque,
+    public Vehicule(int idLouable, int idAgent, double prixJour, StatutLouable statut, String lieuPrincipal, String marque,
             String modele, int annee, String couleur, String immatriculation, int kilometrage) {
-        super(idLouable, prixJour, statut, lieuPrincipal);
+        super(idLouable, idAgent, prixJour, statut, lieuPrincipal);
         this.marque = marque;
         this.modele = modele;
         this.annee = annee;
@@ -39,9 +39,9 @@ public abstract class Vehicule extends Louable {
         this.immatriculation = immatriculation;
         this.kilometrage = kilometrage;
     }
-    public Vehicule(double prixJour, StatutLouable statut, String lieuPrincipal, String marque, String modele,
+    public Vehicule(int idAgent, double prixJour, StatutLouable statut, String lieuPrincipal, String marque, String modele,
             int annee, String couleur, String immatriculation, int kilometrage) {
-        super(prixJour, statut, lieuPrincipal);
+        super(idAgent, prixJour, statut, lieuPrincipal);
         this.marque = marque;
         this.modele = modele;
         this.annee = annee;

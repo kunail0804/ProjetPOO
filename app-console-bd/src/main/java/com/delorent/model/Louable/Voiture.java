@@ -9,10 +9,10 @@ public class Voiture extends Vehicule {
     private Carburant carburant;
     private boolean climatisation;
     
-    public Voiture(int idLouable, double prixJour, String lieuPrincipal, String marque, String modele, int annee,
+    public Voiture(int idLouable, int idAgent, double prixJour, String lieuPrincipal, String marque, String modele, int annee,
             String couleur, String immatriculation, int kilometrage, int nbPortes, int nbPlaces, int volumeCoffreLitres,
             TypeBoite boite, Carburant carburant, boolean climatisation) {
-        super(idLouable, prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        super(idLouable, idAgent, prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
         this.nbPortes = nbPortes;
         this.nbPlaces = nbPlaces;
         this.volumeCoffreLitres = volumeCoffreLitres;
@@ -20,10 +20,10 @@ public class Voiture extends Vehicule {
         this.carburant = carburant;
         this.climatisation = climatisation;
     }
-    public Voiture(double prixJour, String lieuPrincipal, String marque, String modele, int annee, String couleur,
+    public Voiture(int idAgent, double prixJour, String lieuPrincipal, String marque, String modele, int annee, String couleur,
             String immatriculation, int kilometrage, int nbPortes, int nbPlaces, int volumeCoffreLitres,
             TypeBoite boite, Carburant carburant, boolean climatisation) {
-        super(prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        super(idAgent, prixJour, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
         this.nbPortes = nbPortes;
         this.nbPlaces = nbPlaces;
         this.volumeCoffreLitres = volumeCoffreLitres;
@@ -31,10 +31,10 @@ public class Voiture extends Vehicule {
         this.carburant = carburant;
         this.climatisation = climatisation;
     }
-    public Voiture(int idLouable, double prixJour, StatutLouable statut, String lieuPrincipal, String marque,
+    public Voiture(int idLouable, int idAgent, double prixJour, StatutLouable statut, String lieuPrincipal, String marque,
             String modele, int annee, String couleur, String immatriculation, int kilometrage, int nbPortes,
             int nbPlaces, int volumeCoffreLitres, TypeBoite boite, Carburant carburant, boolean climatisation) {
-        super(idLouable, prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        super(idLouable, idAgent, prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
         this.nbPortes = nbPortes;
         this.nbPlaces = nbPlaces;
         this.volumeCoffreLitres = volumeCoffreLitres;
@@ -42,10 +42,10 @@ public class Voiture extends Vehicule {
         this.carburant = carburant;
         this.climatisation = climatisation;
     }
-    public Voiture(double prixJour, StatutLouable statut, String lieuPrincipal, String marque, String modele, int annee,
+    public Voiture(int idAgent, double prixJour, StatutLouable statut, String lieuPrincipal, String marque, String modele, int annee,
             String couleur, String immatriculation, int kilometrage, int nbPortes, int nbPlaces, int volumeCoffreLitres,
             TypeBoite boite, Carburant carburant, boolean climatisation) {
-        super(prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
+        super(idAgent, prixJour, statut, lieuPrincipal, marque, modele, annee, couleur, immatriculation, kilometrage);
         this.nbPortes = nbPortes;
         this.nbPlaces = nbPlaces;
         this.volumeCoffreLitres = volumeCoffreLitres;

@@ -10,6 +10,7 @@ import com.delorent.model.Utilisateur.EntrepriseEntretien;
 import com.delorent.model.Utilisateur.Loueur;
 import com.delorent.model.Utilisateur.Utilisateur;
 import com.delorent.repository.ContratRepository;
+import com.delorent.repository.LouableRepository.LouableRepository;
 import com.delorent.service.ConnexionService;
 import com.delorent.service.UtilisateurService;
 
@@ -19,11 +20,13 @@ public class ProfilController {
     private final ConnexionService connexionService;
     private final UtilisateurService utilisateurService;
     private final ContratRepository contratRepository;
+    private final LouableRepository louableRepository;
 
-    public ProfilController(ConnexionService connexionService, UtilisateurService utilisateurService, ContratRepository contratRepository) {
+    public ProfilController(ConnexionService connexionService, UtilisateurService utilisateurService, ContratRepository contratRepository, LouableRepository louableRepository) {
         this.connexionService = connexionService;
         this.utilisateurService = utilisateurService;
         this.contratRepository = contratRepository;
+        this.louableRepository = louableRepository;
     }
 
     @GetMapping("/profil")
@@ -48,6 +51,10 @@ public class ProfilController {
 
         if (utilisateur instanceof Loueur l) {
             model.addAttribute("contrats", contratRepository.getByLoueurId(l.getIdUtilisateur()));
+        }
+
+        if (utilisateur instanceof Agent a) {
+            model.addAttribute("louables", louableRepository.getByProprietaire(a.getIdUtilisateur()));
         }
 
         return "profil";

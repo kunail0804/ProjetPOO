@@ -1,91 +1,185 @@
 <!doctype html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Profil véhicule</title>
-    <style>
-        .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
-        .muted { color: #666; font-size: 0.9em; }
-        .ok { color: green; }
-        .err { color: red; }
-        .row { display:flex; gap:24px; flex-wrap: wrap; }
-        .col { flex: 1 1 320px; }
-        .btn { display:inline-block; padding:8px 12px; border:1px solid #ccc; border-radius:8px; text-decoration:none; }
-        .btn-primary { border-color:#999; font-weight:600; }
-        .kv { margin: 0; }
-        .kv dt { font-weight: 600; margin-top: 10px; }
-        .kv dd { margin: 2px 0 0 0; }
-        .badge { display:inline-block; padding:2px 8px; border:1px solid #ddd; border-radius:999px; font-size: 0.85em; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Mon louable</title>
+  <style>
+    .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
+    .muted { color: #666; font-size: 0.9em; }
+    .ok { color: green; }
+    .err { color: red; }
+    .row { display:flex; gap:24px; flex-wrap: wrap; }
+    .col { flex: 1 1 320px; }
+    .btn { display:inline-block; padding:8px 12px; border:1px solid #ccc; border-radius:8px; text-decoration:none; }
+    .btn-primary { border-color:#999; font-weight:600; }
+    .kv { margin: 0; }
+    .kv dt { font-weight: 600; margin-top: 10px; }
+    .kv dd { margin: 2px 0 0 0; }
+    .badge { display:inline-block; padding:2px 8px; border:1px solid #ddd; border-radius:999px; font-size: 0.85em; }
+    hr { border:0; border-top:1px solid #eee; margin: 12px 0; }
+  </style>
 </head>
 <body>
 
-<p><a th:href="@{/louables}">← Retour au catalogue</a></p>
+<p>
+  <a th:if="${backToProfile}" th:href="@{/profil}">← Retour au profil</a>
+  <a th:if="${!backToProfile}" th:href="@{/louables}">← Retour au catalogue</a>
+</p>
 
-<h1>Profil du véhicule</h1>
+
+<h1>Détails de mon louable</h1>
 
 <div th:if="${succes}">
-    <p class="ok" th:text="${succes}">Succès</p>
+  <p class="ok" th:text="${succes}">Succès</p>
 </div>
 <div th:if="${erreur}">
-    <p class="err" th:text="${erreur}">Erreur</p>
+  <p class="err" th:text="${erreur}">Erreur</p>
 </div>
 
 <!-- Cas louable introuvable -->
 <div th:if="${louable == null}" class="box">
-    <p class="err">Ce véhicule est introuvable.</p>
-    <p class="muted">Vérifie l’identifiant dans l’URL.</p>
+  <p class="err">Ce louable est introuvable.</p>
+  <p class="muted">Vérifie l’identifiant dans l’URL.</p>
 </div>
 
 <!-- Profil -->
 <div th:if="${louable != null}" class="row">
-    <div class="col box">
 
-        <p class="muted" style="margin-top:4px;">
-            ID louable :
-            <strong th:text="${louable.idLouable != null ? louable.idLouable : louable.id}">1</strong>
-        </p>
+  <!-- Colonne principale -->
+  <div class="col box">
+    <p class="muted" style="margin-top:4px;">
+      Type :
+      <strong th:text="${type}">VOITURE</strong>
+      &nbsp;•&nbsp;
+      ID :
+      <strong th:text="${louable.idLouable}">1</strong>
+    </p>
 
-        <dl class="kv">
-            <dt>Prix / jour</dt>
-            <dd>
-                <span th:text="${louable.prixJour != null ? (louable.prixJour + ' €') : '—'}">50 €</span>
-            </dd>
+    <dl class="kv">
+      <dt>Prix / jour</dt>
+      <dd th:text="${louable.prixJour + ' €'}">50 €</dd>
 
-            <dt>Statut</dt>
-            <dd>
-                <span class="badge" th:text="${louable.statut != null ? louable.statut : '—'}">DISPONIBLE</span>
-            </dd>
+      <dt>Statut</dt>
+      <dd>
+        <span class="badge" th:text="${louable.statut}">DISPONIBLE</span>
+      </dd>
 
-            <dt>Lieu principal (prise)</dt>
-            <dd th:text="${louable.lieuPrincipal != null ? louable.lieuPrincipal : '—'}">Toulouse</dd>
-        </dl>
+      <dt>Lieu principal</dt>
+      <dd th:text="${louable.lieuPrincipal}">Toulouse</dd>
+    </dl>
 
-        <hr>
+    <hr>
 
-        <!-- Bouton louer : on envoie idLouable en query param -->
-        <a class="btn btn-primary"
-            th:href="@{/louables/{id}/louer(id=${louable.idLouable})}">
-            Louer ce véhicule
-        </a>
+    <h2 style="margin: 0 0 8px 0;">Informations véhicule</h2>
+    <dl class="kv">
+      <dt>Marque</dt>
+      <dd th:text="${louable.marque}">Renault</dd>
 
-        <p class="muted" style="margin-top:8px;">
-            Tu passeras ensuite au formulaire de location (dates, assurance, lieu de dépôt…).
-        </p>
+      <dt>Modèle</dt>
+      <dd th:text="${louable.modele}">Clio</dd>
+
+      <dt>Année</dt>
+      <dd th:text="${louable.annee}">2020</dd>
+
+      <dt>Couleur</dt>
+      <dd th:text="${louable.couleur}">Gris</dd>
+
+      <dt>Immatriculation</dt>
+      <dd th:text="${louable.immatriculation}">AB-123-CD</dd>
+
+      <dt>Kilométrage</dt>
+      <dd th:text="${louable.kilometrage + ' km'}">45000 km</dd>
+    </dl>
+  </div>
+
+  <!-- Colonne champs spécifiques -->
+  <div class="col box">
+    <h2 style="margin-top:0;">Champs spécifiques</h2>
+
+    <!-- VOITURE -->
+    <div th:if="${isVoiture}">
+      <h3 style="margin: 8px 0;">Voiture</h3>
+      <dl class="kv">
+        <dt>Nombre de portes</dt>
+        <dd th:text="${louable.nbPortes}">5</dd>
+
+        <dt>Nombre de places</dt>
+        <dd th:text="${louable.nbPlaces}">5</dd>
+
+        <dt>Volume coffre</dt>
+        <dd th:text="${louable.volumeCoffreLitres + ' L'}">300 L</dd>
+
+        <dt>Boîte</dt>
+        <dd th:text="${louable.boite}">MANUELLE</dd>
+
+        <dt>Carburant</dt>
+        <dd th:text="${louable.carburant}">ESSENCE</dd>
+
+        <dt>Climatisation</dt>
+        <dd th:text="${louable.climatisation ? 'Oui' : 'Non'}">Oui</dd>
+      </dl>
     </div>
 
-    <!-- Colonne “à venir” (contexte pour plus tard) -->
-    <div class="col box">
-        <h2 style="margin-top:0;">Informations (à venir)</h2>
-        <p class="muted">
-            Plus tard on mettra ici : photos, description, options, historiques, etc.
-        </p>
-        <ul class="muted">
-            <li>Résumé des disponibilités</li>
-            <li>Conditions / règles</li>
-            <li>Détails véhicule</li>
-        </ul>
+    <!-- MOTO -->
+    <div th:if="${isMoto}">
+      <h3 style="margin: 8px 0;">Moto</h3>
+      <dl class="kv">
+        <dt>Cylindrée</dt>
+        <dd th:text="${louable.cylindreeCc + ' cc'}">650 cc</dd>
+
+        <dt>Puissance</dt>
+        <dd th:text="${louable.puissanceCh + ' ch'}">70 ch</dd>
+
+        <dt>Type de moto</dt>
+        <dd th:text="${louable.typeMoto}">ROADSTER</dd>
+
+        <dt>Permis requis</dt>
+        <dd th:text="${louable.permisRequis}">A2</dd>
+      </dl>
     </div>
+
+    <!-- CAMION -->
+    <div th:if="${isCamion}">
+      <h3 style="margin: 8px 0;">Camion</h3>
+      <dl class="kv">
+        <dt>Charge max</dt>
+        <dd th:text="${louable.chargeMaxKg + ' kg'}">1200 kg</dd>
+
+        <dt>Volume utile</dt>
+        <dd th:text="${louable.volumeUtileM3 + ' m³'}">10 m³</dd>
+
+        <dt>Hauteur</dt>
+        <dd th:text="${louable.hauteurM + ' m'}">2.2 m</dd>
+
+        <dt>Longueur</dt>
+        <dd th:text="${louable.longueurM + ' m'}">4.5 m</dd>
+
+        <dt>Permis requis</dt>
+        <dd th:text="${louable.permisRequis}">B</dd>
+      </dl>
+    </div>
+
+<hr>
+
+<div th:if="${canManage}">
+  <p class="muted">
+    Actions (Agent propriétaire)
+  </p>
+
+  <!-- Exemples (à brancher plus tard) -->
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <!-- placeholders: adapte les routes quand tu les créeras -->
+    <a class="btn" th:href="@{/louables/{id}/modifier(id=${louable.idLouable})}">Modifier</a>
+    <a class="btn" th:href="@{/louables/{id}/supprimer(id=${louable.idLouable})}">Supprimer</a>
+
+    <form th:action="@{/louables/{id}/supprimer(id=${louable.idLouable})}" method="post"
+          onsubmit="return confirm('Supprimer définitivement ce louable ?');" style="display:inline;">
+    </form>
+  </div>
+</div>
+
+<!-- si pas canManage : rien à afficher -->
+
 </div>
 
 </body>
