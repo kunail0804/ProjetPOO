@@ -161,6 +161,10 @@
 
 <hr>
 
+<div th:if="${!canManage}">
+  <a class="btn" th:href="@{/louables/{id}/louer(id=${louable.idLouable})}">Louer ce Louable</a>
+</div>
+
 <div th:if="${canManage}">
   <p class="muted">
     Actions (Agent propriétaire)
