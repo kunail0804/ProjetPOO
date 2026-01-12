@@ -187,4 +187,49 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
 
         return disponibles;
     }
+
+    public List<VehiculeSummary> getByProprietaire(int idProprietaire) {
+        List<Voiture> voitures = voitureRepository.getByProprietaire(idProprietaire);
+        List<Camion> camions = camionRepository.getByProprietaire(idProprietaire);
+        List<Moto> motos = motoRepository.getByProprietaire(idProprietaire);
+
+        List<VehiculeSummary> summaries = new ArrayList<>();
+        for (Voiture voiture : voitures) {
+            summaries.add(new VehiculeSummary(
+                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                voiture.getMarque(),
+                voiture.getModele(),
+                voiture.getAnnee(),
+                voiture.getCouleur(),
+                voiture.getImmatriculation(),
+                voiture.getKilometrage(),
+                "Voiture"
+            ));
+        }
+        for (Camion camion : camions) {
+            summaries.add(new VehiculeSummary(
+                new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                camion.getMarque(),
+                camion.getModele(),
+                camion.getAnnee(),
+                camion.getCouleur(),
+                camion.getImmatriculation(),
+                camion.getKilometrage(),
+                "Camion"
+            ));
+        }
+        for (Moto moto : motos) {
+            summaries.add(new VehiculeSummary(
+                new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                moto.getMarque(),
+                moto.getModele(),
+                moto.getAnnee(),
+                moto.getCouleur(),
+                moto.getImmatriculation(),
+                moto.getKilometrage(),
+                "Moto"
+            ));
+        }
+        return summaries;
+    }
 }

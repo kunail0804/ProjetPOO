@@ -57,4 +57,13 @@ public class LouableRepository implements RepositoryBase<LouableSummary, Integer
         }
         return summaries;
     }
+
+    public List<LouableSummary> getByProprietaire(int idProprietaire) {
+        List<VehiculeSummary> vehicules = vehiculeRepository.getByProprietaire(idProprietaire);
+        List<LouableSummary> summaries = new ArrayList<>();
+        for (VehiculeSummary vehicule : vehicules) {
+            summaries.add(vehicule.louable());
+        }
+        return summaries;
+    }
 }

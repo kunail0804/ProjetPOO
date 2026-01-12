@@ -141,4 +141,27 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
                 rs.getString("permisRequis")
         ));
     }
+
+    public List<Moto> getByProprietaire(int idProprietaire) {
+        String sql = "SELECT * FROM LOUABLE l " +
+                     "JOIN VEHICULE v ON l.id = v.id " +
+                     "JOIN MOTO m ON v.id = m.id " +
+                     "WHERE l.idProprietaire = ?";
+        return jdbcTemplate.query(sql, new Object[]{idProprietaire}, (rs, rowNum) -> new Moto(
+                rs.getInt("id"),
+                rs.getDouble("prixJour"),
+                StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
+                rs.getString("lieuPrincipal"),
+                rs.getString("marque"),
+                rs.getString("modele"),
+                rs.getInt("annee"),
+                rs.getString("couleur"),
+                rs.getString("immatriculation"),
+                rs.getInt("kilometrage"),
+                rs.getInt("cylindreeCc"),
+                rs.getInt("puissanceCh"),
+                TypeMoto.valueOf(rs.getString("typeMoto").toUpperCase()),
+                rs.getString("permisRequis")
+        ));
+    }
 }

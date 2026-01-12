@@ -148,4 +148,29 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
                 rs.getBoolean("climatisation")
         ));
     }
+
+    public List<Voiture> getByProprietaire(int idProprietaire) {
+        String sql = "SELECT * FROM LOUABLE l" +
+                     " JOIN VEHICULE v ON l.id = v.id" +
+                     " JOIN VOITURE vo ON v.id = vo.id" +
+                     " WHERE l.idProprietaire = ?";
+        return jdbcTemplate.query(sql, new Object[]{idProprietaire}, (rs, rowNum) -> new Voiture(
+                rs.getInt("id"),
+                rs.getDouble("prixJour"),
+                StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
+                rs.getString("lieuPrincipal"),
+                rs.getString("marque"),
+                rs.getString("modele"),
+                rs.getInt("annee"),
+                rs.getString("couleur"),
+                rs.getString("immatriculation"),
+                rs.getInt("kilometrage"),
+                rs.getInt("nbPortes"),
+                rs.getInt("nbPlaces"),
+                rs.getInt("volumeCoffreLitres"),
+                TypeBoite.valueOf(rs.getString("boite").toUpperCase()),
+                Carburant.valueOf(rs.getString("carburant").toUpperCase()),
+                rs.getBoolean("climatisation")
+        ));
+    }
 }

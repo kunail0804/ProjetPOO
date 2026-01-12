@@ -142,4 +142,28 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
             rs.getString("permisRequis")
         ));
     }
+
+    public List<Camion> getByProprietaire(int idProprietaire) {
+        String sql = "SELECT * FROM LOUABLE l " +
+                     "JOIN VEHICULE v ON l.id = v.id " +
+                     "JOIN CAMION ca ON v.id = ca.id " +
+                     "WHERE l.idProprietaire = ?";
+        return jdbcTemplate.query(sql, new Object[]{idProprietaire}, (rs, rowNum) -> new Camion(
+            rs.getInt("id"),
+            rs.getDouble("prixJour"),
+            StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
+            rs.getString("lieuPrincipal"),
+            rs.getString("marque"),
+            rs.getString("modele"),
+            rs.getInt("annee"),
+            rs.getString("couleur"),
+            rs.getString("immatriculation"),
+            rs.getInt("kilometrage"),
+            rs.getInt("chargeMaxKg"),
+            rs.getDouble("volumeUtileM3"),
+            rs.getDouble("hauteurM"),
+            rs.getDouble("longueurM"),
+            rs.getString("permisRequis")
+        ));
+    }
 }

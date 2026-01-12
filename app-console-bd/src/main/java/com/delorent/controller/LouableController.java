@@ -1,7 +1,7 @@
 package com.delorent.controller;
 
-import com.delorent.model.StatutLouable;
-import com.delorent.repository.LouableRepository;
+import com.delorent.model.Louable.StatutLouable;
+import com.delorent.repository.LouableRepository.LouableRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/louables")
 public class LouableController {
 
-    private final LouableRepository louableRepository;
+    /**private final LouableRepository louableRepository;
 
     public LouableController(LouableRepository louableRepository) {
         this.louableRepository = louableRepository;
@@ -79,5 +79,6 @@ public class LouableController {
         public int id;
         public CreatedResponse(int id) { this.id = id; }
     }
+        **/
 }
 

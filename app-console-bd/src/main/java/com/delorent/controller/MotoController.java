@@ -1,9 +1,9 @@
 package com.delorent.controller;
 
-import com.delorent.model.StatutLouable;
-import com.delorent.repository.LouableRepository;
-import com.delorent.repository.VehiculeRepository;
-import com.delorent.repository.MotoRepository;
+import com.delorent.model.Louable.StatutLouable;
+import com.delorent.repository.LouableRepository.LouableRepository;
+import com.delorent.repository.LouableRepository.VehiculeRepository;
+import com.delorent.repository.LouableRepository.MotoRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/motos")
 public class MotoController {
 
-    private final LouableRepository louableRepository;
+    /**private final LouableRepository louableRepository;
     private final VehiculeRepository vehiculeRepository;
     private final MotoRepository motoRepository;
 
@@ -145,4 +145,5 @@ public class MotoController {
         public int id;
         public CreatedResponse(int id) { this.id = id; }
     }
+        **/
 }
