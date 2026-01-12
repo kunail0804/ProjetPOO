@@ -15,6 +15,8 @@ import com.delorent.repository.RepositoryBase;
 import java.util.List;
 import java.util.ArrayList;
 
+// TODO: gérer les notes
+
 @Repository
 public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integer> {
     private final JdbcTemplate jdbcTemplate;

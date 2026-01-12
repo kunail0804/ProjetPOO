@@ -1,149 +1,367 @@
 <!doctype html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Catalogue des véhicules</title>
-    <style>
-        .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
-        .muted { color: #666; font-size: 0.9em; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #e5e5e5; padding: 8px; text-align: left; }
-        th { background: #f7f7f7; }
-        .ok { color: green; }
-        .err { color: red; }
-        .btn { display:inline-block; padding:6px 10px; border:1px solid #ccc; border-radius:6px; text-decoration:none; }
-        .filters { display:flex; gap:12px; align-items:end; flex-wrap:wrap; }
-        .filters label { display:block; font-size:0.9em; margin-bottom:4px; }
-        .filters input { padding:6px 10px; border:1px solid #ccc; border-radius:6px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalogue des louables</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    .header {
+      background-color: white;
+      padding: 26px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .header h1 {
+      color: #333;
+      font-size: 2.2em;
+      margin-bottom: 10px;
+    }
+
+    .header p { color: #666; font-size: 1.05em; }
+
+    .count { color: #667eea; font-weight: bold; }
+
+    .muted { color: #666; font-size: 0.95em; }
+    .ok { color: #1b5e20; font-weight: 600; }
+    .err { color: #b71c1c; font-weight: 600; }
+
+    .box {
+      background: white;
+      border-radius: 15px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      margin-bottom: 18px;
+    }
+
+    .btn {
+      display:inline-block;
+      padding:8px 12px;
+      border:1px solid #ccc;
+      border-radius:10px;
+      text-decoration:none;
+      background: #fff;
+      color: #333;
+      font-weight: 600;
+    }
+    .btn:hover { filter: brightness(0.97); }
+
+    /* Filtres */
+    .filters { display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap; }
+    .filters label { display:block; font-size:0.95em; margin-bottom:6px; color:#444; }
+    .filters input[type="number"] {
+      padding:8px 10px;
+      border:1px solid #ccc;
+      border-radius:10px;
+      min-width: 200px;
+    }
+    .filters .checkline { display:flex; align-items:center; gap:10px; padding: 8px 10px; background:#f6f7fb; border-radius:10px; }
+    .filters .checkline input { transform: scale(1.1); }
+
+    /* Grid cards */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 22px;
+      margin-top: 8px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 15px;
+      padding: 22px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 0.85em;
+      font-weight: bold;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .title {
+      color: #2c3e50;
+      font-size: 1.55em;
+      margin: 10px 0 14px 0;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 10px;
+    }
+    .info-icon { font-size: 1.15em; margin-right: 10px; min-width: 26px; }
+    .info-label { font-weight: 700; color: #555; margin-right: 8px; }
+    .info-value { color: #333; overflow-wrap:anywhere; }
+
+    .note-section {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 14px;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 14px;
+    }
+    .note-value { font-size: 2.2em; font-weight: 900; display: block; line-height: 1; }
+
+    .actions {
+      display:flex;
+      gap:10px;
+      margin-top: 14px;
+    }
+    .btn-primary {
+      border: none;
+      color: #fff;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 9px 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 800;
+      display: inline-block;
+      text-align: center;
+      flex: 1;
+    }
+    .btn-primary:hover { filter: brightness(1.03); }
+
+    .no-item {
+      background-color: white;
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+    .no-item h2 { color: #666; font-size: 1.7em; margin-bottom: 12px; }
+    .no-item p { color: #999; font-size: 1.05em; }
+
+    .footer { text-align:center; margin-top: 28px; color: white; font-size: 0.9em; }
+  </style>
 </head>
+
 <body>
+<div class="container">
 
-<h1>Véhicules disponibles</h1>
+  <!-- Header -->
+  <div class="header">
+    <h1>Véhicules / Louables disponibles</h1>
+    <p class="muted">
+      Sélectionne un louable pour accéder à sa page et lancer une demande de location.
+    </p>
 
-<p class="muted">
-    Sélectionne un véhicule pour accéder à sa page et lancer une demande de location.
-</p>
+    <!-- Compteur (selon filtre) -->
+    <p style="margin-top:10px;">
+      <span class="count"
+            th:text="${filtreVehicule} ? ${#lists.size(vehicules)} : ${#lists.size(louables)}">0</span>
+      <span th:text="${filtreVehicule} ? 'véhicules' : 'louables'">louables</span>
+      <span>disponibles</span>
+    </p>
+  </div>
 
-<div th:if="${succes}">
+  <!-- Messages -->
+  <div class="box" th:if="${succes}">
     <p class="ok" th:text="${succes}">Succès</p>
-</div>
-<div th:if="${erreur}">
+  </div>
+  <div class="box" th:if="${erreur}">
     <p class="err" th:text="${erreur}">Erreur</p>
-</div>
+  </div>
 
-<div class="box" style="margin-bottom: 12px;">
+  <!-- Filtres -->
+  <div class="box">
     <form method="get" th:action="@{/louables}" class="filters">
-        <div>
-            <label for="prixMax">Prix max / jour (€)</label>
-            <input id="prixMax"
-                   type="number"
-                   name="prixMax"
-                   min="0"
-                   step="0.01"
-                   placeholder="ex: 50"
-                   th:value="${filtrePrixMax}">
-        </div>
+      <div>
+        <label for="prixMax">Prix max / jour (€)</label>
+        <input id="prixMax"
+               type="number"
+               name="prixMax"
+               min="0"
+               step="0.01"
+               placeholder="ex: 50"
+               th:value="${filtrePrixMax}">
+      </div>
 
-        <div>
-            <label>
-                <input type="checkbox" name="vehicule" value="true" th:checked="${filtreVehicule}">
-                Véhicule
-            </label>
-        </div>
+      <div class="checkline">
+        <input id="vehiculeCheck" type="checkbox" name="vehicule" value="true" th:checked="${filtreVehicule}">
+        <label for="vehiculeCheck" style="margin:0;">Véhicule</label>
+      </div>
 
-
-        <div>
-            <button class="btn" type="submit">Filtrer</button>
-            <a class="btn" th:href="@{/louables}">Réinitialiser</a>
-        </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn" type="submit">Filtrer</button>
+        <a class="btn" th:href="@{/louables}">Réinitialiser</a>
+      </div>
     </form>
 
-    <p class="muted" style="margin-top:8px" th:if="${filtrePrixMax != null}">
-        Filtre actif : prix ≤ <span th:text="${filtrePrixMax}">50</span> €/jour
+    <p class="muted" style="margin-top:10px" th:if="${filtrePrixMax != null}">
+      Filtre actif : prix ≤ <span th:text="${filtrePrixMax}">50</span> €/jour
     </p>
+  </div>
+
+  <!-- MODE 1 : Louables (non véhicule) -->
+  <div th:if="${!filtreVehicule}">
+    <div class="grid" th:if="${louables != null && !#lists.isEmpty(louables)}">
+      <div class="card" th:each="l : ${louables}">
+        <span class="badge" th:text="${l.type}">LOUABLE</span>
+
+        <h2 class="title">
+          Louable #<span th:text="${l.idLouable}">1</span>
+        </h2>
+
+        <div class="info-row">
+          <span class="info-icon">👤</span>
+          <span class="info-label">Propriétaire:</span>
+          <span class="info-value" th:text="${l.idAgent}">idAgent</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">📍</span>
+          <span class="info-label">Lieu:</span>
+          <span class="info-value" th:text="${l.lieuPrincipal}">Toulouse</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">💶</span>
+          <span class="info-label">Prix/jour:</span>
+          <span class="info-value">
+            <span th:text="${l.prixJour}">50</span> €
+          </span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">✅</span>
+          <span class="info-label">Statut:</span>
+          <span class="info-value" th:text="${l.statut}">DISPONIBLE</span>
+        </div>
+
+        <div class="actions">
+          <a class="btn-primary" th:href="@{/louables/{id}(id=${l.idLouable})}">Voir</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-item" th:if="${louables == null || #lists.isEmpty(louables)}">
+      <h2>😔 Aucun louable disponible</h2>
+      <p>Il n'y a pas de louable disponible pour le moment. Revenez plus tard !</p>
+    </div>
+  </div>
+
+  <!-- MODE 2 : Véhicules -->
+  <div th:if="${filtreVehicule}">
+    <div class="grid" th:if="${vehicules != null && !#lists.isEmpty(vehicules)}">
+      <div class="card" th:each="v : ${vehicules}">
+        <span class="badge" th:text="${v.type()}">VEHICULE</span>
+
+        <h2 class="title" th:text="${v.marque()} + ' ' + ${v.modele()}">Marque Modèle</h2>
+
+        <div class="info-row">
+          <span class="info-icon">🆔</span>
+          <span class="info-label">ID:</span>
+          <span class="info-value" th:text="${v.louable().idLouable()}">1</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">🎨</span>
+          <span class="info-label">Couleur:</span>
+          <span class="info-value" th:text="${v.couleur()}">Rouge</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">📅</span>
+          <span class="info-label">Année:</span>
+          <span class="info-value" th:text="${v.annee()}">2020</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">🧾</span>
+          <span class="info-label">Immat.:</span>
+          <span class="info-value" th:text="${v.immatriculation()}">AB-123-CD</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">🛣️</span>
+          <span class="info-label">Km:</span>
+          <span class="info-value" th:text="${v.kilometrage()}">15000</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">📍</span>
+          <span class="info-label">Lieu:</span>
+          <span class="info-value" th:text="${v.louable().lieuPrincipal()}">Toulouse</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">💶</span>
+          <span class="info-label">Prix/jour:</span>
+          <span class="info-value">
+            <span th:text="${v.louable().prixJour()}">50</span> €
+          </span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-icon">✅</span>
+          <span class="info-label">Statut:</span>
+          <span class="info-value" th:text="${v.louable().statut()}">DISPONIBLE</span>
+        </div>
+
+        <!-- NOTE (optionnelle): si tu n'as pas noteGlobale, tu peux enlever ce bloc -->
+        <div class="note-section" th:if="${v.noteGlobale() != null}">
+          <span>⭐ Note globale</span>
+          <span class="note-value" th:text="${v.noteGlobale()}">0.0</span>
+          <span>/ 5</span>
+        </div>
+
+        <div class="actions">
+          <a class="btn-primary" th:href="@{/louables/{id}(id=${v.louable().idLouable()})}">Voir</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-item" th:if="${vehicules == null || #lists.isEmpty(vehicules)}">
+      <h2>😔 Aucun véhicule disponible</h2>
+      <p>Il n'y a pas de véhicule disponible pour le moment. Revenez plus tard !</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>© 2024 Plateforme Autopartage</p>
+  </div>
+
 </div>
-
-<div class="box" th:if="${!filtreVehicule}">
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Propriétaire</th>
-            <th>Type</th>
-            <th>Prix/jour</th>
-            <th>Statut</th>
-            <th>Lieu principal</th>
-            <th>Action</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr th:if="${louables == null || #lists.isEmpty(louables)}">
-            <td colspan="5" class="muted">Aucun louable disponible pour le moment.</td>
-        </tr>
-
-        <tr th:each="l : ${louables}">
-            <td th:text="${l.idLouable}">1</td>
-            <td th:text="${l.idAgent}">pas de propriétaire</td>
-            <td th:text="${l.type}">VOITURE</td>
-            <td th:text="${l.prixJour}">50</td>
-            <td th:text="${l.statut}">DISPONIBLE</td>
-            <td th:text="${l.lieuPrincipal}">Toulouse</td>
-            <td>
-                <a class="btn" th:href="@{/louables/{id}(id=${l.idLouable})}">Voir</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
-
-<div class="box" th:if="${filtreVehicule}">
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Propriétaire</th>
-            <th>Type</th>
-            <th>Marque</th>
-            <th>Modèle</th>
-            <th>Année</th>
-            <th>Couleur</th>
-            <th>Immatriculation</th>
-            <th>Kilométrage</th>
-            <th>Prix/jour</th>
-            <th>Lieu</th>
-            <th>Statut</th>
-            <th>Action</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr th:if="${vehicules == null || #lists.isEmpty(vehicules)}">
-            <td colspan="12" class="muted">Aucun véhicule disponible pour le moment.</td>
-        </tr>
-
-        <tr th:each="v : ${vehicules}">
-            <td th:text="${v.louable().idLouable()}">1</td>
-            <td th:text="${v.louable().idAgent()}">pas de propriétaire</td>
-            <td th:text="${v.type()}">VOITURE</td>
-            <td th:text="${v.marque()}">Peugeot</td>
-            <td th:text="${v.modele()}">208</td>
-            <td th:text="${v.annee()}">2020</td>
-            <td th:text="${v.couleur()}">Rouge</td>
-            <td th:text="${v.immatriculation()}">AB-123-CD</td>
-            <td th:text="${v.kilometrage()}">15000</td>
-            <td th:text="${v.louable().prixJour()}">50</td>
-            <td th:text="${v.louable().lieuPrincipal()}">Toulouse</td>
-            <td th:text="${v.louable().statut()}">DISPONIBLE</td>
-            <td>
-                <a class="btn" th:href="@{/louables/{id}(id=${v.louable().idLouable()})}">Voir</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
-
-
 </body>
 </html>
