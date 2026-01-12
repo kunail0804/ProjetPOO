@@ -4,18 +4,25 @@
     <meta charset="UTF-8">
     <title>Profil véhicule</title>
     <style>
-        .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
+        .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
         .muted { color: #666; font-size: 0.9em; }
-        .ok { color: green; }
-        .err { color: red; }
+        .ok { color: green; font-weight: bold; }
+        .err { color: red; font-weight: bold; }
         .row { display:flex; gap:24px; flex-wrap: wrap; }
         .col { flex: 1 1 320px; }
-        .btn { display:inline-block; padding:8px 12px; border:1px solid #ccc; border-radius:8px; text-decoration:none; }
-        .btn-primary { border-color:#999; font-weight:600; }
+        .btn { display:inline-block; padding:8px 12px; border:1px solid #ccc; border-radius:8px; text-decoration:none; cursor: pointer; background: #eee; color: #333; }
+        .btn-primary { border-color:#007bff; background-color: #007bff; color: white; font-weight:600; }
+        .btn-danger { border-color:#dc3545; background-color: #dc3545; color: white; }
         .kv { margin: 0; }
         .kv dt { font-weight: 600; margin-top: 10px; }
         .kv dd { margin: 2px 0 0 0; }
         .badge { display:inline-block; padding:2px 8px; border:1px solid #ddd; border-radius:999px; font-size: 0.85em; }
+        
+        /* Styles spécifiques pour l'offre */
+        .offre-box { background-color: #fff8e1; border-color: #ffecb3; }
+        .offre-active { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; width: 100%; margin-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -24,26 +31,28 @@
 
 <h1>Profil du véhicule</h1>
 
-<div th:if="${succes}">
-    <p class="ok" th:text="${succes}">Succès</p>
+<div th:if="${succes}" class="box" style="border-color: green; background-color: #f0fff4;">
+    <p class="ok" style="margin:0;" th:text="${succes}">Succès</p>
 </div>
-<div th:if="${erreur}">
-    <p class="err" th:text="${erreur}">Erreur</p>
+<div th:if="${info}" class="box" style="border-color: blue; background-color: #e8f0fe;">
+    <p style="margin:0; color: blue;" th:text="${info}">Info</p>
+</div>
+<div th:if="${erreur}" class="box" style="border-color: red; background-color: #fef0f0;">
+    <p class="err" style="margin:0;" th:text="${erreur}">Erreur</p>
 </div>
 
-<!-- Cas louable introuvable -->
 <div th:if="${louable == null}" class="box">
     <p class="err">Ce véhicule est introuvable.</p>
     <p class="muted">Vérifie l’identifiant dans l’URL.</p>
 </div>
 
-<!-- Profil -->
 <div th:if="${louable != null}" class="row">
+    
     <div class="col box">
-
+        <h2 style="margin-top:0;">Détails Véhicule</h2>
+        
         <p class="muted" style="margin-top:4px;">
-            ID louable :
-            <strong th:text="${louable.idLouable != null ? louable.idLouable : louable.id}">1</strong>
+            ID louable : <strong th:text="${louable.idLouable}">1</strong>
         </p>
 
         <dl class="kv">
@@ -54,37 +63,79 @@
 
             <dt>Statut</dt>
             <dd>
-                <span class="badge" th:text="${louable.statut != null ? louable.statut : '—'}">DISPONIBLE</span>
+                <span class="badge" th:text="${louable.statut}">DISPONIBLE</span>
             </dd>
 
-            <dt>Lieu principal (prise)</dt>
-            <dd th:text="${louable.lieuPrincipal != null ? louable.lieuPrincipal : '—'}">Toulouse</dd>
+            <dt>Lieu actuel</dt>
+            <dd th:text="${louable.lieuPrincipal}">Toulouse</dd>
+            
+            <dt>Type</dt>
+            <dd th:text="${louable.type}">Voiture</dd>
         </dl>
 
         <hr>
 
-        <!-- Bouton louer : on envoie idLouable en query param -->
-        <a class="btn btn-primary"
+        <a class="btn btn-primary" style="width: 90%; text-align: center;"
             th:href="@{/louables/{id}/louer(id=${louable.idLouable})}">
             Louer ce véhicule
         </a>
 
-        <p class="muted" style="margin-top:8px;">
-            Tu passeras ensuite au formulaire de location (dates, assurance, lieu de dépôt…).
+        <p class="muted" style="margin-top:8px; font-size: 0.8em;">
+            Tu passeras ensuite au formulaire de réservation.
         </p>
     </div>
 
-    <!-- Colonne “à venir” (contexte pour plus tard) -->
-    <div class="col box">
-        <h2 style="margin-top:0;">Informations (à venir)</h2>
-        <p class="muted">
-            Plus tard on mettra ici : photos, description, options, historiques, etc.
-        </p>
-        <ul class="muted">
-            <li>Résumé des disponibilités</li>
-            <li>Conditions / règles</li>
-            <li>Détails véhicule</li>
-        </ul>
+    <div class="col">
+        
+        <div class="box">
+            <h3>Caractéristiques</h3>
+            <ul class="muted">
+                <li th:if="${vehicule.marque != null}" th:text="'Marque : ' + ${vehicule.marque}">Marque</li>
+                <li th:if="${vehicule.modele != null}" th:text="'Modèle : ' + ${vehicule.modele}">Modèle</li>
+                <li th:if="${vehicule.kilometrage != null}">Km : <span th:text="${vehicule.kilometrage}"></span></li>
+            </ul>
+        </div>
+
+        <div class="box offre-box">
+            <h3 style="margin-top:0;">Option Convoyage (Agent)</h3>
+            
+            <div th:if="${offreActuelle == null}">
+                <p class="muted" style="font-size: 0.9em;">
+                    Vous souhaitez faire déplacer ce véhicule ? Sélectionnez un parking partenaire <strong>Vienci</strong> pour le retour.
+                </p>
+                
+                <form th:action="@{/louables/{id}/offre/ajouter(id=${louable.idLouable})}" method="post">
+                    <label for="parkingSelect">Destination souhaitée :</label>
+                    
+                    <select id="parkingSelect" name="idParking" required>
+                        <option value="" disabled selected>-- Choisir un parking --</option>
+                        <option th:each="p : ${listeParkings}" 
+                                th:value="${p.idParking}" 
+                                th:text="${p.ville} + ' - ' + ${p.nom} + ' (Coût agent: ' + ${p.prixAgent} + '€)'">
+                            Lyon - Vienci Part-Dieu (18€)
+                        </option>
+                    </select>
+
+                    <button type="submit" class="btn">Activer l'offre Aller Simple</button>
+                </form>
+            </div>
+
+            <div th:if="${offreActuelle != null}" class="box offre-active" style="margin-bottom:0;">
+                <p style="margin-top:0;"><strong>✅ Offre Active !</strong></p>
+                <p style="margin-bottom: 10px;">
+                    Ce véhicule doit être rendu à :<br>
+                    <strong th:text="${offreActuelle.villeParking} + ' (' + ${offreActuelle.nomParking} + ')'">Lyon</strong>.
+                </p>
+                
+                <form th:action="@{/louables/{id}/offre/supprimer(id=${louable.idLouable})}" method="post">
+                    <button type="submit" class="btn btn-danger" style="font-size: 0.8em;">
+                        Annuler l'offre
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
     </div>
 </div>
 

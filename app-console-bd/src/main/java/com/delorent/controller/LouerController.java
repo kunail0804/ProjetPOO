@@ -1,20 +1,25 @@
 package com.delorent.controller;
 
-import com.delorent.service.ConnexionService;
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping; // Import AJOUTÉ
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.delorent.model.Contrat;
+import com.delorent.model.Louable.Disponibilite;
+import com.delorent.model.OffreConvoyage;
 import com.delorent.model.Utilisateur.Agent;
 import com.delorent.model.Utilisateur.Loueur;
 import com.delorent.model.Utilisateur.Utilisateur;
 import com.delorent.repository.LouableRepository.LouableSummary;
-import com.delorent.model.Contrat;
-import com.delorent.model.Louable.Disponibilite;
+import com.delorent.service.ConnexionService;
 import com.delorent.service.LocationService;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Controller
 public class LouerController {
@@ -38,22 +43,27 @@ public class LouerController {
         LouableSummary louable = locationService.getLouable(idLouable);
         if (louable == null) {
             model.addAttribute("erreur", "Louable introuvable (id=" + idLouable + ").");
-            // tu peux choisir une page erreur dédiée, ou renvoyer vers catalogue
             return "louer";
-            // ou: return "redirect:/louables";
         }
+
+        // --- AJOUT : Détection de l'offre Aller Simple ---
+        OffreConvoyage offre = locationService.getOffreActive(idLouable);
+        if (offre != null) {
+            model.addAttribute("offreSpeciale", offre);
+            model.addAttribute("info", "🔥 PROMO : Ce véhicule est en Aller Simple vers " + offre.getVilleParking() + " (Réduction incluse).");
+        }
+        // -------------------------------------------------
 
         // Listes
         model.addAttribute("idLouable", idLouable);
         model.addAttribute("louable", louable);
-        // TODO faire la gestion complète des assurances
         model.addAttribute("assurances", locationService.getAllAssurances());
 
         return "louer";
     }
 
     /* =========================
-       POST Demande louer (pas de service pour l'instant)
+       POST Demande louer
        ========================= */
 
     @PostMapping("/louables/{id}/louer")
@@ -100,7 +110,7 @@ public class LouerController {
             return "louer";
         }
 
-        // 4) validations dates (en plus du service)
+        // 4) validations dates
         if (dateDebut == null || dateFin == null) {
             model.addAttribute("erreur", "Dates manquantes.");
             return "louer";
@@ -123,7 +133,14 @@ public class LouerController {
 
             String assuranceNom = locationService.getAssurance(idAssurance).getNom();
 
-            model.addAttribute("succes", "Location créée (contrat #" + contrat.getId() + ").");
+            // --- MODIFICATION : Message personnalisé si Aller Simple ---
+            if (contrat.getIdParkingRetour() != null) {
+                model.addAttribute("succes", "✅ Location Validée ! ATTENTION : Ce véhicule doit être rendu au parking partenaire.");
+            } else {
+                model.addAttribute("succes", "Location créée (contrat #" + contrat.getId() + ").");
+            }
+            // -----------------------------------------------------------
+
             model.addAttribute("contrat", new ContratView(
                 contrat.getId(),
                 contrat.getDateDebut(),
@@ -142,7 +159,7 @@ public class LouerController {
     }
 
     /* =========================
-       API JSON dispo (reste pareil mais idéalement on la scoperait sur /louables/{id})
+       API JSON dispo
        ========================= */
 
     @GetMapping("/louer/disponibilites")
@@ -150,4 +167,7 @@ public class LouerController {
     public List<Disponibilite> disponibilites(@RequestParam int idLouable) {
         return locationService.getByLouable(idLouable);
     }
+    
+    // Je rajoute le Record ici pour être sûr que ça compile (au cas où il manquerait)
+    public record ContratView(int id, LocalDate debut, LocalDate fin, String depart, String retour, String assurance) {}
 }

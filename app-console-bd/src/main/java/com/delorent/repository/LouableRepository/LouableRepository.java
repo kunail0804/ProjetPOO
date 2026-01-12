@@ -1,12 +1,13 @@
 package com.delorent.repository.LouableRepository;
 
-import org.springframework.stereotype.Repository;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import com.delorent.repository.RepositoryBase;
-import com.delorent.model.Louable.LouableFiltre;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import com.delorent.model.Louable.LouableFiltre;
+import com.delorent.repository.RepositoryBase;
 
 @Repository
 public class LouableRepository implements RepositoryBase<LouableSummary, Integer> {
@@ -30,7 +31,11 @@ public class LouableRepository implements RepositoryBase<LouableSummary, Integer
 
     @Override
     public LouableSummary get(Integer id) {
+
         VehiculeSummary vehicule = vehiculeRepository.get(id);
+            if (vehicule == null) {
+            return null;
+        }
         return vehicule.louable();
     }
 

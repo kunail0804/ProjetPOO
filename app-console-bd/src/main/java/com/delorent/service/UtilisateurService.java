@@ -3,12 +3,14 @@ package com.delorent.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.delorent.repository.AgentRepository;
+import com.delorent.model.Utilisateur.Agent;
+import com.delorent.model.Utilisateur.AgentAmateur;
+import com.delorent.model.Utilisateur.AgentProfessionnel;
+import com.delorent.model.Utilisateur.EntrepriseEntretien;
+import com.delorent.model.Utilisateur.Loueur;       // Import Ajouté
+import com.delorent.repository.AgentRepository; // Import Ajouté
 import com.delorent.repository.EntrepriseEntretienRepository;
 import com.delorent.repository.LoueurRepository;
-import com.delorent.model.Utilisateur.Agent;
-import com.delorent.model.Utilisateur.EntrepriseEntretien;
-import com.delorent.model.Utilisateur.Loueur;
 
 @Service
 public class UtilisateurService {
@@ -42,12 +44,15 @@ public class UtilisateurService {
     }
 
     private String hashPassword(String rawPassword) {
-        // TODO: BCryptPasswordEncoder etc.
+        // Pour l'instant on retourne le mot de passe en clair (TODO: BCrypt)
         return rawPassword;
     }
 
-    // --- Méthodes demandées (ordre des args = constructeurs des modèles) ---
+    // --- Méthodes demandées ---
 
+    /**
+     * Ajoute un Agent AMATEUR (Particulier)
+     */
     @Transactional
     public long ajouterAgent(
             String email,
@@ -82,8 +87,54 @@ public class UtilisateurService {
 
         String passwordHash = hashPassword(p);
 
-        // Agent(String mail, String motDePasse, String adresse, String ville, String codePostal, String region, String telephone, String nom, String prenom)
-        return agentRepository.add(new Agent(e, passwordHash, a, v, cp, r, t, n, pr));
+        // MODIFICATION : On instancie AgentAmateur car Agent est abstrait
+        // Le Repository se chargera de mettre typeAgent='AMATEUR'
+        return agentRepository.add(new AgentAmateur(e, passwordHash, a, v, cp, r, t, n, pr));
+    }
+
+    /**
+     * Ajoute un Agent PROFESSIONNEL (Avec SIRET)
+     */
+    @Transactional
+    public long ajouterAgentProfessionnel(
+            String email,
+            String password,
+            String adresse,
+            String ville,
+            String codePostal,
+            String region,
+            String telephone,
+            String nom,
+            String prenom,
+            String siret
+    ) {
+        String e = clean(email);
+        String p = clean(password);
+        String a = clean(adresse);
+        String v = clean(ville);
+        String cp = clean(codePostal);
+        String r = clean(region);
+        String t = clean(telephone);
+        String n = clean(nom);
+        String pr = clean(prenom);
+        String s = clean(siret);
+
+        require(e, "email");
+        require(p, "password");
+        require(a, "adresse");
+        require(v, "ville");
+        require(cp, "codePostal");
+        require(r, "region");
+        require(t, "telephone");
+        require(n, "nom");
+        require(pr, "prenom");
+        require(s, "siret");
+
+        String passwordHash = hashPassword(p);
+
+        // MODIFICATION : On instancie AgentProfessionnel
+        // Le Repository se chargera de mettre typeAgent='PRO' et d'insérer le SIRET
+        return agentRepository.add(new AgentProfessionnel(e, passwordHash, a, v, cp, r, t, n, pr, s));
     }
 
     @Transactional
@@ -120,7 +171,6 @@ public class UtilisateurService {
 
         String passwordHash = hashPassword(p);
 
-        // Loueur(String mail, String motDePasse, String adresse, String ville, String codePostal, String region, String telephone, String nom, String prenom)
         return loueurRepository.add(new Loueur(e, passwordHash, a, v, cp, r, t, n, pr));
     }
 
@@ -161,11 +211,10 @@ public class UtilisateurService {
 
         String passwordHash = hashPassword(p);
 
-        // EntrepriseEntretien(String mail, String motDePasse, String adresse, String ville, String codePostal, String region, String telephone, String nomEntreprise, String raisonSoc, String noSiret)
         return entrepriseEntretienRepository.add(new EntrepriseEntretien(e, passwordHash, a, v, cp, r, t, ne, rs, si));
     }
 
-    //TODO : corriger la suppression dans les repositorys
+    // --- Suppression et Mises à jour ---
 
     @Transactional
     public void supprimerAgent(Long idAgent) {
@@ -196,9 +245,4 @@ public class UtilisateurService {
     public void updateEntrepriseEntretien(EntrepriseEntretien entrepriseEntretien) {
         entrepriseEntretienRepository.modify(entrepriseEntretien);
     }
-
-    /** TODO:
-     * @Transactional
-     * public long ajouterAgentProfessionnel(...) { ... }
-     */
 }
