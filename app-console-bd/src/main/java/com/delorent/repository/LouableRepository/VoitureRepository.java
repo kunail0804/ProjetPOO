@@ -34,7 +34,7 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
 
     public VehiculeSummary toSummary(Voiture voiture, boolean dispoJour) {
         return new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture", dispoJour),
+                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
                 voiture.getMarque(),
                 voiture.getModele(),
                 voiture.getAnnee(),

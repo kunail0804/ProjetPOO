@@ -3,10 +3,22 @@ package com.delorent.repository.LouableRepository;
 import com.delorent.model.Louable.StatutLouable;
 
 public record LouableSummary(
-    Integer idLouable,
-    StatutLouable statutBase,      // statut stocké en base (DISPONIBLE / EN_LOCATION / etc.)
-    double prixJour,
-    String lieuPrincipal,
-    String type,
-    boolean disponibleLeJour        // statut calculé via DISPONIBILITE pour la date sélectionnée
-) {}
+        int idLouable,
+        StatutLouable statut,
+        double prixJour,
+        String lieuPrincipal,
+        String type
+) {
+    // Constructeur compact (PAS de this(...) ici)
+    public LouableSummary {
+        if (statut == null) {
+            statut = StatutLouable.INDISPONIBLE;
+        }
+        if (lieuPrincipal == null) {
+            lieuPrincipal = "";
+        }
+        if (type == null || type.isBlank()) {
+            type = "Louable";
+        }
+    }
+}

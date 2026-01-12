@@ -1,30 +1,28 @@
 package com.delorent.repository.LouableRepository;
 
-import org.springframework.stereotype.Repository;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import com.delorent.repository.RepositoryBase;
 import com.delorent.model.Louable.LouableFiltre;
+import com.delorent.repository.RepositoryBase;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class LouableRepository implements RepositoryBase<LouableSummary, Integer> {
 
-    private final JdbcTemplate jdbcTemplate;
     private final VehiculeRepository vehiculeRepository;
 
-    public LouableRepository(JdbcTemplate jdbcTemplate, VehiculeRepository vehiculeRepository) {
-        this.jdbcTemplate = jdbcTemplate;
+    public LouableRepository(VehiculeRepository vehiculeRepository) {
         this.vehiculeRepository = vehiculeRepository;
     }
 
     @Override
     public List<LouableSummary> getAll() {
-        // Ancien comportement : sans notion de date => on prend "aujourd'hui" et pas de filtre "uniquement dispo"
-        return getCatalogue(LocalDate.now(), false, List.of());
+        List<VehiculeSummary> vehicules = vehiculeRepository.getCatalogue(LocalDate.now(), false, List.of());
+        List<LouableSummary> res = new ArrayList<>();
+        for (VehiculeSummary v : vehicules) res.add(v.louable());
+        return res;
     }
 
     @Override
@@ -48,12 +46,14 @@ public class LouableRepository implements RepositoryBase<LouableSummary, Integer
         throw new UnsupportedOperationException("Use specific repositories to delete vehicles.");
     }
 
-    public List<LouableSummary> getCatalogue(LocalDate dateCible, boolean uniquementDisponibles, List<LouableFiltre> filtres) {
-        List<VehiculeSummary> vehicules = vehiculeRepository.getCatalogue(dateCible, uniquementDisponibles, filtres);
-        List<LouableSummary> summaries = new ArrayList<>();
-        for (VehiculeSummary v : vehicules) {
-            summaries.add(v.louable());
-        }
-        return summaries;
+    public List<LouableSummary> getCatalogue(LocalDate date, boolean uniquementDisponibles, List<LouableFiltre> filtres) {
+        List<VehiculeSummary> vehicules = vehiculeRepository.getCatalogue(date, uniquementDisponibles, filtres);
+        List<LouableSummary> res = new ArrayList<>();
+        for (VehiculeSummary v : vehicules) res.add(v.louable());
+        return res;
+    }
+
+    public List<LouableSummary> getDisponibles(List<LouableFiltre> filtres) {
+        return getCatalogue(LocalDate.now(), true, filtres);
     }
 }

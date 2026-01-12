@@ -8,13 +8,10 @@ public enum StatutLouable {
     public static StatutLouable fromDb(String raw) {
         if (raw == null) return INDISPONIBLE;
 
-        String s = raw.trim().toUpperCase();
+        String s = raw.trim().toUpperCase()
+                .replace(' ', '_')
+                .replace('-', '_');
 
-        // normalisation
-        s = s.replace(' ', '_')
-             .replace('-', '_');
-
-        // cas fréquents
         if (s.equals("ENLOCATION")) s = "EN_LOCATION";
         if (s.equals("DISPO")) s = "DISPONIBLE";
 
