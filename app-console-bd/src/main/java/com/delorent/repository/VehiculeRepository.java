@@ -12,38 +12,58 @@ public class VehiculeRepository {
         this.jdbc = jdbc;
     }
 
-    /** Add VEHICULE */
-    public int addVehicule(int id,
-                           String marque,
-                           String modele,
-                           String immatriculation) {
+    /**
+     * CREATE Vehicule (partie enfant)
+     */
+    public int createVehicule(int id,
+                              String modele,
+                              int annee,
+                              String couleur,
+                              String immatriculation,
+                              int kilometrage) {
 
         String sql = """
-            INSERT INTO VEHICULE (id_louable, marque, modele, immatriculation)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO VEHICULE (id, modele, annee, couleur, immatriculation, kilometrage)
+            VALUES (?, ?, ?, ?, ?, ?)
         """;
 
-        return jdbc.update(sql, id, marque, modele, immatriculation);
+        return jdbc.update(sql, id, modele, annee, couleur, immatriculation, kilometrage);
     }
 
-    /** Update VEHICULE */
+    /**
+     * UPDATE Vehicule
+     */
     public int updateVehicule(int id,
-                              String marque,
                               String modele,
-                              String immatriculation) {
+                              int annee,
+                              String couleur,
+                              String immatriculation,
+                              int kilometrage) {
 
         String sql = """
             UPDATE VEHICULE
-            SET marque = ?, modele = ?, immatriculation = ?
-            WHERE id_louable = ?
+            SET modele = ?, annee = ?, couleur = ?, immatriculation = ?, kilometrage = ?
+            WHERE id = ?
         """;
 
-        return jdbc.update(sql, marque, modele, immatriculation, id);
+        return jdbc.update(sql, modele, annee, couleur, immatriculation, kilometrage, id);
     }
 
-    /** Delete VEHICULE */
-    public int deleteVehicule(int idLouable) {
-        String sql = "DELETE FROM VEHICULE WHERE id_louable = ?";
-        return jdbc.update(sql, idLouable);
+    /**
+     * DELETE Vehicule
+     */
+    public int deleteVehicule(int id) {
+        String sql = "DELETE FROM VEHICULE WHERE id = ?";
+        return jdbc.update(sql, id);
+    }
+
+    /**
+     * EXISTS Vehicule
+     */
+    public boolean existsById(int id) {
+        String sql = "SELECT COUNT(*) FROM VEHICULE WHERE id = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, id);
+        return count != null && count > 0;
     }
 }
+
