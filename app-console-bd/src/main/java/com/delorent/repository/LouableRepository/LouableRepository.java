@@ -5,11 +5,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.delorent.repository.RepositoryBase;
 import com.delorent.model.Louable.LouableFiltre;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
 
 @Repository
 public class LouableRepository implements RepositoryBase<LouableSummary, Integer> {
+
     private final JdbcTemplate jdbcTemplate;
     private final VehiculeRepository vehiculeRepository;
 
@@ -20,18 +23,14 @@ public class LouableRepository implements RepositoryBase<LouableSummary, Integer
 
     @Override
     public List<LouableSummary> getAll() {
-        List<VehiculeSummary> vehicules = vehiculeRepository.getAll();
-        List<LouableSummary> summaries = new ArrayList<>();
-        for (VehiculeSummary vehicule : vehicules) {
-            summaries.add(vehicule.louable());
-        }
-        return summaries;
+        // Ancien comportement : sans notion de date => on prend "aujourd'hui" et pas de filtre "uniquement dispo"
+        return getCatalogue(LocalDate.now(), false, List.of());
     }
 
     @Override
     public LouableSummary get(Integer id) {
-        VehiculeSummary vehicule = vehiculeRepository.get(id);
-        return vehicule.louable();
+        VehiculeSummary v = vehiculeRepository.get(id);
+        return v == null ? null : v.louable();
     }
 
     @Override
@@ -49,11 +48,11 @@ public class LouableRepository implements RepositoryBase<LouableSummary, Integer
         throw new UnsupportedOperationException("Use specific repositories to delete vehicles.");
     }
 
-    public List<LouableSummary> getDisponibles(List<LouableFiltre> filtres){
-        List<VehiculeSummary> vehicules = vehiculeRepository.getDisponibles(filtres);
+    public List<LouableSummary> getCatalogue(LocalDate dateCible, boolean uniquementDisponibles, List<LouableFiltre> filtres) {
+        List<VehiculeSummary> vehicules = vehiculeRepository.getCatalogue(dateCible, uniquementDisponibles, filtres);
         List<LouableSummary> summaries = new ArrayList<>();
-        for (VehiculeSummary vehicule : vehicules) {
-            summaries.add(vehicule.louable());
+        for (VehiculeSummary v : vehicules) {
+            summaries.add(v.louable());
         }
         return summaries;
     }

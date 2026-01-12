@@ -7,16 +7,17 @@ import com.delorent.model.Louable.Vehicule;
 import com.delorent.model.Louable.Camion;
 import com.delorent.model.Louable.Voiture;
 import com.delorent.model.Louable.Moto;
-import com.delorent.model.Louable.StatutLouable;
 import com.delorent.model.Louable.LouableFiltre;
 
 import com.delorent.repository.RepositoryBase;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
 
 @Repository
 public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integer> {
+
     private final JdbcTemplate jdbcTemplate;
     private final VoitureRepository voitureRepository;
     private final CamionRepository camionRepository;
@@ -31,99 +32,26 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
 
     @Override
     public List<VehiculeSummary> getAll() {
-        List<Voiture> voitures = voitureRepository.getAll();
-        List<Camion> camions = camionRepository.getAll();
-        List<Moto> motos = motoRepository.getAll();
-
-        List<VehiculeSummary> summaries = new ArrayList<>();
-        for (Voiture voiture : voitures) {
-            summaries.add(new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
-                voiture.getMarque(),
-                voiture.getModele(),
-                voiture.getAnnee(),
-                voiture.getCouleur(),
-                voiture.getImmatriculation(),
-                voiture.getKilometrage(),
-                "Voiture"
-            ));
-        }
-        for (Camion camion : camions) {
-            summaries.add(new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
-                camion.getMarque(),
-                camion.getModele(),
-                camion.getAnnee(),
-                camion.getCouleur(),
-                camion.getImmatriculation(),
-                camion.getKilometrage(),
-                "Camion"
-            ));
-        }
-        for (Moto moto : motos) {
-            summaries.add(new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
-                moto.getMarque(),
-                moto.getModele(),
-                moto.getAnnee(),
-                moto.getCouleur(),
-                moto.getImmatriculation(),
-                moto.getKilometrage(),
-                "Moto"
-            ));
-        }
-        return summaries;
+        return getCatalogue(LocalDate.now(), false, List.of());
     }
 
     @Override
     public VehiculeSummary get(Integer id) {
+        // inchangé (mais attention: si VOITURE/CAMION/MOTO vides, tu ne trouveras pas)
         try {
             Voiture voiture = voitureRepository.get(id);
-            return new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
-                voiture.getMarque(),
-                voiture.getModele(),
-                voiture.getAnnee(),
-                voiture.getCouleur(),
-                voiture.getImmatriculation(),
-                voiture.getKilometrage(),
-                "Voiture"
-            );
-        } catch (Exception e) {
-            // Not a Voiture
-        }
+            return voitureRepository.toSummary(voiture, true); // bool ici non utilisé, mais méthode attend un boolean
+        } catch (Exception ignored) {}
 
         try {
             Camion camion = camionRepository.get(id);
-            return new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
-                camion.getMarque(),
-                camion.getModele(),
-                camion.getAnnee(),
-                camion.getCouleur(),
-                camion.getImmatriculation(),
-                camion.getKilometrage(),
-                "Camion"
-            );
-        } catch (Exception e) {
-            // Not a Camion
-        }
+            return camionRepository.toSummary(camion, true);
+        } catch (Exception ignored) {}
 
         try {
             Moto moto = motoRepository.get(id);
-            return new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
-                moto.getMarque(),
-                moto.getModele(),
-                moto.getAnnee(),
-                moto.getCouleur(),
-                moto.getImmatriculation(),
-                moto.getKilometrage(),
-                "Moto"
-            );
-        } catch (Exception e) {
-            // Not a Moto
-        }
+            return motoRepository.toSummary(moto, true);
+        } catch (Exception ignored) {}
 
         return null;
     }
@@ -143,48 +71,20 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         throw new UnsupportedOperationException("Use specific repositories to delete vehicles.");
     }
 
-    public List<VehiculeSummary> getDisponibles(List<LouableFiltre> filtres) {
-        List<Voiture> voitures = voitureRepository.getDisponibles(filtres);
-        List<Camion> camions = camionRepository.getDisponibles(filtres);
-        List<Moto> motos = motoRepository.getDisponibles(filtres);
-        List<VehiculeSummary> disponibles = new ArrayList<>();
-        for (Voiture voiture : voitures) {
-            disponibles.add(new VehiculeSummary(
-                new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
-                voiture.getMarque(),
-                voiture.getModele(),
-                voiture.getAnnee(),
-                voiture.getCouleur(),
-                voiture.getImmatriculation(),
-                voiture.getKilometrage(),
-                "Voiture"
-            ));
-        }
-        for (Camion camion : camions) {
-            disponibles.add(new VehiculeSummary(
-                new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
-                camion.getMarque(),
-                camion.getModele(),
-                camion.getAnnee(),
-                camion.getCouleur(),
-                camion.getImmatriculation(),
-                camion.getKilometrage(),
-                "Camion"
-            ));
-        }
-        for (Moto moto : motos) {
-            disponibles.add(new VehiculeSummary(
-                new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
-                moto.getMarque(),
-                moto.getModele(),
-                moto.getAnnee(),
-                moto.getCouleur(),
-                moto.getImmatriculation(),
-                moto.getKilometrage(),
-                "Moto"
-            ));
-        }
+    public List<VehiculeSummary> getCatalogue(LocalDate dateCible, boolean uniquementDisponibles, List<LouableFiltre> filtres) {
 
-        return disponibles;
+        List<Voiture> voitures = voitureRepository.getCatalogue(dateCible, uniquementDisponibles, filtres);
+        List<Camion> camions = camionRepository.getCatalogue(dateCible, uniquementDisponibles, filtres);
+        List<Moto> motos = motoRepository.getCatalogue(dateCible, uniquementDisponibles, filtres);
+
+        List<VehiculeSummary> out = new ArrayList<>();
+
+        // Les repo renvoient des entités où le champ statut est celui de base.
+        // Le "disponibleLeJour" est calculé dans le SELECT et injecté dans les Summary via toSummary.
+        for (Voiture v : voitures) out.add(voitureRepository.toSummary(v, voitureRepository.isDernierDisponibleLeJour(v)));
+        for (Camion c : camions) out.add(camionRepository.toSummary(c, camionRepository.isDernierDisponibleLeJour(c)));
+        for (Moto m : motos) out.add(motoRepository.toSummary(m, motoRepository.isDernierDisponibleLeJour(m)));
+
+        return out;
     }
 }

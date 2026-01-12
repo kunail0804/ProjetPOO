@@ -4,8 +4,9 @@ import com.delorent.model.Louable.StatutLouable;
 
 public record LouableSummary(
     Integer idLouable,
-    StatutLouable statut,
+    StatutLouable statutBase,      // statut stocké en base (DISPONIBLE / EN_LOCATION / etc.)
     double prixJour,
     String lieuPrincipal,
-    String type
+    String type,
+    boolean disponibleLeJour        // statut calculé via DISPONIBILITE pour la date sélectionnée
 ) {}

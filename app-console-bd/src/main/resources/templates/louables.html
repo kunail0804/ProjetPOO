@@ -11,15 +11,26 @@
         th { background: #f7f7f7; }
         .ok { color: green; }
         .err { color: red; }
-        .btn { display:inline-block; padding:6px 10px; border:1px solid #ccc; border-radius:6px; text-decoration:none; }
+        .btn {
+            display:inline-block;
+            padding:6px 10px;
+            border:1px solid #ccc;
+            border-radius:6px;
+            text-decoration:none;
+            background:#fff;
+            cursor:pointer;
+        }
+        button.btn { appearance: none; -webkit-appearance: none; }
         .filters { display:flex; gap:12px; align-items:end; flex-wrap:wrap; }
         .filters label { display:block; font-size:0.9em; margin-bottom:4px; }
         .filters input { padding:6px 10px; border:1px solid #ccc; border-radius:6px; }
+        .pill-ok { color: #0a7; font-weight: 600; }
+        .pill-no { color: #c33; font-weight: 600; }
     </style>
 </head>
 <body>
 
-<h1>Véhicules disponibles</h1>
+<h1>Catalogue des véhicules</h1>
 
 <p class="muted">
     Sélectionne un véhicule pour accéder à sa page et lancer une demande de location.
@@ -34,6 +45,15 @@
 
 <div class="box" style="margin-bottom: 12px;">
     <form method="get" th:action="@{/louables}" class="filters">
+
+        <div>
+            <label for="date">Date</label>
+            <input id="date"
+                   type="date"
+                   name="date"
+                   th:value="${filtreDate}">
+        </div>
+
         <div>
             <label for="prixMax">Prix max / jour (€)</label>
             <input id="prixMax"
@@ -48,19 +68,26 @@
         <div>
             <label>
                 <input type="checkbox" name="vehicule" value="true" th:checked="${filtreVehicule}">
-                Véhicule
+                Affichage détaillé “Véhicule”
             </label>
         </div>
 
+        <div>
+            <label>
+                <input type="checkbox" name="uniquementDisponibles" value="true" th:checked="${filtreUniquementDisponibles}">
+                Uniquement disponibles à la date
+            </label>
+        </div>
 
         <div>
             <button class="btn" type="submit">Filtrer</button>
             <a class="btn" th:href="@{/louables}">Réinitialiser</a>
         </div>
+
     </form>
 
-    <p class="muted" style="margin-top:8px" th:if="${filtrePrixMax != null}">
-        Filtre actif : prix ≤ <span th:text="${filtrePrixMax}">50</span> €/jour
+    <p class="muted" style="margin-top:8px">
+        Date sélectionnée : <span th:text="${filtreDate}">2026-01-12</span>
     </p>
 </div>
 
@@ -71,7 +98,8 @@
             <th>ID</th>
             <th>Type</th>
             <th>Prix/jour</th>
-            <th>Statut</th>
+            <th>Statut base</th>
+            <th>Disponible à la date</th>
             <th>Lieu principal</th>
             <th>Action</th>
         </tr>
@@ -79,14 +107,18 @@
 
         <tbody>
         <tr th:if="${louables == null || #lists.isEmpty(louables)}">
-            <td colspan="5" class="muted">Aucun louable disponible pour le moment.</td>
+            <td colspan="7" class="muted">Aucun louable.</td>
         </tr>
 
         <tr th:each="l : ${louables}">
             <td th:text="${l.idLouable}">1</td>
             <td th:text="${l.type}">VOITURE</td>
             <td th:text="${l.prixJour}">50</td>
-            <td th:text="${l.statut}">DISPONIBLE</td>
+            <td th:text="${l.statutBase}">DISPONIBLE</td>
+            <td>
+                <span th:if="${l.disponibleLeJour}" class="pill-ok">DISPONIBLE</span>
+                <span th:if="${!l.disponibleLeJour}" class="pill-no">INDISPONIBLE</span>
+            </td>
             <td th:text="${l.lieuPrincipal}">Toulouse</td>
             <td>
                 <a class="btn" th:href="@{/louables/{id}(id=${l.idLouable})}">Voir</a>
@@ -110,14 +142,15 @@
             <th>Kilométrage</th>
             <th>Prix/jour</th>
             <th>Lieu</th>
-            <th>Statut</th>
+            <th>Statut base</th>
+            <th>Disponible à la date</th>
             <th>Action</th>
         </tr>
         </thead>
 
         <tbody>
         <tr th:if="${vehicules == null || #lists.isEmpty(vehicules)}">
-            <td colspan="12" class="muted">Aucun véhicule disponible pour le moment.</td>
+            <td colspan="13" class="muted">Aucun véhicule.</td>
         </tr>
 
         <tr th:each="v : ${vehicules}">
@@ -131,7 +164,11 @@
             <td th:text="${v.kilometrage()}">15000</td>
             <td th:text="${v.louable().prixJour()}">50</td>
             <td th:text="${v.louable().lieuPrincipal()}">Toulouse</td>
-            <td th:text="${v.louable().statut()}">DISPONIBLE</td>
+            <td th:text="${v.louable().statutBase()}">DISPONIBLE</td>
+            <td>
+                <span th:if="${v.louable().disponibleLeJour()}" class="pill-ok">DISPONIBLE</span>
+                <span th:if="${!v.louable().disponibleLeJour()}" class="pill-no">INDISPONIBLE</span>
+            </td>
             <td>
                 <a class="btn" th:href="@{/louables/{id}(id=${v.louable().idLouable()})}">Voir</a>
             </td>
@@ -139,7 +176,6 @@
         </tbody>
     </table>
 </div>
-
 
 </body>
 </html>
