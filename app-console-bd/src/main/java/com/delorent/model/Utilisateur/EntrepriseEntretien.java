@@ -7,19 +7,18 @@ public class EntrepriseEntretien extends Utilisateur {
     private String noSiret;
 
     public EntrepriseEntretien(
-            String mail, 
-            String motDePasse, 
             String adresse,
-            String ville, 
-            String codePostal, 
+            String ville,
+            String codePostal,
             String region,
             String telephone,
+            String mail,
+            String motDePasse,
             String nomEntreprise,
             String raisonSoc,
             String noSiret
     ) {
-        super(mail, motDePasse, adresse, ville, codePostal, region, telephone);
-
+        super(adresse, ville, codePostal, region, telephone, mail, motDePasse);
         this.nomEntreprise = nomEntreprise;
         this.raisonSoc = raisonSoc;
         this.noSiret = noSiret;
@@ -27,19 +26,18 @@ public class EntrepriseEntretien extends Utilisateur {
 
     public EntrepriseEntretien(
             int idUtilisateur,
-            String mail, 
-            String motDePasse, 
             String adresse,
-            String ville, 
-            String codePostal, 
+            String ville,
+            String codePostal,
             String region,
             String telephone,
+            String mail,
+            String motDePasse,
             String nomEntreprise,
             String raisonSoc,
             String noSiret
     ) {
-        super(idUtilisateur, mail, motDePasse, adresse, ville, codePostal, region, telephone);
-
+        super(idUtilisateur, adresse, ville, codePostal, region, telephone, mail, motDePasse);
         this.nomEntreprise = nomEntreprise;
         this.raisonSoc = raisonSoc;
         this.noSiret = noSiret;
@@ -49,20 +47,20 @@ public class EntrepriseEntretien extends Utilisateur {
         return nomEntreprise;
     }
 
-    public String getRaisonSoc() {
-        return raisonSoc;
-    }
-
-    public String getNoSiret() {
-        return noSiret;
-    }
-
     public void setNomEntreprise(String nomEntreprise) {
         this.nomEntreprise = nomEntreprise;
     }
 
+    public String getRaisonSoc() {
+        return raisonSoc;
+    }
+
     public void setRaisonSoc(String raisonSoc) {
         this.raisonSoc = raisonSoc;
+    }
+
+    public String getNoSiret() {
+        return noSiret;
     }
 
     public void setNoSiret(String noSiret) {
