@@ -61,6 +61,33 @@
               </span>
             </div>
           </div>
+
+          <!-- MOYENNE DES NOTES DU LOUABLE (tous contrats) -->
+          <div class="kv-row">
+            <div class="k">Note moyenne</div>
+            <div class="v">
+              <span th:if="${noteMoyenne != null}"
+                    th:text="${noteMoyenne + ' / 5'}">4.2 / 5</span>
+              <span class="muted" th:if="${noteMoyenne == null}">Aucune note</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <!-- Noter le louable -->
+        <div class="btnrow">
+          <!-- Si tu passes un booléen `peutNoter` depuis le controller, le bouton disparaît si déjà noté -->
+          <a class="btn primary"
+             th:if="${peutNoter == null or peutNoter}"
+             th:href="@{/notation/formulaire(idContrat=${contrat.idContrat()})}">
+            Noter ce louable
+          </a>
+
+          <span class="badge green"
+                th:if="${peutNoter != null and !peutNoter}">
+            Déjà noté
+          </span>
         </div>
       </article>
 
@@ -136,12 +163,10 @@
           <div class="col field">
             <div class="label">Type</div>
 
-            <!-- Si PRISE manquant => on force PRISE -->
             <select name="typeReleve" required th:if="${relevePrise == null}">
               <option value="PRISE" selected>PRISE</option>
             </select>
 
-            <!-- Si PRISE présent et RETOUR manquant => on force RETOUR -->
             <select name="typeReleve" required th:if="${relevePrise != null and releveRetour == null}">
               <option value="RETOUR" selected>RETOUR</option>
             </select>

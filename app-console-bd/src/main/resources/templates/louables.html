@@ -86,6 +86,16 @@
             <div class="spacer"></div>
             <div class="h3" style="margin:0;" th:text="${v.louable().prixJour()} + ' € / jour'">0 € / jour</div>
             <div class="muted small" th:text="${v.louable().lieuPrincipal()}">Lieu</div>
+
+            <div class="spacer"></div>
+            <div class="muted small"
+                 th:if="${moyennesNotes != null and moyennesNotes.get(v.louable().idLouable()) != null}">
+                 <span th:text="${'⭐ ' + #numbers.formatDecimal(moyennesNotes.get(v.louable().idLouable()), 1, 1) + ' / 5'}">⭐ 4.5 / 5</span>
+            </div>
+            <div class="muted small"
+                 th:if="${moyennesNotes == null or moyennesNotes.get(v.louable().idLouable()) == null}">
+                 ⭐ Aucune note
+            </div>
           </div>
         </div>
 
@@ -129,6 +139,16 @@
             <div class="spacer"></div>
             <div class="h3" style="margin:0;" th:text="${l.prixJour()} + ' € / jour'">0 € / jour</div>
             <div class="muted small" th:text="${l.lieuPrincipal()}">Lieu</div>
+
+            <div class="spacer"></div>
+            <div class="muted small"
+                 th:if="${moyennesNotes != null and moyennesNotes.get(l.idLouable()) != null}">
+                 <span th:text="${'⭐ ' + #numbers.formatDecimal(moyennesNotes.get(l.idLouable()), 1, 1) + ' / 5'}">⭐ 4.5 / 5</span>
+            </div>
+            <div class="muted small"
+                 th:if="${moyennesNotes == null or moyennesNotes.get(l.idLouable()) == null}">
+                 ⭐ Aucune note
+            </div>
           </div>
         </div>
 

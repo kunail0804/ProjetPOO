@@ -454,3 +454,22 @@ a.rowlink-a:hover{opacity:.95}
 .cal{width:100%; border-collapse:collapse; min-width: 740px;} /* 7 colonnes lisibles */
 .cal th,.cal td{border:1px solid rgba(255,255,255,.10); padding:12px; text-align:center; font-weight:900}
 .cal td{height:56px; min-width: 90px;} /* force largeur => plus de “3 jours seulement” */
+
+
+/* Notation */
+.rating {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rating-stars .star {
+  opacity: 0.35;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+.rating-stars .star.on {
+  opacity: 1;
+}
