@@ -3,13 +3,12 @@ package com.delorent.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.delorent.repository.AgentRepository;
-import com.delorent.repository.EntrepriseEntretienRepository;
-import com.delorent.repository.LoueurRepository;
-
 import com.delorent.model.Agent;
 import com.delorent.model.EntrepriseEntretien;
 import com.delorent.model.Loueur;
+import com.delorent.repository.AgentRepository;
+import com.delorent.repository.EntrepriseEntretienRepository;
+import com.delorent.repository.LoueurRepository;
 
 @Service
 public class UtilisateurService {

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil entreprise</title>
+</head>
+<body>
+
+<h1>Profil entreprise</h1>
+
+<p><strong>ID :</strong> <span th:text="${entreprise.idUtilisateur}">0</span></p>
+<p><strong>Mail :</strong> <span th:text="${entreprise.mail}">mail</span></p>
+<p><strong>Téléphone :</strong> <span th:text="${entreprise.telephone}">tel</span></p>
+<p><strong>Ville :</strong> <span th:text="${entreprise.ville}">ville</span></p>
+<p><strong>Code postal :</strong> <span th:text="${entreprise.codePostal}">cp</span></p>
+<p><strong>Région :</strong> <span th:text="${entreprise.region}">region</span></p>
+
+<hr>
+
+<p><strong>Nom entreprise :</strong> <span th:text="${entreprise.nomEntreprise}">nom</span></p>
+<p><strong>Raison sociale :</strong> <span th:text="${entreprise.raisonSoc}">raison</span></p>
+<p><strong>SIRET :</strong> <span th:text="${entreprise.noSiret}">siret</span></p>
+
+<form th:action="@{/entreprise/logout}" method="post">
+  <button type="submit">Se déconnecter</button>
+</form>
+
+</body>
+</html>

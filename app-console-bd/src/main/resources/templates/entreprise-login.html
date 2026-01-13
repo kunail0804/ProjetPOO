@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion entreprise</title>
+</head>
+<body>
+
+<h1>Connexion – Entreprise</h1>
+
+<p th:if="${error}" style="color:red;" th:text="${error}"></p>
+
+<form th:action="@{/entreprise/login}" method="post">
+  <label>Email</label><br>
+  <input type="email" name="email" th:value="${email}" required><br><br>
+
+  <label>Mot de passe</label><br>
+  <input type="password" name="motDePasse" required><br><br>
+
+  <button type="submit">Se connecter</button>
+</form>
+
+</body>
+</html>
