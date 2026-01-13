@@ -51,40 +51,51 @@
 
   <div class="spacer"></div>
 
-  <!-- MODE: vehicules = true -->
+  <!-- =======================
+       MODE: vehicules = true
+       ======================= -->
   <div th:if="${vehicules != null}">
     <div class="grid">
       <article class="card" th:each="v : ${vehicules}">
         <div class="panel-head">
           <div>
-            <span class="badge cyan" th:text="${v.type()}">Vehicule</span>
-            <div class="card-title" th:text="${v.marque()} + ' ' + ${v.modele()}">Marque Modèle</div>
+            <span class="badge cyan" th:text="${v.type}">Vehicule</span>
+            <div class="card-title" th:text="${v.marque + ' ' + v.modele}">Marque Modèle</div>
             <div class="muted small">
-              <span th:text="${v.annee()}">2020</span>
-              · <span th:text="${v.couleur()}">Noir</span>
-              · <span th:text="${v.kilometrage()} + ' km'">0 km</span>
+              <span th:text="${v.annee}">2020</span>
+              · <span th:text="${v.couleur}">Noir</span>
+              · <span th:text="${v.kilometrage} + ' km'">0 km</span>
             </div>
           </div>
 
           <div class="text-right">
             <div class="badge"
-                 th:classappend="${idsDispo != null and idsDispo.contains(v.louable().idLouable())} ? ' green' : ' red'"
-                 th:text="${idsDispo != null and idsDispo.contains(v.louable().idLouable())} ? 'DISPONIBLE' : 'INDISPONIBLE'">
+                 th:classappend="${idsDispo != null and idsDispo.contains(v.louable.idLouable)} ? ' green' : ' red'"
+                 th:text="${idsDispo != null and idsDispo.contains(v.louable.idLouable)} ? 'DISPONIBLE' : 'INDISPONIBLE'">
               DISPONIBLE
             </div>
             <div class="spacer"></div>
-            <div class="h3" style="margin:0;" th:text="${v.louable().prixJour()} + ' € / jour'">0 € / jour</div>
-            <div class="muted small" th:text="${v.louable().lieuPrincipal()}">Lieu</div>
+            <div class="h3" style="margin:0;" th:text="${v.louable.prixJour} + ' € / jour'">0 € / jour</div>
+            <div class="muted small" th:text="${v.louable.lieuPrincipal}">Lieu</div>
+
+            <!-- NOTE MOYENNE -->
+            <div class="spacer"></div>
+            <div class="muted small"
+                 th:if="${moyennesNotes != null and moyennesNotes.get(v.louable.idLouable) != null}"
+                 th:text="${'⭐ ' + moyennesNotes.get(v.louable.idLouable) + ' / 5'}">⭐ 4.2 / 5</div>
+            <div class="muted small"
+                 th:if="${moyennesNotes == null or moyennesNotes.get(v.louable.idLouable) == null}"
+                 th:text="${'⭐ Aucune note'}">⭐ Aucune note</div>
           </div>
         </div>
 
         <div class="hr"></div>
 
         <div class="btnrow">
-          <a class="btn primary" th:href="@{/louables/{id}(id=${v.louable().idLouable()})}">Voir</a>
+          <a class="btn primary" th:href="@{/louables/{id}(id=${v.louable.idLouable})}">Voir</a>
           <a class="btn"
-             th:href="@{/louables/{id}/louer(id=${v.louable().idLouable()})}"
-             th:if="${idsDispo != null and idsDispo.contains(v.louable().idLouable())}">
+             th:href="@{/louables/{id}/louer(id=${v.louable.idLouable})}"
+             th:if="${idsDispo != null and idsDispo.contains(v.louable.idLouable)}">
             Louer
           </a>
         </div>
@@ -98,39 +109,50 @@
     </div>
   </div>
 
-  <!-- MODE: vehicule = false -->
+  <!-- =======================
+       MODE: vehicule = false
+       ======================= -->
   <div th:if="${louables != null}">
     <div class="grid">
       <article class="card" th:each="l : ${louables}">
         <div class="panel-head">
           <div>
-            <span class="badge magenta" th:text="${l.type()}">Louable</span>
-            <div class="card-title" th:text="'Louable #' + ${l.idLouable()}">Louable #</div>
+            <span class="badge magenta" th:text="${l.type}">Louable</span>
+            <div class="card-title" th:text="'Louable #' + ${l.idLouable}">Louable #</div>
             <div class="muted small">
               Statut :
-              <strong th:text="${l.statut()}">OK</strong>
+              <strong th:text="${l.statut}">OK</strong>
             </div>
           </div>
 
           <div class="text-right">
             <div class="badge"
-                 th:classappend="${idsDispo != null and idsDispo.contains(l.idLouable())} ? ' green' : ' red'"
-                 th:text="${idsDispo != null and idsDispo.contains(l.idLouable())} ? 'DISPONIBLE' : 'INDISPONIBLE'">
+                 th:classappend="${idsDispo != null and idsDispo.contains(l.idLouable)} ? ' green' : ' red'"
+                 th:text="${idsDispo != null and idsDispo.contains(l.idLouable)} ? 'DISPONIBLE' : 'INDISPONIBLE'">
               DISPONIBLE
             </div>
             <div class="spacer"></div>
-            <div class="h3" style="margin:0;" th:text="${l.prixJour()} + ' € / jour'">0 € / jour</div>
-            <div class="muted small" th:text="${l.lieuPrincipal()}">Lieu</div>
+            <div class="h3" style="margin:0;" th:text="${l.prixJour} + ' € / jour'">0 € / jour</div>
+            <div class="muted small" th:text="${l.lieuPrincipal}">Lieu</div>
+
+            <!-- NOTE MOYENNE -->
+            <div class="spacer"></div>
+            <div class="muted small"
+                 th:if="${moyennesNotes != null and moyennesNotes.get(l.idLouable) != null}"
+                 th:text="${'⭐ ' + moyennesNotes.get(l.idLouable) + ' / 5'}">⭐ 4.2 / 5</div>
+            <div class="muted small"
+                 th:if="${moyennesNotes == null or moyennesNotes.get(l.idLouable) == null}"
+                 th:text="${'⭐ Aucune note'}">⭐ Aucune note</div>
           </div>
         </div>
 
         <div class="hr"></div>
 
         <div class="btnrow">
-          <a class="btn primary" th:href="@{/louables/{id}(id=${l.idLouable()})}">Voir</a>
+          <a class="btn primary" th:href="@{/louables/{id}(id=${l.idLouable})}">Voir</a>
           <a class="btn"
-             th:href="@{/louables/{id}/louer(id=${l.idLouable()})}"
-             th:if="${idsDispo != null and idsDispo.contains(l.idLouable())}">
+             th:href="@{/louables/{id}/louer(id=${l.idLouable})}"
+             th:if="${idsDispo != null and idsDispo.contains(l.idLouable)}">
             Louer
           </a>
         </div>

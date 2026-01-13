@@ -31,6 +31,7 @@
     <div th:if="${louableSummary != null}">
       <div class="grid">
 
+        <!-- Infos -->
         <article class="card">
           <div class="card-title">Informations</div>
 
@@ -79,17 +80,80 @@
           </div>
         </article>
 
+        <!-- Note -->
+        <article class="card">
+          <div class="card-title">Notation</div>
+
+          <div class="alert warn" th:if="${nbNotes == null || nbNotes == 0}">
+            Aucune note pour le moment.
+          </div>
+
+          <div th:if="${nbNotes != null && nbNotes > 0}">
+            <div class="kv">
+              <div class="kv-row">
+                <div class="k">Note moyenne</div>
+                <div class="v">
+                  <span class="badge cyan">
+                    <span th:text="${#numbers.formatDecimal(noteMoyenne, 1, 1)}">4.5</span> / 5
+                  </span>
+                  <span class="muted small">
+                    (<span th:text="${nbNotes}">0</span> avis)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </article>
+
+        <!-- Détails complets (véhicule + spécifiques) -->
         <article class="card" th:if="${louable != null}">
-          <div class="card-title">Détails techniques</div>
-          <div class="muted small">
-            Affichage brut (utile pour debug). Remplace par des champs dédiés quand tu veux.
+          <div class="card-title">Détails du véhicule</div>
+
+          <div class="kv">
+            <div class="kv-row"><div class="k">Marque</div><div class="v" th:text="${louable.marque}">-</div></div>
+            <div class="kv-row"><div class="k">Modèle</div><div class="v" th:text="${louable.modele}">-</div></div>
+            <div class="kv-row"><div class="k">Année</div><div class="v" th:text="${louable.annee}">-</div></div>
+            <div class="kv-row"><div class="k">Couleur</div><div class="v" th:text="${louable.couleur}">-</div></div>
+            <div class="kv-row"><div class="k">Immatriculation</div><div class="v" th:text="${louable.immatriculation}">-</div></div>
+            <div class="kv-row"><div class="k">Kilométrage</div><div class="v" th:text="${louable.kilometrage + ' km'}">-</div></div>
           </div>
 
           <div class="hr"></div>
 
-          <div class="alert warn">
-            <div class="muted small" th:text="${louable}">
-              Louable
+          <div th:if="${isVoiture}">
+            <span class="badge cyan">Voiture</span>
+            <div class="spacer"></div>
+            <div class="kv">
+              <div class="kv-row"><div class="k">Portes</div><div class="v" th:text="${louable.nbPortes}">-</div></div>
+              <div class="kv-row"><div class="k">Places</div><div class="v" th:text="${louable.nbPlaces}">-</div></div>
+              <div class="kv-row"><div class="k">Coffre</div><div class="v" th:text="${louable.volumeCoffreLitres + ' L'}">-</div></div>
+              <div class="kv-row"><div class="k">Boîte</div><div class="v" th:text="${louable.boite}">-</div></div>
+              <div class="kv-row"><div class="k">Carburant</div><div class="v" th:text="${louable.carburant}">-</div></div>
+              <div class="kv-row"><div class="k">Clim</div><div class="v" th:text="${louable.climatisation ? 'Oui' : 'Non'}">-</div></div>
+            </div>
+          </div>
+
+          <div th:if="${isMoto}">
+            <span class="badge magenta">Moto</span>
+            <div class="spacer"></div>
+            <div class="kv">
+              <div class="kv-row"><div class="k">Cylindrée</div><div class="v" th:text="${louable.cylindreeCc + ' cc'}">-</div></div>
+              <div class="kv-row"><div class="k">Puissance</div><div class="v" th:text="${louable.puissanceCh + ' ch'}">-</div></div>
+              <div class="kv-row"><div class="k">Type</div><div class="v" th:text="${louable.typeMoto}">-</div></div>
+              <div class="kv-row"><div class="k">Permis</div><div class="v" th:text="${louable.permisRequis}">-</div></div>
+            </div>
+          </div>
+
+          <div th:if="${isCamion}">
+            <span class="badge yellow">Camion</span>
+            <div class="spacer"></div>
+            <div class="kv">
+              <div class="kv-row"><div class="k">Charge max</div><div class="v" th:text="${louable.chargeMaxKg + ' kg'}">-</div></div>
+              <div class="kv-row"><div class="k">Volume</div><div class="v" th:text="${louable.volumeUtileM3 + ' m³'}">-</div></div>
+              <div class="kv-row"><div class="k">Hauteur</div><div class="v" th:text="${louable.hauteurM + ' m'}">-</div></div>
+              <div class="kv-row"><div class="k">Longueur</div><div class="v" th:text="${louable.longueurM + ' m'}">-</div></div>
+              <div class="kv-row"><div class="k">Permis</div><div class="v" th:text="${louable.permisRequis}">-</div></div>
             </div>
           </div>
         </article>

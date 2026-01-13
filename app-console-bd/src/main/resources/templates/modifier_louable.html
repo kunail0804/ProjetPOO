@@ -1,141 +1,279 @@
 <!doctype html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout('Modifier louable', ~{::main})}">
+      th:replace="~{fragments/layout :: layout('Modifier', ~{::section})}">
 
-<main>
-  <div class="panel" style="max-width: 980px; margin: 0 auto;">
+<section>
+
+  <div class="panel soft">
     <div class="panel-head">
       <div>
-        <h1 class="h1">Modifier un louable</h1>
-        <p class="muted small">
-          <a class="nav-link" style="display:inline-flex; padding:8px 10px;"
-             th:href="@{/louables/{id}(id=${idLouable})}">← Retour au louable</a>
-        </p>
+        <h1 class="h1">Modifier</h1>
+        <div class="muted small" th:if="${louable != null}">
+          Louable #<strong th:text="${idLouable}">0</strong>
+          · <strong th:text="${louable.type()}">Type</strong>
+          · <span th:text="${louable.lieuPrincipal()}">Lieu</span>
+          · <span class="badge" th:text="${louable.statut()}">STATUT</span>
+        </div>
       </div>
-      <span class="badge cyan" th:text="${type}">TYPE</span>
+
+      <div class="btnrow">
+        <a class="btn" th:href="@{/louables/{id}(id=${idLouable})}">← Retour</a>
+        <a class="btn ghost" th:href="@{/louables}">Catalogue</a>
+      </div>
     </div>
+
+    <div class="hr"></div>
+
+    <!-- Messages -->
+    <div class="alert err" th:if="${erreur}" th:text="${erreur}">Erreur</div>
+    <div class="alert ok" th:if="${succes}" th:text="${succes}">OK</div>
 
     <div class="spacer"></div>
 
-    <div class="alert err" th:if="${erreur}">
-      <span th:text="${erreur}">Erreur</span>
-    </div>
+    <div class="louer-grid" th:if="${louable != null}">
 
-    <div class="alert err" th:if="${louable == null}">
-      Louable introuvable.
-    </div>
-
-    <div th:if="${louable != null}">
-      <div class="hr"></div>
-
-      <p class="muted small">
-        ID : <strong th:text="${idLouable}">1</strong>
-        • Type : <strong th:text="${type}">VOITURE</strong>
-      </p>
-
-      <form method="post" th:action="@{/louables/{id}/modifier(id=${idLouable})}" class="form">
-        <h2 class="h2">Champs communs</h2>
-
-        <div class="row">
-          <div class="col field">
-            <label class="label" for="prixJour">Prix / jour</label>
-            <input class="input" id="prixJour" name="prixJour" type="number" step="0.01"
-                   th:value="${louable.prixJour}" required />
-          </div>
-
-          <div class="col field">
-            <label class="label" for="statut">Statut</label>
-            <select id="statut" name="statut" required>
-              <option value="DISPONIBLE" th:selected="${louable.statut != null and louable.statut.name() == 'DISPONIBLE'}">DISPONIBLE</option>
-              <option value="INDISPONIBLE" th:selected="${louable.statut != null and louable.statut.name() == 'INDISPONIBLE'}">INDISPONIBLE</option>
-              <option value="EN_LOCATION" th:selected="${louable.statut != null and louable.statut.name() == 'EN_LOCATION'}">EN_LOCATION</option>
-              <option value="EN_ENTRETIEN" th:selected="${louable.statut != null and louable.statut.name() == 'EN_ENTRETIEN'}">EN_ENTRETIEN</option>
-            </select>
-          </div>
-
-          <div class="col field">
-            <label class="label" for="lieuPrincipal">Lieu principal</label>
-            <input class="input" id="lieuPrincipal" name="lieuPrincipal"
-                   th:value="${louable.lieuPrincipal}" required />
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col field"><label class="label" for="marque">Marque</label><input class="input" id="marque" name="marque" th:value="${louable.marque}" required /></div>
-          <div class="col field"><label class="label" for="modele">Modèle</label><input class="input" id="modele" name="modele" th:value="${louable.modele}" required /></div>
-          <div class="col field"><label class="label" for="annee">Année</label><input class="input" id="annee" name="annee" type="number" th:value="${louable.annee}" required /></div>
-        </div>
-
-        <div class="row">
-          <div class="col field"><label class="label" for="couleur">Couleur</label><input class="input" id="couleur" name="couleur" th:value="${louable.couleur}" required /></div>
-          <div class="col field"><label class="label" for="immatriculation">Immatriculation</label><input class="input" id="immatriculation" name="immatriculation" th:value="${louable.immatriculation}" required /></div>
-          <div class="col field"><label class="label" for="kilometrage">Kilométrage</label><input class="input" id="kilometrage" name="kilometrage" type="number" th:value="${louable.kilometrage}" required /></div>
-        </div>
-
-        <div class="hr"></div>
-        <h2 class="h2">Champs spécifiques</h2>
-
-        <div th:if="${isVoiture}" class="panel soft">
-          <span class="badge cyan">Voiture</span>
-          <div class="spacer"></div>
-
-          <div class="row">
-            <div class="col field"><label class="label" for="nbPortes">Portes</label><input class="input" id="nbPortes" name="nbPortes" type="number" th:value="${louable.nbPortes}" required /></div>
-            <div class="col field"><label class="label" for="nbPlaces">Places</label><input class="input" id="nbPlaces" name="nbPlaces" type="number" th:value="${louable.nbPlaces}" required /></div>
-            <div class="col field"><label class="label" for="volumeCoffreLitres">Coffre (L)</label><input class="input" id="volumeCoffreLitres" name="volumeCoffreLitres" type="number" th:value="${louable.volumeCoffreLitres}" required /></div>
-          </div>
-
-          <div class="row">
-            <div class="col field"><label class="label" for="boite">Boîte</label><input class="input" id="boite" name="boite" th:value="${louable.boite}" required /></div>
-            <div class="col field"><label class="label" for="carburant">Carburant</label><input class="input" id="carburant" name="carburant" th:value="${louable.carburant}" required /></div>
-            <div class="col field">
-              <label class="label" for="climatisation">Climatisation</label>
-              <select id="climatisation" name="climatisation">
-                <option value="">(null)</option>
-                <option value="true" th:selected="${louable.climatisation}">true</option>
-                <option value="false" th:selected="${!louable.climatisation}">false</option>
-              </select>
+      <!-- Disponibilités (CALENDRIER IDENTIQUE À louer.html) -->
+      <article class="card">
+        <div class="panel-head">
+          <div>
+            <div class="h2">Disponibilités</div>
+            <div class="muted small">
+              Jours en vert = au moins une disponibilité non réservée couvre la date.
             </div>
           </div>
         </div>
 
-        <div th:if="${isMoto}" class="panel soft">
-          <span class="badge magenta">Moto</span>
-          <div class="spacer"></div>
+        <div class="spacer"></div>
 
-          <div class="row">
-            <div class="col field"><label class="label" for="cylindreeCc">Cylindrée (cc)</label><input class="input" id="cylindreeCc" name="cylindreeCc" type="number" th:value="${louable.cylindreeCc}" required /></div>
-            <div class="col field"><label class="label" for="puissanceCh">Puissance (ch)</label><input class="input" id="puissanceCh" name="puissanceCh" type="number" th:value="${louable.puissanceCh}" required /></div>
-            <div class="col field"><label class="label" for="typeMoto">Type</label><input class="input" id="typeMoto" name="typeMoto" th:value="${louable.typeMoto}" required /></div>
+        <!-- Navigation mois -->
+        <div class="cal-head">
+          <div class="btnrow">
+            <button type="button" class="btn" id="prevMonth">←</button>
+            <button type="button" class="btn" id="nextMonth">→</button>
           </div>
 
-          <div class="row">
-            <div class="col field"><label class="label" for="permisRequisMoto">Permis requis</label><input class="input" id="permisRequisMoto" name="permisRequisMoto" th:value="${louable.permisRequis}" required /></div>
-          </div>
-        </div>
-
-        <div th:if="${isCamion}" class="panel soft">
-          <span class="badge yellow">Camion</span>
-          <div class="spacer"></div>
-
-          <div class="row">
-            <div class="col field"><label class="label" for="chargeMaxKg">Charge max (kg)</label><input class="input" id="chargeMaxKg" name="chargeMaxKg" type="number" th:value="${louable.chargeMaxKg}" required /></div>
-            <div class="col field"><label class="label" for="volumeUtileM3">Volume (m³)</label><input class="input" id="volumeUtileM3" name="volumeUtileM3" type="number" step="0.01" th:value="${louable.volumeUtileM3}" required /></div>
-            <div class="col field"><label class="label" for="hauteurM">Hauteur (m)</label><input class="input" id="hauteurM" name="hauteurM" type="number" step="0.01" th:value="${louable.hauteurM}" required /></div>
+          <div class="cal-title">
+            <div class="h3" style="margin:0;" id="calLabel">Mois</div>
+            <div class="muted small">Change de mois si besoin</div>
           </div>
 
-          <div class="row">
-            <div class="col field"><label class="label" for="longueurM">Longueur (m)</label><input class="input" id="longueurM" name="longueurM" type="number" step="0.01" th:value="${louable.longueurM}" required /></div>
-            <div class="col field"><label class="label" for="permisRequisCamion">Permis requis</label><input class="input" id="permisRequisCamion" name="permisRequisCamion" th:value="${louable.permisRequis}" required /></div>
+          <div class="cal-picker">
+            <input class="input" type="month" id="monthPicker" />
           </div>
         </div>
 
-        <div class="btnrow">
-          <button class="btn primary" type="submit">Enregistrer</button>
-          <a class="btn" th:href="@{/louables/{id}(id=${idLouable})}">Annuler</a>
+        <div class="spacer"></div>
+
+        <div class="cal-wrap">
+          <table class="cal" aria-label="Calendrier des disponibilités">
+            <thead>
+            <tr>
+              <th>LUN</th><th>MAR</th><th>MER</th><th>JEU</th><th>VEN</th><th>SAM</th><th>DIM</th>
+            </tr>
+            </thead>
+            <tbody id="calBody">
+            <!-- rempli en JS -->
+            </tbody>
+          </table>
         </div>
-      </form>
+
+        <div class="legend">
+          <span class="chip"><span class="dot" style="background: rgba(53,247,166,.9)"></span> Disponible</span>
+          <span class="chip"><span class="dot" style="background: rgba(255,255,255,.25)"></span> Hors mois</span>
+        </div>
+
+        <input type="hidden" id="idLouable" th:value="${idLouable}" />
+
+        <div class="spacer"></div>
+
+        <!-- AJOUT DISPONIBILITÉ -->
+        <div class="hr"></div>
+        <div class="spacer"></div>
+
+        <div class="h2">Ajouter une disponibilité</div>
+        <form class="form" method="post" th:action="@{/louables/{id}/disponibilites/add(id=${idLouable})}">
+          <div class="row">
+            <div class="col field">
+              <div class="label">Date début</div>
+              <input class="input" type="date" name="dateDebut" required />
+            </div>
+            <div class="col field">
+              <div class="label">Date fin</div>
+              <input class="input" type="date" name="dateFin" required />
+            </div>
+          </div>
+          <div class="btnrow">
+            <button class="btn primary" type="submit">Ajouter</button>
+          </div>
+        </form>
+
+        <div class="spacer"></div>
+
+        <!-- LISTE + SUPPRESSION -->
+        <div class="h2">Périodes existantes</div>
+
+        <div class="alert warn" th:if="${dispos == null or dispos.size() == 0}">
+          Aucune disponibilité enregistrée.
+        </div>
+
+        <div class="panel soft" th:if="${dispos != null and dispos.size() > 0}">
+          <table class="table">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Début</th>
+              <th>Fin</th>
+              <th>Réservée</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="d : ${dispos}">
+              <td th:text="${d.idDisponibilite}">0</td>
+              <td th:text="${#temporals.format(d.dateDebut, 'dd/MM/yyyy')}">01/01/2026</td>
+              <td th:text="${#temporals.format(d.dateFin, 'dd/MM/yyyy')}">02/01/2026</td>
+              <td>
+                <span class="badge"
+                      th:classappend="${d.estReservee} ? ' red' : ' green'"
+                      th:text="${d.estReservee} ? 'OUI' : 'NON'">NON</span>
+              </td>
+              <td class="text-right">
+                <form method="post"
+                      th:action="@{/louables/{id}/disponibilites/delete(id=${idLouable})}"
+                      th:if="${!d.estReservee}">
+                  <input type="hidden" name="idDisponibilite" th:value="${d.idDisponibilite}" />
+                  <button class="btn" type="submit">Supprimer</button>
+                </form>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </article>
+
     </div>
   </div>
-</main>
+
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    (function(){
+      const idLouable = document.getElementById('idLouable')?.value;
+      const calBody = document.getElementById('calBody');
+      const calLabel = document.getElementById('calLabel');
+      const monthPicker = document.getElementById('monthPicker');
+      const prevBtn = document.getElementById('prevMonth');
+      const nextBtn = document.getElementById('nextMonth');
+
+      if(!idLouable || !calBody) return;
+
+      const monthsFR = [
+        "janvier","février","mars","avril","mai","juin",
+        "juillet","août","septembre","octobre","novembre","décembre"
+      ];
+
+      const pad2 = (n)=> (n<10?("0"+n):(""+n));
+      const ymd = (d)=> `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+
+      const mondayIndex = (d)=>{
+        const js = d.getDay();
+        return (js === 0) ? 6 : (js - 1);
+      };
+
+      const parseDate = (s)=>{
+        if(!s) return null;
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s));
+        if(!m) return null;
+        return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      };
+
+      async function loadAvailableSet(){
+        const res = await fetch(`/louer/disponibilites?idLouable=${encodeURIComponent(idLouable)}`, {
+          headers: { "Accept": "application/json" }
+        });
+        if(!res.ok) throw new Error("Erreur chargement disponibilités");
+        const arr = await res.json();
+
+        const set = new Set();
+
+        for(const item of (Array.isArray(arr) ? arr : [])){
+          const d1 = parseDate(item.dateDebut ?? item.date_debut ?? item.debut ?? item.startDate);
+          const d2 = parseDate(item.dateFin ?? item.date_fin ?? item.fin ?? item.endDate);
+          const reservedRaw = (item.estReservee ?? item.reservee ?? item.isReserved ?? item.reserved);
+          const reserved = String(reservedRaw).toLowerCase() === "true" || reservedRaw === 1;
+
+          if(reserved) continue;
+          if(!d1 || !d2) continue;
+
+          const cur = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
+          const end = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate());
+          while(cur <= end){
+            set.add(ymd(cur));
+            cur.setDate(cur.getDate() + 1);
+          }
+        }
+        return set;
+      }
+
+      let availableSet = new Set();
+      let view = new Date();
+      view = new Date(view.getFullYear(), view.getMonth(), 1);
+
+      function updateLabel(){
+        calLabel.textContent = `${monthsFR[view.getMonth()]} ${view.getFullYear()}`;
+        monthPicker.value = `${view.getFullYear()}-${pad2(view.getMonth()+1)}`;
+      }
+
+      function render(){
+        updateLabel();
+
+        const first = new Date(view.getFullYear(), view.getMonth(), 1);
+        const startOffset = mondayIndex(first);
+        const gridStart = new Date(first);
+        gridStart.setDate(first.getDate() - startOffset);
+
+        calBody.innerHTML = "";
+        const cur = new Date(gridStart);
+
+        for(let week=0; week<6; week++){
+          const tr = document.createElement("tr");
+          for(let i=0; i<7; i++){
+            const td = document.createElement("td");
+            const key = ymd(cur);
+
+            const inMonth = cur.getMonth() === view.getMonth();
+            if(!inMonth) td.classList.add("day-off");
+            if(inMonth && availableSet.has(key)) td.classList.add("day-avail");
+
+            td.textContent = String(cur.getDate());
+            tr.appendChild(td);
+            cur.setDate(cur.getDate()+1);
+          }
+          calBody.appendChild(tr);
+        }
+      }
+
+      function addMonths(delta){
+        view = new Date(view.getFullYear(), view.getMonth() + delta, 1);
+        render();
+      }
+
+      prevBtn?.addEventListener("click", ()=> addMonths(-1));
+      nextBtn?.addEventListener("click", ()=> addMonths(1));
+      monthPicker?.addEventListener("change", ()=>{
+        const v = monthPicker.value;
+        const m = /^(\d{4})-(\d{2})$/.exec(v);
+        if(!m) return;
+        view = new Date(Number(m[1]), Number(m[2]) - 1, 1);
+        render();
+      });
+
+      loadAvailableSet()
+        .then((set)=>{ availableSet = set; render(); })
+        .catch(()=>{ availableSet = new Set(); render(); });
+    })();
+    /*]]>*/
+  </script>
+
+</section>
 </html>

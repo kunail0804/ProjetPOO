@@ -1,3 +1,4 @@
+<!-- FICHIER: src/main/resources/templates/ajouter_louable.html -->
 <!doctype html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout('Ajouter louable', ~{::main})}">
@@ -14,15 +15,14 @@
 
     <div class="hr"></div>
 
+    <div class="alert err" th:if="${error}" th:text="${error}">Erreur</div>
+
     <form method="post" th:action="@{/ajouter_louable}" class="form">
       <div class="field">
         <label class="label" for="type">Type</label>
-        <select id="type" name="type">
+        <select id="type" name="type" required>
           <option value="" disabled selected>-- Choisir un type --</option>
-          <option th:each="t : ${typesLouable}"
-                  th:value="${t.name()}"
-                  th:text="${t.label}">
-          </option>
+          <option th:each="t : ${typesLouable}" th:value="${t.name()}" th:text="${t.label}"></option>
         </select>
       </div>
 
@@ -32,33 +32,40 @@
       <div class="row">
         <div class="col field">
           <label class="label" for="prixJour">Prix / jour</label>
-          <input class="input" id="prixJour" name="prixJour" type="number" step="0.01" />
-        </div>
-
-        <div class="col field">
-          <label class="label" for="statut">Statut</label>
-          <select id="statut" name="statut">
-            <option value="DISPONIBLE">DISPONIBLE</option>
-            <option value="INDISPONIBLE">INDISPONIBLE</option>
-          </select>
+          <input class="input" id="prixJour" name="prixJour" type="number" step="0.01" required />
         </div>
 
         <div class="col field">
           <label class="label" for="lieuPrincipal">Lieu principal</label>
-          <input class="input" id="lieuPrincipal" name="lieuPrincipal" />
+          <input class="input" id="lieuPrincipal" name="lieuPrincipal" required />
         </div>
       </div>
 
       <div class="row">
-        <div class="col field"><label class="label" for="marque">Marque</label><input class="input" id="marque" name="marque" /></div>
-        <div class="col field"><label class="label" for="modele">Modèle</label><input class="input" id="modele" name="modele" /></div>
-        <div class="col field"><label class="label" for="annee">Année</label><input class="input" id="annee" name="annee" type="number" /></div>
+        <div class="col field"><label class="label" for="marque">Marque</label><input class="input" id="marque" name="marque" required /></div>
+        <div class="col field"><label class="label" for="modele">Modèle</label><input class="input" id="modele" name="modele" required /></div>
+        <div class="col field"><label class="label" for="annee">Année</label><input class="input" id="annee" name="annee" type="number" required /></div>
       </div>
 
       <div class="row">
-        <div class="col field"><label class="label" for="couleur">Couleur</label><input class="input" id="couleur" name="couleur" /></div>
-        <div class="col field"><label class="label" for="immatriculation">Immatriculation</label><input class="input" id="immatriculation" name="immatriculation" /></div>
-        <div class="col field"><label class="label" for="kilometrage">Kilométrage</label><input class="input" id="kilometrage" name="kilometrage" type="number" /></div>
+        <div class="col field"><label class="label" for="couleur">Couleur</label><input class="input" id="couleur" name="couleur" required /></div>
+        <div class="col field"><label class="label" for="immatriculation">Immatriculation</label><input class="input" id="immatriculation" name="immatriculation" required /></div>
+        <div class="col field"><label class="label" for="kilometrage">Kilométrage</label><input class="input" id="kilometrage" name="kilometrage" type="number" required /></div>
+      </div>
+
+      <div class="hr"></div>
+      <h2 class="h2">Période de disponibilité (optionnel)</h2>
+      <div class="muted small">Tu pourras en ajouter/retirer ensuite depuis la page du louable.</div>
+
+      <div class="row">
+        <div class="col field">
+          <label class="label" for="dispoDebut">Début</label>
+          <input class="input" id="dispoDebut" name="dispoDebut" type="date" />
+        </div>
+        <div class="col field">
+          <label class="label" for="dispoFin">Fin</label>
+          <input class="input" id="dispoFin" name="dispoFin" type="date" />
+        </div>
       </div>
 
       <div class="hr"></div>
@@ -68,13 +75,11 @@
       <div id="voitureFields" class="panel soft type-fields" data-type="VOITURE" style="display:none;">
         <span class="badge cyan">Voiture</span>
         <div class="spacer"></div>
-
         <div class="row">
           <div class="col field"><label class="label" for="nbPortes">Portes</label><input class="input" id="nbPortes" name="nbPortes" type="number" /></div>
           <div class="col field"><label class="label" for="nbPlaces">Places</label><input class="input" id="nbPlaces" name="nbPlaces" type="number" /></div>
           <div class="col field"><label class="label" for="volumeCoffreLitres">Coffre (L)</label><input class="input" id="volumeCoffreLitres" name="volumeCoffreLitres" type="number" /></div>
         </div>
-
         <div class="row">
           <div class="col field"><label class="label" for="boite">Boîte</label><input class="input" id="boite" name="boite" placeholder="MANUELLE" /></div>
           <div class="col field"><label class="label" for="carburant">Carburant</label><input class="input" id="carburant" name="carburant" placeholder="ESSENCE" /></div>
@@ -93,13 +98,11 @@
       <div id="motoFields" class="panel soft type-fields" data-type="MOTO" style="display:none;">
         <span class="badge magenta">Moto</span>
         <div class="spacer"></div>
-
         <div class="row">
           <div class="col field"><label class="label" for="cylindreeCc">Cylindrée (cc)</label><input class="input" id="cylindreeCc" name="cylindreeCc" type="number" /></div>
           <div class="col field"><label class="label" for="puissanceCh">Puissance (ch)</label><input class="input" id="puissanceCh" name="puissanceCh" type="number" /></div>
           <div class="col field"><label class="label" for="typeMoto">Type</label><input class="input" id="typeMoto" name="typeMoto" placeholder="ROADSTER" /></div>
         </div>
-
         <div class="row">
           <div class="col field"><label class="label" for="permisRequisMoto">Permis requis</label><input class="input" id="permisRequisMoto" name="permisRequisMoto" placeholder="A2" /></div>
         </div>
@@ -109,13 +112,11 @@
       <div id="camionFields" class="panel soft type-fields" data-type="CAMION" style="display:none;">
         <span class="badge yellow">Camion</span>
         <div class="spacer"></div>
-
         <div class="row">
           <div class="col field"><label class="label" for="chargeMaxKg">Charge max (kg)</label><input class="input" id="chargeMaxKg" name="chargeMaxKg" type="number" /></div>
           <div class="col field"><label class="label" for="volumeUtileM3">Volume (m³)</label><input class="input" id="volumeUtileM3" name="volumeUtileM3" type="number" /></div>
           <div class="col field"><label class="label" for="hauteurM">Hauteur (m)</label><input class="input" id="hauteurM" name="hauteurM" type="number" /></div>
         </div>
-
         <div class="row">
           <div class="col field"><label class="label" for="longueurM">Longueur (m)</label><input class="input" id="longueurM" name="longueurM" type="number" /></div>
           <div class="col field"><label class="label" for="permisRequisCamion">Permis requis</label><input class="input" id="permisRequisCamion" name="permisRequisCamion" /></div>

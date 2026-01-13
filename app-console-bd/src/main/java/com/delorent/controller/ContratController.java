@@ -58,7 +58,7 @@ public class ContratController {
         var contrat = contratRepository.getDetailByIdAndLoueur(idContrat, loueur.getIdUtilisateur());
         if (contrat == null) {
             model.addAttribute("erreur", "Contrat introuvable ou non autorisé.");
-            return "contrat-detail";
+            return "contrat";
         }
 
         var prise = releveRepository.findByContratAndType(idContrat, "PRISE");
@@ -67,7 +67,7 @@ public class ContratController {
         model.addAttribute("contrat", contrat);
         model.addAttribute("relevePrise", prise);
         model.addAttribute("releveRetour", retour);
-        return "contrat-detail";
+        return "contrat";
     }
 
     @PostMapping("/{idContrat}/releves")

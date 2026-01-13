@@ -1,4 +1,4 @@
-// src/main/java/com/delorent/controller/LouablesController.java
+// FICHIER: src/main/java/com/delorent/controller/LouablesController.java
 package com.delorent.controller;
 
 import com.delorent.model.Louable.FiltrePrixMax;
@@ -7,6 +7,7 @@ import com.delorent.repository.LouableRepository.LouableRepository;
 import com.delorent.repository.LouableRepository.LouableSummary;
 import com.delorent.repository.LouableRepository.VehiculeRepository;
 import com.delorent.repository.LouableRepository.VehiculeSummary;
+import com.delorent.repository.NoteRepository;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -15,20 +16,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Controller
 public class LouablesController {
 
     private final LouableRepository louableRepository;
     private final VehiculeRepository vehiculeRepository;
+    private final NoteRepository noteRepository;
 
-    public LouablesController(LouableRepository louableRepository, VehiculeRepository vehiculeRepository) {
+    public LouablesController(LouableRepository louableRepository,
+                              VehiculeRepository vehiculeRepository,
+                              NoteRepository noteRepository) {
         this.louableRepository = louableRepository;
         this.vehiculeRepository = vehiculeRepository;
+        this.noteRepository = noteRepository;
     }
 
     @GetMapping("/louables")
@@ -43,7 +45,6 @@ public class LouablesController {
         List<LouableFiltre> filtres = new ArrayList<>();
         filtres.add(new FiltrePrixMax(prixMax));
 
-        // IDs dispo à la date choisie (via table DISPONIBILITE)
         Set<Integer> idsDispo = louableRepository.getIdsDisponiblesA(dateRef);
 
         model.addAttribute("filtrePrixMax", prixMax);
@@ -54,7 +55,6 @@ public class LouablesController {
         if (vehicule) {
             List<VehiculeSummary> vehicules = new ArrayList<>(vehiculeRepository.getDisponibles(filtres));
 
-            // Tri: disponibles à dateRef en premier, puis par idLouable croissant
             vehicules.sort(
                     Comparator
                             .comparing((VehiculeSummary v) -> !idsDispo.contains(v.louable().idLouable()))
@@ -62,10 +62,16 @@ public class LouablesController {
             );
 
             int availableCount = 0;
+            List<Integer> ids = new ArrayList<>();
             for (VehiculeSummary v : vehicules) {
-                if (idsDispo.contains(v.louable().idLouable())) availableCount++;
+                int idLouable = v.louable().idLouable();
+                ids.add(idLouable);
+                if (idsDispo.contains(idLouable)) availableCount++;
             }
 
+            Map<Integer, Double> moyennesNotes = noteRepository.findMoyennesByLouables(ids);
+
+            model.addAttribute("moyennesNotes", moyennesNotes);
             model.addAttribute("vehicules", vehicules);
             model.addAttribute("louables", null);
             model.addAttribute("totalCount", vehicules.size());
@@ -81,10 +87,15 @@ public class LouablesController {
             );
 
             int availableCount = 0;
+            List<Integer> ids = new ArrayList<>();
             for (LouableSummary l : louables) {
+                ids.add(l.idLouable());
                 if (idsDispo.contains(l.idLouable())) availableCount++;
             }
 
+            Map<Integer, Double> moyennesNotes = noteRepository.findMoyennesByLouables(ids);
+
+            model.addAttribute("moyennesNotes", moyennesNotes);
             model.addAttribute("louables", louables);
             model.addAttribute("vehicules", null);
             model.addAttribute("totalCount", louables.size());

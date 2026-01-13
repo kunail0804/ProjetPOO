@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Erreur', ~{::section})}">
+
+<section>
+  <div class="panel soft">
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Erreur</h1>
+        <div class="muted small">Une erreur s'est produite.</div>
+      </div>
+      <div class="btnrow">
+        <a class="btn" th:href="@{/profil}">← Retour profil</a>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="alert err" th:if="${erreur}" th:text="${erreur}">Une erreur est survenue.</div>
+    <div class="alert err" th:if="${message}" th:text="${message}">Une erreur est survenue.</div>
+
+    <div class="alert warn" th:if="${erreur == null and message == null}">
+      Page d'erreur sans message (vérifie le controller).
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="btnrow">
+      <a class="btn" href="javascript:history.back()">← Revenir</a>
+      <a class="btn primary" th:href="@{/profil}">Profil</a>
+    </div>
+  </div>
+</section>
+</html>

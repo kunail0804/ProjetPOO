@@ -15,6 +15,7 @@ import com.delorent.repository.LouableRepository.VoitureRepository;
 import com.delorent.repository.LouableRepository.MotoRepository;
 import com.delorent.repository.LouableRepository.CamionRepository;
 
+import com.delorent.repository.NoteRepository;
 import com.delorent.service.ConnexionService;
 
 @Controller
@@ -25,19 +26,22 @@ public class ProfilLouableController {
     private final MotoRepository motoRepository;
     private final CamionRepository camionRepository;
     private final ConnexionService connexionService;
+    private final NoteRepository noteRepository;
 
     public ProfilLouableController(
             LouableRepository louableRepository,
             VoitureRepository voitureRepository,
             MotoRepository motoRepository,
             CamionRepository camionRepository,
-            ConnexionService connexionService
+            ConnexionService connexionService,
+            NoteRepository noteRepository
     ) {
         this.louableRepository = louableRepository;
         this.voitureRepository = voitureRepository;
         this.motoRepository = motoRepository;
         this.camionRepository = camionRepository;
         this.connexionService = connexionService;
+        this.noteRepository = noteRepository;
     }
 
     @GetMapping("/louables/{id}")
@@ -46,9 +50,14 @@ public class ProfilLouableController {
         LouableSummary summary = louableRepository.get(id);
         if (summary == null) {
             model.addAttribute("erreur", "Louable introuvable (id=" + id + ").");
-            // flags navbar/boutons
             model.addAttribute("canManage", false);
             model.addAttribute("backToProfile", false);
+
+            // Variables attendues par le template (évite les surprises)
+            model.addAttribute("noteMoyenne", null);
+            model.addAttribute("nbNotes", 0);
+            model.addAttribute("noteArrondie", 0);
+
             return "louable-profil";
         }
 
@@ -65,24 +74,32 @@ public class ProfilLouableController {
             case "Voiture" -> louable = voitureRepository.get(id);
             case "Moto" -> louable = motoRepository.get(id);
             case "Camion" -> louable = camionRepository.get(id);
-            default -> {
-                model.addAttribute("erreur", "Type de louable non supporté : " + summary.type());
-            }
+            default -> model.addAttribute("erreur", "Type de louable non supporté : " + summary.type());
         }
         model.addAttribute("louable", louable);
+
+        // ===== NOTATION : moyenne critères par contrat, puis moyenne sur les contrats du louable =====
+        Double moy = noteRepository.findMoyenneByLouableFromCriteres(id);
+        int nb = noteRepository.countNotesByLouableFromCriteres(id);
+
+        model.addAttribute("noteMoyenne", moy); // Double (null si aucune note)
+        model.addAttribute("nbNotes", nb);
+
+        int noteArrondie = (moy == null) ? 0 : (int) Math.round(moy);
+        if (noteArrondie < 0) noteArrondie = 0;
+        if (noteArrondie > 5) noteArrondie = 5;
+        model.addAttribute("noteArrondie", noteArrondie);
 
         // ----- Gestion rôle + propriétaire -----
         Utilisateur u = connexionService.getConnexion();
         boolean connected = (u != null);
         boolean isAgent = (u instanceof Agent);
 
-        // Si pas de louable complet, pas de gestion possible
         boolean owner = false;
         if (connected && isAgent && louable != null) {
             int idUser = u.getIdUtilisateur();
 
-            // ⚠️ Adapte le getter si besoin:
-            // - Vehicule/Louable a sûrement getIdAgent() ou getIdProprietaire()
+            // Adapte le getter si besoin:
             if (louable instanceof Vehicule v) {
                 owner = (v.getIdAgent() == idUser);
             } else if (louable instanceof Louable l) {
@@ -92,9 +109,6 @@ public class ProfilLouableController {
 
         boolean canManage = isAgent && owner;
 
-        // Lien haut:
-        // - si agent + propriétaire => /profil
-        // - sinon => /louables
         model.addAttribute("backToProfile", canManage);
         model.addAttribute("canManage", canManage);
 

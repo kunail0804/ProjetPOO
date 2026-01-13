@@ -1,264 +1,182 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noter un véhicule - Plateforme Autopartage</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .card {
-            background-color: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .header h1 {
-            color: #333;
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 1.1em;
-        }
-        
-        /* Informations du véhicule */
-        .vehicule-info {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-        
-        .vehicule-info h2 {
-            margin-bottom: 10px;
-            font-size: 1.5em;
-        }
-        
-        .vehicule-info p {
-            margin: 5px 0;
-            opacity: 0.9;
-        }
-        
-        /* Formulaire */
-        .form-section {
-            margin-bottom: 25px;
-        }
-        
-        .form-section h3 {
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-        
-        /* Critères de notation avec étoiles */
-        .critere-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .critere-label {
-            font-weight: 500;
-            color: #333;
-            font-size: 1.1em;
-        }
-        
-        /* Système d'étoiles */
-        .star-rating {
-            display: flex;
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-        }
-        
-        .star-rating input {
-            display: none;
-        }
-        
-        .star-rating label {
-            cursor: pointer;
-            font-size: 2em;
-            color: #ddd;
-            padding: 0 5px;
-            transition: color 0.2s;
-        }
-        
-        .star-rating label:hover,
-        .star-rating label:hover ~ label,
-        .star-rating input:checked ~ label {
-            color: #ffc107;
-        }
-        
-        /* Zone de commentaire */
-        .commentaire-section textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 1em;
-            resize: vertical;
-            transition: border-color 0.3s;
-        }
-        
-        .commentaire-section textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .commentaire-section label {
-            display: block;
-            margin-bottom: 10px;
-            color: #333;
-            font-weight: 500;
-        }
-        
-        /* Bouton de soumission */
-        .submit-btn {
-            width: 100%;
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        /* Lien retour */
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: white;
-            text-decoration: none;
-        }
-        
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: white;
-            font-size: 0.9em;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- En-tête -->
-        <div class="card header">
-            <h1>⭐ Noter ce véhicule</h1>
-            <p>Partagez votre expérience pour aider les autres utilisateurs</p>
+<!-- FICHIER: src/main/resources/templates/notation-formulaire.html -->
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Noter un louable', ~{::section})}">
+
+<section>
+  <div class="panel soft">
+
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Noter ce louable</h1>
+        <div class="muted small" th:if="${contrat != null}">
+          Contrat #<strong th:text="${idContrat}">0</strong>
         </div>
-        
-        <!-- Informations du véhicule loué -->
-        <div class="vehicule-info">
-            <h2 th:text="${contrat.marque} + ' ' + ${contrat.modele}">Marque Modèle</h2>
-            <p>📍 Lieu : <span th:text="${contrat.lieu}">Lieu</span></p>
-            <p>📅 Location du <span th:text="${#dates.format(contrat.dateDebut, 'dd/MM/yyyy')}">01/01/2026</span> 
-               au <span th:text="${#dates.format(contrat.dateFin, 'dd/MM/yyyy')}">07/01/2026</span></p>
-        </div>
-        
-        <!-- Formulaire de notation -->
-        <div class="card">
-            <form action="/notation/soumettre" method="post">
-                
-                <!-- Champ caché pour l'ID du contrat -->
-                <input type="hidden" name="idContrat" th:value="${idContrat}">
-                
-                <!-- Section des critères -->
-                <div class="form-section">
-                    <h3>📊 Notez chaque critère</h3>
-                    
-                    <!-- Boucle sur chaque critère -->
-                    <div th:each="critere : ${criteres}" class="critere-item">
-                        <span class="critere-label" th:text="${critere.libelle}">Critère</span>
-                        
-                        <!-- Système d'étoiles (5 à 1 pour l'effet CSS) -->
-                        <div class="star-rating">
-                            <input type="radio" th:id="${'star5_' + critere.id}" th:name="${'critere_' + critere.id}" value="5" required>
-                            <label th:for="${'star5_' + critere.id}">★</label>
-                            
-                            <input type="radio" th:id="${'star4_' + critere.id}" th:name="${'critere_' + critere.id}" value="4">
-                            <label th:for="${'star4_' + critere.id}">★</label>
-                            
-                            <input type="radio" th:id="${'star3_' + critere.id}" th:name="${'critere_' + critere.id}" value="3">
-                            <label th:for="${'star3_' + critere.id}">★</label>
-                            
-                            <input type="radio" th:id="${'star2_' + critere.id}" th:name="${'critere_' + critere.id}" value="2">
-                            <label th:for="${'star2_' + critere.id}">★</label>
-                            
-                            <input type="radio" th:id="${'star1_' + critere.id}" th:name="${'critere_' + critere.id}" value="1">
-                            <label th:for="${'star1_' + critere.id}">★</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Section commentaire -->
-                <div class="form-section commentaire-section">
-                    <h3>💬 Votre commentaire</h3>
-                    <label for="commentaire">Décrivez votre expérience (optionnel)</label>
-                    <textarea id="commentaire" name="commentaire" 
-                              placeholder="Partagez votre expérience avec ce véhicule..."></textarea>
-                </div>
-                
-                <!-- Bouton de soumission -->
-                <button type="submit" class="submit-btn">
-                    ✅ Valider ma note
-                </button>
-            </form>
-        </div>
-        
-        <!-- Lien retour -->
-        <a href="/profil" class="back-link">← Retour à mon profil</a>
-        
-        <!-- Footer -->
-        <div class="footer">
-            <p>© 2026 Plateforme Autopartage - US.L.3 par Alexia</p>
-        </div>
+      </div>
+
+      <div class="btnrow">
+        <a class="btn" th:if="${returnUrl != null}" th:href="${returnUrl}">← Retour</a>
+        <a class="btn" th:if="${returnUrl == null and idContrat != null}"
+           th:href="@{/contrats/{id}(id=${idContrat})}">← Retour contrat</a>
+        <a class="btn" th:if="${returnUrl == null and idContrat == null}" th:href="@{/profil}">← Retour profil</a>
+      </div>
     </div>
-</body>
+
+    <div class="hr"></div>
+
+    <div class="alert err" th:if="${erreur}" th:text="${erreur}">Erreur</div>
+    <div class="alert warn" th:if="${message}" th:text="${message}">Message</div>
+
+    <div class="card" th:if="${contrat != null}">
+      <div class="card-title">Récapitulatif</div>
+
+      <div class="kv">
+        <div class="kv-row">
+          <div class="k">Véhicule</div>
+          <div class="v">
+            <span th:text="${contrat.marque}">Marque</span>
+            <span th:text="${contrat.modele}">Modèle</span>
+          </div>
+        </div>
+
+        <div class="kv-row">
+          <div class="k">Lieu</div>
+          <div class="v" th:text="${contrat.lieu}">Lieu</div>
+        </div>
+
+        <div class="kv-row">
+          <div class="k">Période</div>
+          <div class="v">
+            <span th:text="${#dates.format(contrat.dateDebut, 'dd/MM/yyyy')}">01/01/2026</span>
+            → <span th:text="${#dates.format(contrat.dateFin, 'dd/MM/yyyy')}">07/01/2026</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="card">
+      <div class="card-title">Votre note</div>
+
+      <form class="form" th:action="@{/notation/soumettre}" method="post">
+        <input type="hidden" name="idContrat" th:value="${idContrat}" />
+        <input type="hidden" name="returnUrl" th:if="${returnUrl != null}" th:value="${returnUrl}" />
+
+        <div class="field">
+          <div class="label">Notez chaque critère</div>
+          <p class="help">Survolez puis cliquez : les étoiles à gauche se remplissent.</p>
+        </div>
+
+        <div class="field" th:if="${criteres == null or criteres.size() == 0}">
+          <div class="alert warn">
+            Aucun critère trouvé. Vérifie la table <strong>CRITERE_LOUABLE</strong>.
+          </div>
+        </div>
+
+        <!-- Critères -->
+        <div th:each="critere : ${criteres}" class="kv" style="margin-bottom:12px;">
+          <div class="kv-row" style="align-items:center;">
+            <div class="k" th:text="${critere.libelle}">Critère</div>
+
+            <div class="v">
+              <!-- IMPORTANT : ordre inversé (5..1) pour que ~ label colore vers la GAUCHE -->
+              <div class="rating" aria-label="Notation">
+                <input class="rating-input" type="radio"
+                       th:id="${'c' + critere.id + '_5'}"
+                       th:name="${'critere_' + critere.id}"
+                       value="5" required />
+                <label class="rating-star" th:for="${'c' + critere.id + '_5'}" aria-label="5">★</label>
+
+                <input class="rating-input" type="radio"
+                       th:id="${'c' + critere.id + '_4'}"
+                       th:name="${'critere_' + critere.id}"
+                       value="4" />
+                <label class="rating-star" th:for="${'c' + critere.id + '_4'}" aria-label="4">★</label>
+
+                <input class="rating-input" type="radio"
+                       th:id="${'c' + critere.id + '_3'}"
+                       th:name="${'critere_' + critere.id}"
+                       value="3" />
+                <label class="rating-star" th:for="${'c' + critere.id + '_3'}" aria-label="3">★</label>
+
+                <input class="rating-input" type="radio"
+                       th:id="${'c' + critere.id + '_2'}"
+                       th:name="${'critere_' + critere.id}"
+                       value="2" />
+                <label class="rating-star" th:for="${'c' + critere.id + '_2'}" aria-label="2">★</label>
+
+                <input class="rating-input" type="radio"
+                       th:id="${'c' + critere.id + '_1'}"
+                       th:name="${'critere_' + critere.id}"
+                       value="1" />
+                <label class="rating-star" th:for="${'c' + critere.id + '_1'}" aria-label="1">★</label>
+              </div>
+
+              <p class="help" style="margin-top:6px;">Obligatoire</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="field">
+          <div class="label">Commentaire (optionnel)</div>
+          <textarea class="input" id="commentaire" name="commentaire" rows="4"
+                    placeholder="Décris ton expérience…"></textarea>
+        </div>
+
+        <div class="btnrow">
+          <button class="btn primary" type="submit">Valider ma note</button>
+          <a class="btn" th:if="${idContrat != null}" th:href="@{/contrats/{id}(id=${idContrat})}">Annuler</a>
+          <a class="btn" th:if="${idContrat == null}" th:href="@{/profil}">Annuler</a>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- CSS : 5 étoiles, hover + sélection = jaune sur la GAUCHE -->
+  <style>
+    .rating{
+      display:inline-flex;
+      flex-direction:row-reverse;  /* clé : 5..1 affiché de gauche à droite, mais DOM inversé */
+      gap:6px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .rating-input{
+      position:absolute;
+      left:-9999px;
+      width:1px;
+      height:1px;
+      overflow:hidden;
+    }
+
+    .rating-star{
+      font-size:22px;
+      line-height:1;
+      cursor:pointer;
+      user-select:none;
+      color:rgba(255,255,255,.35); /* neutre sur ton thème sombre */
+      transition:color .15s ease, transform .05s ease;
+    }
+
+    /* Hover : l’étoile survolée + toutes celles à gauche (grâce à row-reverse + ~) */
+    .rating-star:hover,
+    .rating-star:hover ~ .rating-star{
+      color:#ffc107;
+    }
+
+    /* Sélection : l’étoile cochée + toutes celles à gauche */
+    .rating-input:checked ~ .rating-star{
+      color:#ffc107;
+    }
+
+    .rating-star:active{
+      transform:translateY(1px);
+    }
+  </style>
+</section>
 </html>

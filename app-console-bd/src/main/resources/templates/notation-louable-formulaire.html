@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Noter le louable', ~{::section})}">
+
+<section>
+  <div class="panel soft">
+    <div class="panel-head">
+      <div>
+        <h1 class="h1">Noter le louable</h1>
+        <div class="muted small" th:if="${contrat != null}">
+          Contrat #<strong th:text="${contrat.idContrat}">0</strong>
+          · Louable #<strong th:text="${contrat.idLouable}">0</strong>
+          · <span th:text="${contrat.lieu}">Lieu</span>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <a class="btn" th:href="@{/contrats/{id}(id=${idContrat})}">← Retour contrat</a>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="alert err" th:if="${message}" th:text="${message}">Message</div>
+
+    <div class="spacer"></div>
+
+    <div class="panel soft" th:if="${contrat != null}">
+      <div class="muted small">
+        <strong th:text="${contrat.marque != null ? contrat.marque : 'Louable'}">Marque</strong>
+        <span th:if="${contrat.modele != null}" th:text="${' ' + contrat.modele}">Modèle</span>
+        · Du
+        <strong th:text="${#dates.format(contrat.dateDebut, 'dd/MM/yyyy')}">01/01/2026</strong>
+        au
+        <strong th:text="${#dates.format(contrat.dateFin, 'dd/MM/yyyy')}">02/01/2026</strong>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <form class="form" method="post" th:action="@{/notation/louable/soumettre}">
+      <input type="hidden" name="idContrat" th:value="${idContrat}" />
+
+      <div class="grid">
+        <article class="card" th:each="c : ${criteres}">
+          <div class="panel-head">
+            <div class="card-title" th:text="${c.libelle}">Critère</div>
+          </div>
+          <div class="spacer"></div>
+          <div class="field">
+            <div class="label">Note (1 à 5)</div>
+            <select th:name="${'critere_' + c.id}" required>
+              <option value="" disabled selected>Choisir…</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </article>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="field">
+        <div class="label">Commentaire (optionnel)</div>
+        <textarea class="input" name="commentaire" rows="4" placeholder="Décris ton expérience…"></textarea>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn primary" type="submit">Valider la note</button>
+        <a class="btn ghost" th:href="@{/contrats/{id}(id=${idContrat})}">Annuler</a>
+      </div>
+    </form>
+  </div>
+</section>
+</html>
