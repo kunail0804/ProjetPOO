@@ -36,6 +36,8 @@ public class LoueurRepository implements RepositoryBase<Loueur, Long> {
 
     private static final String COL_NOM = "nom";
     private static final String COL_PRENOM = "prenom";
+    private static final String COL_CREDIT = "credit";
+
 
     private Loueur mapRow(ResultSet rs) throws java.sql.SQLException {
         return new Loueur(
@@ -171,4 +173,21 @@ public class LoueurRepository implements RepositoryBase<Loueur, Long> {
         var res = jdbcTemplate.query(sql, (rs, rowNum) -> mapRow(rs), email, password);
         return res.isEmpty() ? null : res.get(0);
     }
+
+    // Crédit parrainage
+    // Il faut ajouter le crédit reçu d'un loueur dans la table LOUEUR dans BD
+    public double getCredit(int idLoueur) {
+        Double credit = jdbcTemplate.queryForObject(
+            "SELECT credit FROM LOUEUR WHERE idLoueur = ?",
+            Double.class, idLoueur
+    );
+    return credit == null ? 0.0 : credit;
+}
+
+    public void addCredit(int idLoueur, double amount) {
+        jdbcTemplate.update(
+                "UPDATE LOUEUR SET credit = credit + ? WHERE idLoueur = ?",
+                amount, idLoueur
+        );
+}
 }
