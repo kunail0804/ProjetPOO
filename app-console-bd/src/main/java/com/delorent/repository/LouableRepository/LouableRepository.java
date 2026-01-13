@@ -1,4 +1,3 @@
-// src/main/java/com/delorent/repository/LouableRepository/LouableRepository.java
 package com.delorent.repository.LouableRepository;
 
 import org.springframework.stereotype.Repository;
@@ -7,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.delorent.repository.RepositoryBase;
 import com.delorent.model.Louable.LouableFiltre;
 
+// On GARDE ces imports de HEAD car ils sont utilisés par la méthode getIdsDisponiblesA en bas
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
@@ -37,6 +37,7 @@ public class LouableRepository implements RepositoryBase<LouableSummary, Integer
     @Override
     public LouableSummary get(Integer id) {
         VehiculeSummary vehicule = vehiculeRepository.get(id);
+        // On garde la version concise de HEAD
         return vehicule == null ? null : vehicule.louable();
     }
 
@@ -76,6 +77,7 @@ public class LouableRepository implements RepositoryBase<LouableSummary, Integer
     /**
      * Renvoie les idLouable disponibles pour une date donnée (jour).
      * Règle : au moins une disponibilité NON réservée couvrant cette date.
+     * (Code apporté par la branche HEAD)
      */
     public Set<Integer> getIdsDisponiblesA(LocalDate date) {
         if (date == null) date = LocalDate.now();

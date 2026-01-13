@@ -1,37 +1,32 @@
 package com.delorent.model.Utilisateur;
 
-public class Agent extends Utilisateur{
+// Ajout du mot clé 'abstract'
+public abstract class Agent extends Utilisateur {
 
-   private String nom;
-   private String prenom;
+    private String nom;
+    private String prenom;
 
-   public Agent(String mail, String motDePasse, String adresse,
-                       String ville, String codePostal, String region,
-                       String telephone, String nom, String prenom) {
-    super(mail, motDePasse, adresse, ville, codePostal, region, telephone);
-    this.nom = nom;
-    this.prenom = prenom;
-  }
-
-    public Agent(int idUtilisateur, String mail, String motDePasse, String adresse,
-                       String ville, String codePostal, String region,
-                       String telephone, String nom, String prenom) {
-    super(idUtilisateur, mail, motDePasse, adresse, ville, codePostal, region, telephone);
-    this.nom = nom;
-    this.prenom = prenom;
-  }
-  
-   public String getNom () { return nom; }
-   public String getPrenom () { return prenom; }
-	 
-      public void setNom(String nom) 
-      {
+    public Agent(String mail, String motDePasse, String adresse,
+                 String ville, String codePostal, String region,
+                 String telephone, String nom, String prenom) {
+        super(mail, motDePasse, adresse, ville, codePostal, region, telephone);
         this.nom = nom;
-    }
-
-	  public void setPrenom(String prenom) 
-      
-      {
         this.prenom = prenom;
     }
+
+    public Agent(int idUtilisateur, String mail, String motDePasse, String adresse,
+                 String ville, String codePostal, String region,
+                 String telephone, String nom, String prenom) {
+        super(idUtilisateur, mail, motDePasse, adresse, ville, codePostal, region, telephone);
+        this.nom = nom;
+        this.prenom = prenom;
+    }
+    
+    // On force les enfants à dire qui ils sont
+    public abstract boolean isProfessionnel();
+
+    public String getNom() { return nom; }
+    public String getPrenom() { return prenom; }
+    public void setNom(String nom) { this.nom = nom; }
+    public void setPrenom(String prenom) { this.prenom = prenom; }
 }

@@ -1,18 +1,23 @@
 <!doctype html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout('Louable', ~{::section})}">
+      th:replace="~{fragments/layout :: layout('Détail Véhicule', ~{::section})}">
 
+<head>
+    <title>Détail</title>
+</head>
+
+<body>
 <section>
   <div class="panel soft">
 
     <div class="panel-head">
       <div>
-        <h1 class="h1">Détail louable</h1>
+        <h1 class="h1">Détail du véhicule</h1>
         <div class="muted small" th:if="${louableSummary != null}">
-          ID #<strong th:text="${louableSummary.idLouable()}">0</strong>
-          <span th:if="${louableSummary.type != null}">
-            · <span th:text="${louableSummary.type()}">Type</span>
-          </span>
+            ID #<strong th:text="${louableSummary.idLouable()}">0</strong>
+            <span th:if="${louableSummary.type != null}">
+                · <span th:text="${louableSummary.type()}">Type</span>
+            </span>
         </div>
       </div>
 
@@ -23,6 +28,10 @@
     </div>
 
     <div class="hr"></div>
+
+    <div class="alert ok" th:if="${succes}" th:text="${succes}">Succès</div>
+    <div class="alert info" th:if="${info}" th:text="${info}">Info</div>
+    <div class="alert err" th:if="${erreur}" th:text="${erreur}">Erreur</div>
 
     <div class="alert err" th:if="${louableSummary == null}">
       Louable introuvable.
@@ -35,6 +44,14 @@
           <div class="card-title">Informations</div>
 
           <div class="kv">
+            <div class="kv-row" th:if="${vehicule != null}">
+                <div class="k">Véhicule</div>
+                <div class="v">
+                    <strong th:text="${vehicule.marque()}">Marque</strong>
+                    <span th:text="${vehicule.modele()}">Modèle</span>
+                </div>
+            </div>
+
             <div class="kv-row">
               <div class="k">Type</div>
               <div class="v" th:text="${louableSummary.type()}">Type</div>
@@ -52,7 +69,14 @@
 
             <div class="kv-row">
               <div class="k">Statut</div>
-              <div class="v" th:text="${louableSummary.statut()}">Statut</div>
+              <div class="v">
+                  <span class="badge" th:text="${louableSummary.statut()}">Statut</span>
+              </div>
+            </div>
+            
+            <div class="kv-row" th:if="${vehicule != null}">
+                 <div class="k">Kilométrage</div>
+                 <div class="v" th:text="${vehicule.kilometrage()} + ' km'">0 km</div>
             </div>
           </div>
 
@@ -79,14 +103,50 @@
           </div>
         </article>
 
+        <article class="card" th:if="${canManage}" style="background-color: #fff8e1; border-color: #ffeeba;">
+            <div class="card-title">Option Convoyage (Propriétaire)</div>
+            
+            <div th:if="${offreActuelle == null}">
+                <p class="muted small">
+                    Souhaitez-vous proposer ce véhicule en "Aller Simple" vers un parking partenaire ?
+                </p>
+                
+                <form th:action="@{/louables/{id}/offre/ajouter(id=${louableSummary.idLouable()})}" method="post">
+                    <div style="margin-bottom: 10px;">
+                        <label for="parkingSelect" style="display:block; font-weight:bold; font-size:0.9em;">Destination :</label>
+                        <select id="parkingSelect" name="idParking" required style="width:100%; padding:8px;">
+                            <option value="" disabled selected>-- Choisir un parking --</option>
+                            <option th:each="p : ${listeParkings}" 
+                                    th:value="${p.idParking}" 
+                                    th:text="${p.ville} + ' - ' + ${p.nom} + ' (Coût: ' + ${p.prixAgent} + '€)'">
+                                Lyon
+                            </option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn primary">Activer l'offre</button>
+                </form>
+            </div>
+
+            <div th:if="${offreActuelle != null}">
+                <div class="alert ok">
+                    <strong>✅ Offre Active !</strong><br>
+                    Retour prévu à : <strong th:text="${offreActuelle.villeParking}">Ville</strong>
+                </div>
+                
+                <form th:action="@{/louables/{id}/offre/supprimer(id=${louableSummary.idLouable()})}" method="post">
+                    <button type="submit" class="btn danger small">
+                        Annuler l'offre
+                    </button>
+                </form>
+            </div>
+        </article>
+
         <article class="card" th:if="${louable != null}">
           <div class="card-title">Détails techniques</div>
           <div class="muted small">
-            Affichage brut (utile pour debug). Remplace par des champs dédiés quand tu veux.
+             Données brutes de l'objet spécifique.
           </div>
-
           <div class="hr"></div>
-
           <div class="alert warn">
             <div class="muted small" th:text="${louable}">
               Louable
@@ -99,4 +159,5 @@
 
   </div>
 </section>
+</body>
 </html>
