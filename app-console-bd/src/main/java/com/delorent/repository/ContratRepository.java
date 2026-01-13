@@ -224,5 +224,11 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
 
         return res.isEmpty() ? null : res.get(0);
     }
+
+        public boolean contratAppartientAuLoueur(int idContrat, int idLoueur) {
+        String sql = "SELECT COUNT(*) FROM CONTRAT WHERE idContrat = ? AND idLoueur = ?";
+        Integer n = jdbc.queryForObject(sql, Integer.class, idContrat, idLoueur);
+        return n != null && n > 0;
+    }
 }
 
