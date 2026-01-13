@@ -220,4 +220,25 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
                 rs.getString("permisRequis")
         ));
     }
+
+    public VehiculeSummary toSummary(Camion camion, boolean dispoJour) {
+        return new VehiculeSummary(
+                new LouableSummary(
+                    camion.getIdLouable(),
+                    camion.getIdAgent(), // <--- AJOUTER ICI
+                    camion.getStatut(),
+                    camion.getPrixJour(),
+                    camion.getLieuPrincipal(),
+                    "Camion",
+                    dispoJour
+                ),
+                camion.getMarque(),
+                camion.getModele(),
+                camion.getAnnee(),
+                camion.getCouleur(),
+                camion.getImmatriculation(),
+                camion.getKilometrage(),
+                "Camion"
+        );
+    }
 }

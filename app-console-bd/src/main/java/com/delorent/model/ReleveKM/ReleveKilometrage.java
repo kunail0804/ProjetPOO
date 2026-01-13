@@ -20,6 +20,10 @@ public class ReleveKilometrage {
         this.dateSaisie = dateSaisie;
     }
 
+    public ReleveKilometrage(){
+        super();
+    }
+
     public int getIdReleve() { return idReleve; }
     public int getIdContrat() { return idContrat; }
     public ReleveType getTypeReleve() { return typeReleve; }

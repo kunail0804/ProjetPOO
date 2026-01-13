@@ -226,4 +226,24 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
                 rs.getString("permisRequis")
         ));
     }
+    public VehiculeSummary toSummary(Moto moto, boolean dispoJour) {
+        return new VehiculeSummary(
+                new LouableSummary(
+                    moto.getIdLouable(),
+                    moto.getIdAgent(), // <--- AJOUTER ICI
+                    moto.getStatut(),
+                    moto.getPrixJour(),
+                    moto.getLieuPrincipal(),
+                    "Moto",
+                    dispoJour
+                ),
+                moto.getMarque(),
+                moto.getModele(),
+                moto.getAnnee(),
+                moto.getCouleur(),
+                moto.getImmatriculation(),
+                moto.getKilometrage(),
+                "Moto"
+        );
+    }
 }

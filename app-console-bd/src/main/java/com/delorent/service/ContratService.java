@@ -1,18 +1,21 @@
 package com.delorent.service;
 
-import com.delorent.model.ReleveKM.ReleveKilometrage;
-import com.delorent.model.ReleveKM.ReleveKilometrage;
+import com.delorent.config.UploadProperties;
+import com.delorent.model.ReleveKM.ReleveKilometrage; // Assure-toi que le package est bon
+import com.delorent.model.ReleveKM.ReleveType;       // IMPORT IMPORTANT (L'Enum)
 import com.delorent.repository.ContratRepository;
-import com.delorent.model.ReleveKM.ReleveType;
 import com.delorent.repository.ReleveKilometrageRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -20,113 +23,96 @@ public class ContratService {
 
     private final ContratRepository contratRepo;
     private final ReleveKilometrageRepository releveRepo;
+    private final UploadProperties uploadProperties;
+    private static final Set<String> ALLOWED_EXT = Set.of("jpg", "jpeg", "png", "webp");
 
-    public ContratService(ContratRepository contratRepo, ReleveKilometrageRepository releveRepo) {
+    public ContratService(ContratRepository contratRepo, 
+                          ReleveKilometrageRepository releveRepo,
+                          UploadProperties uploadProperties) {
         this.contratRepo = contratRepo;
         this.releveRepo = releveRepo;
+        this.uploadProperties = uploadProperties;
     }
 
     @Transactional(readOnly = true)
     public List<ReleveKilometrage> getRelevesContrat(int idContrat, int idLoueur) {
-        assertContratAppartientAuLoueur(idContrat, idLoueur);
+        verifierAppartenance(idContrat, idLoueur);
         return releveRepo.getByContrat(idContrat);
     }
 
     @Transactional(readOnly = true)
-    public boolean peutSaisirType(int idContrat, int idLoueur, ReleveType type) {
-        assertContratAppartientAuLoueur(idContrat, idLoueur);
-        if (type == null) return false;
-
-        // max 2 relevés
-        if (releveRepo.countByContrat(idContrat) >= 2) return false;
-
-        // pas de doublon par type
-        return !releveRepo.existsType(idContrat, type.name());
+    public boolean peutSaisirType(int idContrat, int idLoueur, String typeStr) {
+        try {
+            verifierAppartenance(idContrat, idLoueur);
+            if (releveRepo.countByContrat(idContrat) >= 2) return false;
+            return !releveRepo.existsType(idContrat, typeStr);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Transactional
     public void saisirReleve(int idContrat,
                              int idLoueur,
-                             ReleveType type,
+                             String typeStr, // Reçu en String du contrôleur
                              int kilometrage,
-                             MultipartFile photo) {
+                             MultipartFile photo) throws IOException {
 
-        assertContratAppartientAuLoueur(idContrat, idLoueur);
+        verifierAppartenance(idContrat, idLoueur);
 
-        if (type == null) {
-            throw new IllegalArgumentException("Type de relevé manquant.");
-        }
-        if (kilometrage < 0) {
-            throw new IllegalArgumentException("Le kilométrage ne peut pas être négatif.");
-        }
-        if (photo == null || photo.isEmpty()) {
-            throw new IllegalArgumentException("Photo obligatoire (preuve).");
-        }
+        // 1. Validation de base
+        if (typeStr == null || typeStr.isBlank()) throw new IllegalArgumentException("Type manquant.");
+        if (kilometrage < 0) throw new IllegalArgumentException("Kilométrage invalide.");
+        if (photo == null || photo.isEmpty()) throw new IllegalArgumentException("Photo obligatoire.");
 
-        // règles métier (même si tu as aussi un trigger)
-        int count = releveRepo.countByContrat(idContrat);
-        if (count >= 2) {
-            throw new IllegalArgumentException("Il y a déjà 2 relevés pour ce contrat.");
-        }
-        if (releveRepo.existsType(idContrat, type.name())) {
-            throw new IllegalArgumentException("Un relevé " + type.name() + " existe déjà pour ce contrat.");
+        // 2. CONVERSION STRING -> ENUM (La correction est ici !)
+        ReleveType typeEnum;
+        try {
+            typeEnum = ReleveType.valueOf(typeStr);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Type de relevé invalide : " + typeStr);
         }
 
-        String photoPath = savePhotoToUploads(idContrat, type, photo);
+        // 3. Vérifications métier
+        if (releveRepo.countByContrat(idContrat) >= 2) {
+            throw new IllegalArgumentException("Déjà 2 relevés pour ce contrat.");
+        }
+        if (releveRepo.existsType(idContrat, typeStr)) {
+            throw new IllegalArgumentException("Le relevé " + typeStr + " existe déjà.");
+        }
 
-        ReleveKilometrage r = new ReleveKilometrage(
-                0,
-                idContrat,
-                type,
-                kilometrage,
-                photoPath,
-                LocalDateTime.now()
-        );
+        // 4. Upload
+        String original = StringUtils.cleanPath(photo.getOriginalFilename() == null ? "" : photo.getOriginalFilename());
+        String ext = getExtLower(original);
+        if (!ALLOWED_EXT.contains(ext)) throw new IllegalArgumentException("Format non autorisé.");
+
+        Path root = uploadProperties.getUploadRoot();
+        Path dir = root.resolve("releves");
+        Files.createDirectories(dir);
+        
+        String filename = UUID.randomUUID() + "." + ext;
+        Files.copy(photo.getInputStream(), dir.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+        String photoPath = "/uploads/releves/" + filename;
+
+        // 5. Création de l'objet (Utilise l'Enum maintenant !)
+        ReleveKilometrage r = new ReleveKilometrage();
+        r.setIdContrat(idContrat);
+        r.setTypeReleve(typeEnum); // ✅ On passe l'Enum, plus le String
+        r.setKilometrage(kilometrage);
+        r.setPhotoPath(photoPath);
+        r.setDateSaisie(LocalDateTime.now());
 
         releveRepo.add(r);
     }
 
-    private void assertContratAppartientAuLoueur(int idContrat, int idLoueur) {
-        if (!contratRepo.contratAppartientAuLoueur(idContrat, idLoueur)) {
-            throw new IllegalArgumentException("Accès refusé : ce contrat ne vous appartient pas.");
+    private void verifierAppartenance(int idContrat, int idLoueur) {
+        if (contratRepo.getDetailByIdAndLoueur(idContrat, idLoueur) == null) {
+            throw new IllegalArgumentException("Accès refusé.");
         }
     }
 
-    private String savePhotoToUploads(int idContrat, ReleveType type, MultipartFile photo) {
-        // sécurité simple sur content-type
-        String ct = photo.getContentType();
-        if (ct == null || !ct.startsWith("image/")) {
-            throw new IllegalArgumentException("La photo doit être une image.");
-        }
-
-        String original = photo.getOriginalFilename();
-        String ext = guessExtension(original);
-        String filename = type.name().toLowerCase() + "-" + UUID.randomUUID() + ext;
-
-        Path dir = Paths.get("uploads", "releves-km", String.valueOf(idContrat));
-        try {
-            Files.createDirectories(dir);
-            Path target = dir.resolve(filename);
-
-            // overwrite interdit par défaut : on force REPLACE_EXISTING si besoin
-            Files.copy(photo.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-
-            // chemin web
-            return "/uploads/releves-km/" + idContrat + "/" + filename;
-        } catch (IOException e) {
-            throw new IllegalStateException("Impossible d'enregistrer la photo : " + e.getMessage(), e);
-        }
-    }
-
-    private String guessExtension(String filename) {
-        if (filename == null) return "";
-        int dot = filename.lastIndexOf('.');
-        if (dot < 0) return "";
-        String ext = filename.substring(dot).toLowerCase();
-        // mini whitelist
-        return switch (ext) {
-            case ".jpg", ".jpeg", ".png", ".webp" -> ext;
-            default -> "";
-        };
+    private String getExtLower(String filename) {
+        int idx = filename.lastIndexOf('.');
+        return idx < 0 ? "" : filename.substring(idx + 1).toLowerCase();
     }
 }

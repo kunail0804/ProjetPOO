@@ -103,43 +103,50 @@
           </div>
         </article>
 
-        <article class="card" th:if="${canManage}" style="background-color: #fff8e1; border-color: #ffeeba;">
-            <div class="card-title">Option Convoyage (Propriétaire)</div>
+        <article class="card" th:if="${canManage}">
             
-            <div th:if="${offreActuelle == null}">
-                <p class="muted small">
-                    Souhaitez-vous proposer ce véhicule en "Aller Simple" vers un parking partenaire ?
-                </p>
-                
-                <form th:action="@{/louables/{id}/offre/ajouter(id=${louableSummary.idLouable()})}" method="post">
-                    <div style="margin-bottom: 10px;">
-                        <label for="parkingSelect" style="display:block; font-weight:bold; font-size:0.9em;">Destination :</label>
-                        <select id="parkingSelect" name="idParking" required style="width:100%; padding:8px;">
-                            <option value="" disabled selected>-- Choisir un parking --</option>
-                            <option th:each="p : ${listeParkings}" 
-                                    th:value="${p.idParking}" 
-                                    th:text="${p.ville} + ' - ' + ${p.nom} + ' (Coût: ' + ${p.prixAgent} + '€)'">
-                                Lyon
-                            </option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn primary">Activer l'offre</button>
-                </form>
-            </div>
+          <div class="card-title">Option Convoyage (Propriétaire)</div>
+          
+          <div class="muted small" style="margin-bottom: 1rem;">
+              Proposez ce véhicule en "Aller Simple" vers un parking partenaire.
+          </div>
+          
+          <div th:if="${offreActuelle == null}">
+              <form th:action="@{/louables/{id}/offre/ajouter(id=${louableSummary.idLouable()})}" method="post">
+                  <div style="margin-bottom: 15px;">
+                      <label for="parkingSelect" style="display:block; font-weight:bold; margin-bottom: 5px;">
+                          Destination :
+                      </label>
+                      <select id="parkingSelect" name="idParking" required style="width:100%; padding:8px; border: 1px solid #ccc; border-radius: 4px;">
+                          <option value="" disabled selected>-- Choisir un parking --</option>
+                          <option th:each="p : ${listeParkings}" 
+                                  th:value="${p.idParking}" 
+                                  th:text="${p.ville} + ' - ' + ${p.nom} + ' (Coût: ' + ${p.prixAgent} + '€)'">
+                              Lyon
+                          </option>
+                      </select>
+                  </div>
+                  <button type="submit" class="btn primary">
+                      Activer l'offre
+                  </button>
+              </form>
+          </div>
 
-            <div th:if="${offreActuelle != null}">
-                <div class="alert ok">
-                    <strong>✅ Offre Active !</strong><br>
-                    Retour prévu à : <strong th:text="${offreActuelle.villeParking}">Ville</strong>
-                </div>
-                
-                <form th:action="@{/louables/{id}/offre/supprimer(id=${louableSummary.idLouable()})}" method="post">
-                    <button type="submit" class="btn danger small">
-                        Annuler l'offre
-                    </button>
-                </form>
-            </div>
-        </article>
+          <div th:if="${offreActuelle != null}">
+              <div class="alert ok">
+                  <strong>✅ Offre Active !</strong><br>
+                  Retour prévu à : <strong th:text="${offreActuelle.villeParking}">Ville</strong>
+              </div>
+              
+              <div class="spacer"></div>
+
+              <form th:action="@{/louables/{id}/offre/supprimer(id=${louableSummary.idLouable()})}" method="post">
+                  <button type="submit" class="btn danger">
+                      Annuler l'offre
+                  </button>
+              </form>
+          </div>
+      </article>
 
         <article class="card" th:if="${louable != null}">
           <div class="card-title">Détails techniques</div>

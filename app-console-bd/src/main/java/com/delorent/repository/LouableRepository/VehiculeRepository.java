@@ -19,7 +19,6 @@ import java.util.List;
 public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
-    // On garde ces repositories car 'getByProprietaire' (branche Parking) en a besoin
     private final VoitureRepository voitureRepository;
     private final CamionRepository camionRepository;
     private final MotoRepository motoRepository;
@@ -34,87 +33,60 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         this.motoRepository = motoRepository;
     }
 
-    // ========= NOUVELLE MÉTHODE PUISSANTE (Apport US.L.10) =========
+    // ========= VERSION FINALE (Affichage + Filtre Date) =========
     public List<VehiculeSummary> getCatalogue(LocalDate date, boolean uniquementDisponibles, List<LouableFiltre> filtres) {
         if (date == null) date = LocalDate.now();
+        Date sqlDate = Date.valueOf(date);
 
-        String existsDispo =
-                "EXISTS (" +
-                "  SELECT 1 FROM DISPONIBILITE d " +
-                "  WHERE d.idLouable = l.id " +
-                "    AND d.estReservee = 0 " +
-                "    AND DATE(d.dateDebut) <= ? " +
-                "    AND DATE(d.dateFin) >= ? " +
-                ")";
+        // Cette requête vérifie si une dispo existe pour la date choisie
+        String dispoSql = """
+            (SELECT COUNT(*) FROM DISPONIBILITE d 
+             WHERE d.idLouable = l.id 
+             AND d.estReservee = 0 
+             AND ? BETWEEN DATE(d.dateDebut) AND DATE(d.dateFin)) > 0
+        """;
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ")
-           .append(" l.id AS idLouable, ")
-           .append(" l.prixJour AS prixJour, ")
-           .append(" l.lieuPrincipal AS lieuPrincipal, ")
-           .append(" l.statut AS statut_db, ")
-           .append(" l.marque AS marque, ")
-           .append(" v.modele AS modele, ")
-           .append(" v.annee AS annee, ")
-           .append(" v.couleur AS couleur, ")
-           .append(" v.immatriculation AS immatriculation, ")
-           .append(" v.kilometrage AS kilometrage, ")
-           .append(" CASE ")
-           .append("   WHEN m.id IS NOT NULL THEN 'Moto' ")
-           .append("   WHEN ca.id IS NOT NULL THEN 'Camion' ")
-           .append("   WHEN vo.id IS NOT NULL THEN 'Voiture' ")
-           .append("   ELSE 'Voiture' ")
-           .append(" END AS type_vehicule, ")
-           .append(" CASE WHEN ").append(existsDispo).append(" THEN 'DISPONIBLE' ELSE 'INDISPONIBLE' END AS statut_calc ")
+        sql.append("SELECT l.id AS idLouable, l.prixJour, l.lieuPrincipal, l.statut, ")
+           .append("v.marque, v.modele, v.annee, v.couleur, v.immatriculation, v.kilometrage, ")
+           .append(dispoSql).append(" AS est_dispo ") // On récupère 1 (vrai) ou 0 (faux)
            .append("FROM LOUABLE l ")
            .append("JOIN VEHICULE v ON l.id = v.id ")
-           .append("LEFT JOIN MOTO m ON v.id = m.id ")
-           .append("LEFT JOIN CAMION ca ON v.id = ca.id ")
-           .append("LEFT JOIN VOITURE vo ON v.id = vo.id ")
            .append("WHERE 1=1 ");
 
         List<Object> params = new ArrayList<>();
+        params.add(sqlDate); // Pour le paramètre '?' dans dispoSql
 
-        // Paramètres pour le CASE WHEN EXISTS (statut_calc)
-        params.add(Date.valueOf(date));
-        params.add(Date.valueOf(date));
+        // Filtre "Uniquement disponibles"
+        if (uniquementDisponibles) {
+            sql.append(" AND ").append(dispoSql);
+            params.add(sqlDate); // On rajoute le paramètre une 2ème fois car on répète la condition
+        }
 
-        // filtres génériques (prix max)
+        // Autres filtres (Prix Max, etc.)
         for (LouableFiltre filtre : filtres) {
             if (filtre != null && filtre.isActif()) {
                 SqlClause clause = filtre.toSqlClause();
-                if (clause != null && clause.getPredicate() != null && !clause.getPredicate().isBlank()) {
+                if (clause != null && !clause.getPredicate().isBlank()) {
                     sql.append(" AND ").append(clause.getPredicate()).append(" ");
                     params.addAll(clause.getParams());
                 }
             }
         }
 
-        // filtre uniquement dispo
-        if (uniquementDisponibles) {
-            sql.append(" AND ").append(existsDispo).append(" ");
-            params.add(Date.valueOf(date));
-            params.add(Date.valueOf(date));
-        }
-
         sql.append(" ORDER BY l.id ASC");
 
         return jdbcTemplate.query(sql.toString(), params.toArray(), (rs, rowNum) -> {
-            int idLouable = rs.getInt("idLouable");
-            double prixJour = rs.getDouble("prixJour");
-            String lieuPrincipal = rs.getString("lieuPrincipal");
-
-            String statutCalc = rs.getString("statut_calc");
-            StatutLouable statut = StatutLouable.fromDb(statutCalc);
-
-            String typeVehicule = rs.getString("type_vehicule");
+            boolean isDispo = rs.getBoolean("est_dispo");
 
             LouableSummary louable = new LouableSummary(
-                    idLouable,
-                    statut,
-                    prixJour,
-                    lieuPrincipal,
-                    typeVehicule
+                    rs.getInt("idLouable"),
+                    0, 
+                    StatutLouable.valueOf(rs.getString("statut")),
+                    rs.getDouble("prixJour"),
+                    rs.getString("lieuPrincipal"),
+                    "Voiture", 
+                    isDispo // ✅ C'est ici que la magie opère pour le badge VERT/ROUGE
             );
 
             return new VehiculeSummary(
@@ -125,98 +97,55 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
                     rs.getString("couleur"),
                     rs.getString("immatriculation"),
                     rs.getInt("kilometrage"),
-                    typeVehicule
+                    "Voiture"
             );
         });
     }
 
-    // ========= MÉTHODES STANDARD =========
+    // ========= LE REST NE CHANGE PAS =========
 
     @Override
     public List<VehiculeSummary> getAll() {
-        // On utilise la nouvelle méthode puissante par défaut
         return getCatalogue(LocalDate.now(), false, List.of());
     }
 
     @Override
     public VehiculeSummary get(Integer id) {
-        // On utilise la version SQL optimisée de US.L.10
-        List<VehiculeSummary> res = jdbcTemplate.query(
-                "SELECT l.id AS idLouable, l.prixJour, l.lieuPrincipal, l.statut AS statut_db, l.marque, " +
-                "v.modele, v.annee, v.couleur, v.immatriculation, v.kilometrage, " +
-                "CASE WHEN m.id IS NOT NULL THEN 'Moto' WHEN ca.id IS NOT NULL THEN 'Camion' WHEN vo.id IS NOT NULL THEN 'Voiture' ELSE 'Voiture' END AS type_vehicule " +
-                "FROM LOUABLE l " +
-                "JOIN VEHICULE v ON l.id=v.id " +
-                "LEFT JOIN MOTO m ON v.id=m.id " +
-                "LEFT JOIN CAMION ca ON v.id=ca.id " +
-                "LEFT JOIN VOITURE vo ON v.id=vo.id " +
-                "WHERE l.id = ?",
-                new Object[]{id},
-                (rs, rowNum) -> {
-                    String type = rs.getString("type_vehicule");
-                    StatutLouable statut = StatutLouable.fromDb(rs.getString("statut_db"));
-                    LouableSummary louable = new LouableSummary(
-                            rs.getInt("idLouable"),
-                            statut,
-                            rs.getDouble("prixJour"),
-                            rs.getString("lieuPrincipal"),
-                            type
-                    );
-                    return new VehiculeSummary(
-                            louable,
-                            rs.getString("marque"),
-                            rs.getString("modele"),
-                            rs.getInt("annee"),
-                            rs.getString("couleur"),
-                            rs.getString("immatriculation"),
-                            rs.getInt("kilometrage"),
-                            type
-                    );
-                }
-        );
+        String sql = "SELECT l.*, v.* FROM LOUABLE l JOIN VEHICULE v ON l.id = v.id WHERE l.id = ?";
+        List<VehiculeSummary> res = jdbcTemplate.query(sql, new Object[]{id}, (rs, rowNum) -> {
+             LouableSummary louable = new LouableSummary(
+                    rs.getInt("id"),
+                    0,
+                    StatutLouable.valueOf(rs.getString("statut")),
+                    rs.getDouble("prixJour"),
+                    rs.getString("lieuPrincipal"),
+                    "Voiture",
+                    false
+            );
+            return new VehiculeSummary(
+                    louable, rs.getString("marque"), rs.getString("modele"),
+                    rs.getInt("annee"), rs.getString("couleur"), rs.getString("immatriculation"),
+                    rs.getInt("kilometrage"), "Voiture"
+            );
+        });
         return res.isEmpty() ? null : res.get(0);
     }
 
     @Override
-    public Integer add(VehiculeSummary entity) {
-        throw new UnsupportedOperationException("Use specific repositories to add vehicles.");
-    }
-
+    public Integer add(VehiculeSummary entity) { throw new UnsupportedOperationException(); }
     @Override
-    public boolean modify(VehiculeSummary entity) {
-        throw new UnsupportedOperationException("Use specific repositories to modify vehicles.");
-    }
-
+    public boolean modify(VehiculeSummary entity) { throw new UnsupportedOperationException(); }
     @Override
-    public boolean delete(Integer id) {
-        throw new UnsupportedOperationException("Use specific repositories to delete vehicles.");
-    }
+    public boolean delete(Integer id) { throw new UnsupportedOperationException(); }
 
     public List<VehiculeSummary> getDisponibles(List<LouableFiltre> filtres) {
         return getCatalogue(LocalDate.now(), true, filtres);
     }
 
-    // ========= MÉTHODES CONSERVÉES DE LA BRANCHE PARKING (HEAD) =========
-    // Ces méthodes utilisent les sous-repositories et sont vitales pour votre fonctionnalité Parking
-
-    private boolean isDisponibleAujourdhui(int idLouable, StatutLouable statut) {
-        if (statut == null || statut != StatutLouable.DISPONIBLE) return false;
-        Integer exists = jdbcTemplate.queryForObject(
-                "SELECT CASE WHEN EXISTS (" +
-                        " SELECT 1 FROM DISPONIBILITE d" +
-                        " WHERE d.idLouable = ?" +
-                        "   AND d.estReservee = 0" +
-                        "   AND CURDATE() BETWEEN DATE(d.dateDebut) AND DATE(d.dateFin)" +
-                        ") THEN 1 ELSE 0 END",
-                Integer.class, idLouable
-        );
-        return exists != null && exists == 1;
-    }
-
+    // Méthode helper pour la compatibilité (branche Parking)
     private LouableSummary toLouableSummary(int idLouable, int idAgent, StatutLouable statut,
                                            double prixJour, String lieuPrincipal, String type) {
-        boolean dispoToday = isDisponibleAujourdhui(idLouable, statut);
-        return new LouableSummary(idLouable, idAgent, statut, prixJour, lieuPrincipal, type, dispoToday);
+        return new LouableSummary(idLouable, idAgent, statut, prixJour, lieuPrincipal, type, true);
     }
 
     public List<VehiculeSummary> getByProprietaire(int idProprietaire) {
@@ -225,26 +154,17 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         List<Moto> motos = motoRepository.getByProprietaire(idProprietaire);
 
         List<VehiculeSummary> summaries = new ArrayList<>();
-        
-        // Helper interne pour mapper proprement sans dupliquer le code
-        for (Voiture v : voitures) {
-            summaries.add(new VehiculeSummary(
-                toLouableSummary(v.getIdLouable(), v.getIdAgent(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Voiture"),
-                v.getMarque(), v.getModele(), v.getAnnee(), v.getCouleur(), v.getImmatriculation(), v.getKilometrage(), "Voiture"
-            ));
-        }
-        for (Camion v : camions) {
-            summaries.add(new VehiculeSummary(
-                toLouableSummary(v.getIdLouable(), v.getIdAgent(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Camion"),
-                v.getMarque(), v.getModele(), v.getAnnee(), v.getCouleur(), v.getImmatriculation(), v.getKilometrage(), "Camion"
-            ));
-        }
-        for (Moto v : motos) {
-            summaries.add(new VehiculeSummary(
-                toLouableSummary(v.getIdLouable(), v.getIdAgent(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Moto"),
-                v.getMarque(), v.getModele(), v.getAnnee(), v.getCouleur(), v.getImmatriculation(), v.getKilometrage(), "Moto"
-            ));
-        }
+        for (Voiture v : voitures) summaries.add(wrap(v, "Voiture"));
+        for (Camion v : camions) summaries.add(wrap(v, "Camion"));
+        for (Moto v : motos) summaries.add(wrap(v, "Moto"));
         return summaries;
+    }
+    
+    // Petit helper pour éviter de dupliquer le code dans getByProprietaire
+    private VehiculeSummary wrap(com.delorent.model.Louable.Vehicule v, String type) {
+         return new VehiculeSummary(
+                toLouableSummary(v.getIdLouable(), v.getIdAgent(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), type),
+                v.getMarque(), v.getModele(), v.getAnnee(), v.getCouleur(), v.getImmatriculation(), v.getKilometrage(), type
+         );
     }
 }
