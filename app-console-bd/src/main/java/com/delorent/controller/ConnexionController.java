@@ -31,14 +31,16 @@ public class ConnexionController {
      */
     private String validerChamps(Map<String, String> champs) {
         Pattern emailP = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-        Pattern passwordP = Pattern.compile("^.{6,100}$"); // min 6
+        //Pattern passwordP = Pattern.compile("^.{6,100}$"); // min 6//
+        Pattern passwordP = Pattern.compile("^.{4,100}$"); // min 4
 
         record Rule(String label, Pattern pattern, boolean required, String messageSiInvalide) {}
 
         Rule[] rules = new Rule[] {
                 new Rule("role", Pattern.compile("^(AGENT|LOUEUR|ENTRETIEN)$"), true, "Veuillez sélectionner un type de compte valide."),
                 new Rule("email", emailP, true, "Email invalide."),
-                new Rule("password", passwordP, true, "Mot de passe invalide (min 6 caractères).")
+                //new Rule("password", passwordP, true, "Mot de passe invalide (min 6 caractères).")//
+                new Rule("password", passwordP, true, "Mot de passe invalide (min 4 caractères).")
         };
 
         for (Rule r : rules) {

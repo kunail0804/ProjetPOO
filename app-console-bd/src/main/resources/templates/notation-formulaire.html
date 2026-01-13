@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noter un véhicule - Plateforme Autopartage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        /* Informations du véhicule */
+        .vehicule-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .vehicule-info h2 {
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+        
+        .vehicule-info p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+        
+        /* Formulaire */
+        .form-section {
+            margin-bottom: 25px;
+        }
+        
+        .form-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        /* Critères de notation avec étoiles */
+        .critere-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .critere-label {
+            font-weight: 500;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        /* Système d'étoiles */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        
+        .star-rating input {
+            display: none;
+        }
+        
+        .star-rating label {
+            cursor: pointer;
+            font-size: 2em;
+            color: #ddd;
+            padding: 0 5px;
+            transition: color 0.2s;
+        }
+        
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #ffc107;
+        }
+        
+        /* Zone de commentaire */
+        .commentaire-section textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        .commentaire-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .commentaire-section label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        /* Bouton de soumission */
+        .submit-btn {
+            width: 100%;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Lien retour */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête -->
+        <div class="card header">
+            <h1>⭐ Noter ce véhicule</h1>
+            <p>Partagez votre expérience pour aider les autres utilisateurs</p>
+        </div>
+        
+        <!-- Informations du véhicule loué -->
+        <div class="vehicule-info">
+            <h2 th:text="${contrat.marque} + ' ' + ${contrat.modele}">Marque Modèle</h2>
+            <p>📍 Lieu : <span th:text="${contrat.lieu}">Lieu</span></p>
+            <p>📅 Location du <span th:text="${#dates.format(contrat.dateDebut, 'dd/MM/yyyy')}">01/01/2026</span> 
+               au <span th:text="${#dates.format(contrat.dateFin, 'dd/MM/yyyy')}">07/01/2026</span></p>
+        </div>
+        
+        <!-- Formulaire de notation -->
+        <div class="card">
+            <form action="/notation/soumettre" method="post">
+                
+                <!-- Champ caché pour l'ID du contrat -->
+                <input type="hidden" name="idContrat" th:value="${idContrat}">
+                
+                <!-- Section des critères -->
+                <div class="form-section">
+                    <h3>📊 Notez chaque critère</h3>
+                    
+                    <!-- Boucle sur chaque critère -->
+                    <div th:each="critere : ${criteres}" class="critere-item">
+                        <span class="critere-label" th:text="${critere.libelle}">Critère</span>
+                        
+                        <!-- Système d'étoiles (5 à 1 pour l'effet CSS) -->
+                        <div class="star-rating">
+                            <input type="radio" th:id="${'star5_' + critere.id}" th:name="${'critere_' + critere.id}" value="5" required>
+                            <label th:for="${'star5_' + critere.id}">★</label>
+                            
+                            <input type="radio" th:id="${'star4_' + critere.id}" th:name="${'critere_' + critere.id}" value="4">
+                            <label th:for="${'star4_' + critere.id}">★</label>
+                            
+                            <input type="radio" th:id="${'star3_' + critere.id}" th:name="${'critere_' + critere.id}" value="3">
+                            <label th:for="${'star3_' + critere.id}">★</label>
+                            
+                            <input type="radio" th:id="${'star2_' + critere.id}" th:name="${'critere_' + critere.id}" value="2">
+                            <label th:for="${'star2_' + critere.id}">★</label>
+                            
+                            <input type="radio" th:id="${'star1_' + critere.id}" th:name="${'critere_' + critere.id}" value="1">
+                            <label th:for="${'star1_' + critere.id}">★</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section commentaire -->
+                <div class="form-section commentaire-section">
+                    <h3>💬 Votre commentaire</h3>
+                    <label for="commentaire">Décrivez votre expérience (optionnel)</label>
+                    <textarea id="commentaire" name="commentaire" 
+                              placeholder="Partagez votre expérience avec ce véhicule..."></textarea>
+                </div>
+                
+                <!-- Bouton de soumission -->
+                <button type="submit" class="submit-btn">
+                    ✅ Valider ma note
+                </button>
+            </form>
+        </div>
+        
+        <!-- Lien retour -->
+        <a href="/profil" class="back-link">← Retour à mon profil</a>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2026 Plateforme Autopartage - US.L.3 par Alexia</p>
+        </div>
+    </div>
+</body>
+</html>

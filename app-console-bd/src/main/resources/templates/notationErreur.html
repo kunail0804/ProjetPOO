@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erreur - Plateforme Autopartage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .error-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        
+        .message {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        
+        .error-details {
+            background-color: #ffeaea;
+            border: 1px solid #e74c3c;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="error-icon">😕</div>
+        <h1>Oups, une erreur s'est produite</h1>
+        
+        <div class="error-details" th:if="${erreur}">
+            <p th:text="${erreur}">Message d'erreur</p>
+        </div>
+        
+        <div class="error-details" th:if="${message}">
+            <p th:text="${message}">Message</p>
+        </div>
+        
+        <p class="message">Veuillez réessayer ou contacter le support si le problème persiste.</p>
+        
+        <a href="/profil" class="btn">👤 Retour à mon profil</a>
+        
+        <div class="footer">
+            <p>© 2026 Plateforme Autopartage - US.L.3 par Alexia</p>
+        </div>
+    </div>
+</body>
+</html>
+```
+
+## 5. URLs de test
+
+Une fois que tu as créé tous les fichiers et redémarré l'application, voici comment tester.
+
+### Étape préalable importante
+
+Comme le système vérifie que l'utilisateur est connecté en tant que Loueur, tu dois d'abord te connecter. Va sur cette URL et connecte-toi avec un compte Loueur existant :
+```
+http://localhost:8080/connexion
+```
+
+### Test du formulaire de notation
+
+Une fois connecté, tu peux accéder au formulaire de notation. Essaie ces différentes URLs pour voir différents véhicules fictifs :
+```
+http://localhost:8080/notation/formulaire?idContrat=1
+```
+Cette URL affiche le formulaire pour noter une Peugeot 208 à Toulouse.
+```
+http://localhost:8080/notation/formulaire?idContrat=3
+```
+Cette URL affiche le formulaire pour noter une Renault Clio à Paris.
+```
+http://localhost:8080/notation/formulaire?idContrat=4
+```
+Cette URL affiche le formulaire pour noter une Citroën C3 à Lyon.
+
+### Test de la soumission
+
+Sur le formulaire, clique sur les étoiles pour donner une note à chaque critère, ajoute un commentaire si tu veux, puis clique sur "Valider ma note". Tu seras redirigé vers la page de confirmation qui affiche la note globale calculée.
+
+### Test de la page d'erreur
+
+Pour voir la page d'erreur, essaie de noter le même contrat deux fois. La deuxième fois, tu verras le message "Ce contrat a déjà été noté !".
+
+### Vérification dans le terminal
+
+Quand tu soumets une note, regarde le terminal de VS Code. Tu devrais voir un message comme celui-ci qui confirme que les données ont été reçues :
+```
+===========================================
+NOTE SAUVEGARDÉE (version mock) :
+  - ID Contrat : 1
+  - Note globale : 4.2
+  - Commentaire : Super véhicule !
+  - Notes par critère : {1=5, 2=4, 3=4, 4=4, 5=4}
+===========================================
