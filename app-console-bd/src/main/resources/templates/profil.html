@@ -18,6 +18,9 @@
       </div>
 
       <div class="btnrow">
+        <a class="btn secondary" th:href="@{/messagerie}">
+          📂 Mes messages
+      </a>
         <a class="btn" th:href="@{/profil/edition}">Modifier</a>
         <form th:action="@{/profil/suppression}" method="post" style="margin:0;"
               onsubmit="return confirm('Supprimer définitivement le compte ?');">

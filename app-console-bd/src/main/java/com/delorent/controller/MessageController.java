@@ -1,6 +1,8 @@
 package com.delorent.controller;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,28 +10,47 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.delorent.model.Utilisateur.Utilisateur;
 import com.delorent.model.Discussion;
 import com.delorent.model.Message;
 import com.delorent.repository.MessageRepository;
+import com.delorent.service.ConnexionService; // <--- On importe ton service
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class MessageController {
 
     private final MessageRepository messageRepository;
-    private final int ID_USER_CONNECTE = 1; // Simulation : Je suis Jean
+    private final ConnexionService connexionService; // <--- On l'injecte ici
 
-    public MessageController(MessageRepository messageRepository) {
+    // On demande à Spring de nous donner les deux outils
+    public MessageController(MessageRepository messageRepository, ConnexionService connexionService) {
         this.messageRepository = messageRepository;
+        this.connexionService = connexionService;
     }
 
     @GetMapping("/messagerie")
-    public String afficherMessagerie(@RequestParam(required = false) Integer idDiscussion, Model model) {
-        // 1. Charger la liste de mes conversations (Colonne de gauche)
-        List<Discussion> mesDiscussions = messageRepository.trouverDiscussionsUtilisateur(ID_USER_CONNECTE);
-        model.addAttribute("discussions", mesDiscussions);
-        model.addAttribute("userId", ID_USER_CONNECTE);
+    public String afficherMessagerie(@RequestParam(required = false) Integer idDiscussion, 
+                                     Model model) {
+        
+        // 1. On demande au service : "Qui est connecté ?" 
+        Utilisateur user = connexionService.getConnexion();
+        
+        // Si personne n'est connecté, on redirige
+        if (user == null) {
+            return "redirect:/connexion";
+        }
 
-        // 2. Si une discussion est sélectionnée, charger les messages (Colonne de droite)
+        // On récupère l'ID proprement
+        Integer idConnecte = user.getIdUtilisateur();
+
+        // 2. Charger la liste de mes conversations (Colonne de gauche)
+        List<Discussion> mesDiscussions = messageRepository.trouverDiscussionsUtilisateur(idConnecte);
+        model.addAttribute("discussions", mesDiscussions);
+        model.addAttribute("userId", idConnecte);
+
+        // 3. Si une discussion est sélectionnée, charger les messages (Colonne de droite)
         if (idDiscussion != null) {
             List<Message> messages = messageRepository.trouverMessages(idDiscussion);
             model.addAttribute("messages", messages);
@@ -40,15 +61,53 @@ public class MessageController {
     }
 
     @PostMapping("/messagerie/envoyer")
-    public String envoyer(@RequestParam int idDiscussion, @RequestParam String contenu) {
+    public String envoyer(@RequestParam int idDiscussion, 
+                          @RequestParam String contenu) {
+        
+        Utilisateur user = connexionService.getConnexion();
+        if (user == null) return "redirect:/connexion";
+
         Message msg = new Message();
         msg.setIdDiscussion(idDiscussion);
-        msg.setIdExpediteur(ID_USER_CONNECTE);
+        msg.setIdExpediteur(user.getIdUtilisateur());
         msg.setContenu(contenu);
         
         messageRepository.envoyerMessage(msg);
         
-        // On recharge la page sur la discussion en cours
+        return "redirect:/messagerie?idDiscussion=" + idDiscussion;
+    }
+
+    @PostMapping("/messagerie/nouveau")
+    public String demarrerDiscussion(@RequestParam int idDestinataire) {
+        
+        // 1. Récupération via le service
+        Utilisateur user = connexionService.getConnexion();
+        
+        if (user == null) {
+            System.out.println("❌ Redirection : ConnexionService renvoie null");
+            return "redirect:/connexion";
+        }
+
+        Integer idConnecte = user.getIdUtilisateur();
+        System.out.println("✅ Utilisateur identifié ID : " + idConnecte);
+
+        // 2. Logique de création de discussion
+        Optional<Discussion> existing = messageRepository.findByUtilisateurs(idConnecte, idDestinataire);
+
+        int idDiscussion;
+
+        if (existing.isPresent()) {
+            idDiscussion = existing.get().getIdDiscussion();
+        } else {
+            Discussion nouvelle = new Discussion();
+            nouvelle.setIdUtilisateur1(idConnecte);
+            nouvelle.setIdUtilisateur2(idDestinataire);
+            nouvelle.setDateCreation(LocalDate.now().toString());
+            
+            Discussion saved = messageRepository.save(nouvelle);
+            idDiscussion = saved.getIdDiscussion();
+        }
+
         return "redirect:/messagerie?idDiscussion=" + idDiscussion;
     }
 }

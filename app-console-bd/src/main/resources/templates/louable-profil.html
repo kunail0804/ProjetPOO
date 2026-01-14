@@ -83,6 +83,12 @@
           <div class="spacer"></div>
 
           <div class="btnrow">
+            <form th:action="@{/messagerie/nouveau}" method="post" style="display:inline;">
+              <input type="hidden" name="idDestinataire" th:value="${louableSummary.idAgent()}" /> 
+              <button type="submit" class="btn secondary">
+                  ✉️ Contacter le propriétaire
+              </button>
+          </form>
             <a class="btn primary"
                th:href="@{/louables/{id}/louer(id=${louableSummary.idLouable()})}">
               Louer
