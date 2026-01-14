@@ -89,9 +89,15 @@
             </a>
 
             <a class="btn"
+               th:href="@{/louables/{id}/modifierDisponibilite(id=${louableSummary.idLouable()})}"
+               th:if="${canManage}">
+              Modifier Disponibilite
+            </a>
+
+            <a class="btn"
                th:href="@{/louables/{id}/modifier(id=${louableSummary.idLouable()})}"
                th:if="${canManage}">
-              Modifier
+              Modifier Louable
             </a>
 
             <a class="btn danger"

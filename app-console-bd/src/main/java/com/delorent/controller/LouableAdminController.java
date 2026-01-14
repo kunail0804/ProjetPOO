@@ -24,7 +24,7 @@ public class LouableAdminController {
     }
 
     // Page MODIFIER
-    @GetMapping("/louables/{id:\\d+}/modifier")
+    @GetMapping("/louables/{id:\\d+}/modifierDisponibilite")
     public String modifierLouable(@PathVariable("id") int idLouable,
                                   @RequestParam(required = false) String succes,
                                   @RequestParam(required = false) String erreur,
@@ -43,7 +43,7 @@ public class LouableAdminController {
         model.addAttribute("succes", succes);
         model.addAttribute("erreur", erreur);
 
-        return "modifier_louable";
+        return "modifier_disponibilite";
     }
 
     // Ajouter une disponibilité (avec MERGE intelligent + contrôles)
