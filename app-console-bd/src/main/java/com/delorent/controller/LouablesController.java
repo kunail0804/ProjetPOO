@@ -1,5 +1,7 @@
 package com.delorent.controller;
 
+import com.delorent.model.Louable.FiltreDateDisponible;
+import com.delorent.model.Louable.FiltreParUniquementDispo;
 import com.delorent.model.Louable.FiltrePrixMax;
 import com.delorent.model.Louable.LouableFiltre;
 import com.delorent.repository.LouableRepository.LouableRepository;
@@ -61,12 +63,14 @@ public class LouablesController {
 
         List<LouableFiltre> filtres = new ArrayList<>();
         filtres.add(new FiltrePrixMax(prixMax));
+        filtres.add(new FiltreDateDisponible(dateCible));
+        filtres.add(new FiltreParUniquementDispo(uniquementDisponibles));
 
         try {
             if (vehicule) {
                 // A. Récupération optimisée (HEAD)
-                List<VehiculeSummary> resultats = vehiculeRepository.getCatalogue(dateCible, uniquementDisponibles, filtres);
-                
+                List<VehiculeSummary> resultats = vehiculeRepository.getDisponibles(filtres);
+
                 // B. Calcul des stats et Notes (Intégration branche Notation)
                 List<Integer> ids = resultats.stream().map(v -> v.louable().idLouable()).collect(Collectors.toList());
                 long availableCount = resultats.stream().filter(v -> v.louable().disponibleAujourdhui()).count();
@@ -77,14 +81,13 @@ public class LouablesController {
                 // C. Envoi au Model
                 model.addAttribute("vehicules", resultats);
                 model.addAttribute("louables", null);
-                model.addAttribute("moyennesNotes", moyennesNotes); // Les étoiles !
+                model.addAttribute("moyennesNotes", moyennesNotes);
                 model.addAttribute("totalCount", resultats.size());
                 model.addAttribute("availableCount", availableCount);
 
             } else {
                 // A. Récupération optimisée (HEAD)
-                List<LouableSummary> resultats = louableRepository.getCatalogue(dateCible, uniquementDisponibles, filtres);
-
+                List<LouableSummary> resultats = louableRepository.getDisponibles(filtres);
                 // B. Calcul des stats et Notes
                 List<Integer> ids = resultats.stream().map(LouableSummary::idLouable).collect(Collectors.toList());
                 long availableCount = resultats.stream().filter(LouableSummary::disponibleAujourdhui).count();

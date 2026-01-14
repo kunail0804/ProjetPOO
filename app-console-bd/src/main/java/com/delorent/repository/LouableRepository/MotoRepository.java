@@ -7,6 +7,7 @@ import com.delorent.model.Louable.Moto;
 import com.delorent.model.Louable.SqlClause;
 import com.delorent.model.Louable.StatutLouable;
 import com.delorent.model.Louable.TypeMoto;
+import com.delorent.model.Louable.Camion;
 import com.delorent.model.Louable.LouableFiltre;
 
 import com.delorent.repository.RepositoryBase;
@@ -199,7 +200,42 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
 
     // Gardé pour compatibilité HEAD
     public List<Moto> getDisponibles(List<LouableFiltre> filtres) {
-        return getCatalogue(LocalDate.now(), true, filtres);
+                StringBuilder sql = new StringBuilder(
+            "SELECT * FROM LOUABLE l "+
+            "JOIN VEHICULE v ON l.id = v.id "+
+            "JOIN MOTO vo ON v.id = vo.id WHERE 1=1 "
+        );
+
+        List<Object> params = new ArrayList<>();
+        for (LouableFiltre filtre : filtres) {
+            if (filtre.isActif()) {
+                SqlClause clause = filtre.toSqlClause();
+                if (clause.getPredicate() != null && !clause.getPredicate().isBlank()) {
+                    sql.append(" AND ").append(clause.getPredicate());
+                    params.addAll(clause.getParams());
+                }
+            }
+        }
+
+        return jdbcTemplate.query(sql.toString(), params.toArray(), (rs, rowNum) -> {
+            return new Moto(
+                rs.getInt("id"),
+                rs.getInt("idProprietaire"),
+                rs.getDouble("prixJour"),
+                StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
+                rs.getString("lieuPrincipal"),
+                rs.getString("marque"),
+                rs.getString("modele"),
+                rs.getInt("annee"),
+                rs.getString("couleur"),
+                rs.getString("immatriculation"),
+                rs.getInt("kilometrage"),
+                rs.getInt("cylindreeCc"),
+                rs.getInt("puissanceCh"),
+                TypeMoto.valueOf(rs.getString("typeMoto").toUpperCase()),
+                rs.getString("permisRequis")
+            );
+        });
     }
 
     // Gardé pour compatibilité HEAD (Gestion Propriétaire)

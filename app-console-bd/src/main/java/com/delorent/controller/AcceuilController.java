@@ -16,7 +16,7 @@ public class AcceuilController {
     @GetMapping({"/", "/accueil"})
     public String accueil(Model model) {
         model.addAttribute("estConnecte", connexionService.estConnecte());
-        model.addAttribute("utilisateur", connexionService.getConnexion()); // optionnel (afficher nom/role)
+        model.addAttribute("utilisateur", connexionService.getConnexion());
         return "accueil";
     }
 }

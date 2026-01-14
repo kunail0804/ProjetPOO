@@ -33,102 +33,123 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         this.motoRepository = motoRepository;
     }
 
-    // ========= VERSION FINALE (Affichage + Filtre Date) =========
-    public List<VehiculeSummary> getCatalogue(LocalDate date, boolean uniquementDisponibles, List<LouableFiltre> filtres) {
-        if (date == null) date = LocalDate.now();
-        Date sqlDate = Date.valueOf(date);
-
-        // Cette requête vérifie si une dispo existe pour la date choisie
-        String dispoSql = """
-            (SELECT COUNT(*) FROM DISPONIBILITE d 
-             WHERE d.idLouable = l.id 
-             AND d.estReservee = 0 
-             AND ? BETWEEN DATE(d.dateDebut) AND DATE(d.dateFin)) > 0
-        """;
-
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT l.id AS idLouable, l.prixJour, l.lieuPrincipal, l.statut, ")
-           .append("v.marque, v.modele, v.annee, v.couleur, v.immatriculation, v.kilometrage, ")
-           .append(dispoSql).append(" AS est_dispo ") // On récupère 1 (vrai) ou 0 (faux)
-           .append("FROM LOUABLE l ")
-           .append("JOIN VEHICULE v ON l.id = v.id ")
-           .append("WHERE 1=1 ");
-
-        List<Object> params = new ArrayList<>();
-        params.add(sqlDate); // Pour le paramètre '?' dans dispoSql
-
-        // Filtre "Uniquement disponibles"
-        if (uniquementDisponibles) {
-            sql.append(" AND ").append(dispoSql);
-            params.add(sqlDate); // On rajoute le paramètre une 2ème fois car on répète la condition
-        }
-
-        // Autres filtres (Prix Max, etc.)
-        for (LouableFiltre filtre : filtres) {
-            if (filtre != null && filtre.isActif()) {
-                SqlClause clause = filtre.toSqlClause();
-                if (clause != null && !clause.getPredicate().isBlank()) {
-                    sql.append(" AND ").append(clause.getPredicate()).append(" ");
-                    params.addAll(clause.getParams());
-                }
-            }
-        }
-
-        sql.append(" ORDER BY l.id ASC");
-
-        return jdbcTemplate.query(sql.toString(), params.toArray(), (rs, rowNum) -> {
-            boolean isDispo = rs.getBoolean("est_dispo");
-
-            LouableSummary louable = new LouableSummary(
-                    rs.getInt("idLouable"),
-                    0, 
-                    StatutLouable.valueOf(rs.getString("statut")),
-                    rs.getDouble("prixJour"),
-                    rs.getString("lieuPrincipal"),
-                    "Voiture", 
-                    isDispo // ✅ C'est ici que la magie opère pour le badge VERT/ROUGE
-            );
-
-            return new VehiculeSummary(
-                    louable,
-                    rs.getString("marque"),
-                    rs.getString("modele"),
-                    rs.getInt("annee"),
-                    rs.getString("couleur"),
-                    rs.getString("immatriculation"),
-                    rs.getInt("kilometrage"),
-                    "Voiture"
-            );
-        });
-    }
-
-    // ========= LE REST NE CHANGE PAS =========
-
     @Override
     public List<VehiculeSummary> getAll() {
-        return getCatalogue(LocalDate.now(), false, List.of());
+
+        List<VehiculeSummary> result = new ArrayList<>();
+
+        List<Voiture> voitures = voitureRepository.getAll();
+        List<Camion> camions = camionRepository.getAll();
+        List<Moto> motos = motoRepository.getAll();
+
+        for (Voiture v : voitures) {
+            result.add(new VehiculeSummary(
+                new LouableSummary(v.getIdLouable(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Voiture"),
+                v.getMarque(),
+                v.getModele(),
+                v.getAnnee(),
+                v.getCouleur(),
+                v.getImmatriculation(),
+                v.getKilometrage(),
+                "Voiture"
+            ));
+        }
+
+        for (Camion c : camions) {
+            result.add(new VehiculeSummary(
+                new LouableSummary(c.getIdLouable(), c.getStatut(), c.getPrixJour(), c.getLieuPrincipal(), "Camion"),
+                c.getMarque(),
+                c.getModele(),
+                c.getAnnee(),
+                c.getCouleur(),
+                c.getImmatriculation(),
+                c.getKilometrage(),
+                "Camion"
+            ));
+        }
+
+        for (Moto m : motos) {
+            result.add(new VehiculeSummary(
+                new LouableSummary(m.getIdLouable(), m.getStatut(), m.getPrixJour(), m.getLieuPrincipal(), "Moto"),
+                m.getMarque(),
+                m.getModele(),
+                m.getAnnee(),
+                m.getCouleur(),
+                m.getImmatriculation(),
+                m.getKilometrage(),
+                "Moto"
+            ));
+        }
+
+        return result;
     }
 
     @Override
     public VehiculeSummary get(Integer id) {
-        String sql = "SELECT l.*, v.* FROM LOUABLE l JOIN VEHICULE v ON l.id = v.id WHERE l.id = ?";
-        List<VehiculeSummary> res = jdbcTemplate.query(sql, new Object[]{id}, (rs, rowNum) -> {
-             LouableSummary louable = new LouableSummary(
-                    rs.getInt("id"),
-                    0,
-                    StatutLouable.valueOf(rs.getString("statut")),
-                    rs.getDouble("prixJour"),
-                    rs.getString("lieuPrincipal"),
-                    "Voiture",
-                    false
-            );
-            return new VehiculeSummary(
-                    louable, rs.getString("marque"), rs.getString("modele"),
-                    rs.getInt("annee"), rs.getString("couleur"), rs.getString("immatriculation"),
-                    rs.getInt("kilometrage"), "Voiture"
-            );
-        });
-        return res.isEmpty() ? null : res.get(0);
+
+        boolean voitureFail = false;
+        boolean camionFail = false;
+        boolean motoFail = false;
+
+        try {
+            Voiture voiture = voitureRepository.get(id);
+            if (voiture != null) {
+                return new VehiculeSummary(
+                    new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                    voiture.getMarque(),
+                    voiture.getModele(),
+                    voiture.getAnnee(),
+                    voiture.getCouleur(),
+                    voiture.getImmatriculation(),
+                    voiture.getKilometrage(),
+                    "Voiture"
+                );
+            }
+        } catch (Exception e) {
+            voitureFail = true;
+        }
+
+        try {
+            Camion camion = camionRepository.get(id);
+            if (camion != null) {
+                return new VehiculeSummary(
+                    new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Voiture"),
+                    camion.getMarque(),
+                    camion.getModele(),
+                    camion.getAnnee(),
+                    camion.getCouleur(),
+                    camion.getImmatriculation(),
+                    camion.getKilometrage(),
+                    "Camion"
+                );
+            }
+        } catch (Exception e) {
+            camionFail = true;
+        }
+
+        try {
+            Moto moto = motoRepository.get(id);
+            if (moto != null) {
+                return new VehiculeSummary(
+                    new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Voiture"),
+                    moto.getMarque(),
+                    moto.getModele(),
+                    moto.getAnnee(),
+                    moto.getCouleur(),
+                    moto.getImmatriculation(),
+                    moto.getKilometrage(),
+                    "Moto"
+                );
+            }
+        } catch (Exception e) {
+            motoFail = true;
+        }
+
+        if (voitureFail && camionFail && motoFail) {
+            return null; // ou throw new NoSuchElementException("Véhicule introuvable id=" + id);
+        }
+
+        return null;
     }
 
     @Override
@@ -139,10 +160,67 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
     public boolean delete(Integer id) { throw new UnsupportedOperationException(); }
 
     public List<VehiculeSummary> getDisponibles(List<LouableFiltre> filtres) {
-        return getCatalogue(LocalDate.now(), true, filtres);
+
+        List<VehiculeSummary> result = new ArrayList<>();
+
+        List<Voiture> voitures = new ArrayList<>();
+        List<Camion> camions = new ArrayList<>();
+        List<Moto> motos = new ArrayList<>();
+
+        try {
+            voitures = voitureRepository.getDisponibles(filtres);
+        } catch (Exception ignored) {}
+
+        try {
+            camions = camionRepository.getDisponibles(filtres);
+        } catch (Exception ignored) {}
+
+        try {
+            motos = motoRepository.getDisponibles(filtres);
+        } catch (Exception ignored) {}
+
+        for (Voiture v : voitures) {
+            result.add(new VehiculeSummary(
+                new LouableSummary(v.getIdLouable(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Voiture"),
+                v.getMarque(),
+                v.getModele(),
+                v.getAnnee(),
+                v.getCouleur(),
+                v.getImmatriculation(),
+                v.getKilometrage(),
+                "Voiture"
+            ));
+        }
+
+        for (Camion c : camions) {
+            result.add(new VehiculeSummary(
+                new LouableSummary(c.getIdLouable(), c.getStatut(), c.getPrixJour(), c.getLieuPrincipal(), "Camion"),
+                c.getMarque(),
+                c.getModele(),
+                c.getAnnee(),
+                c.getCouleur(),
+                c.getImmatriculation(),
+                c.getKilometrage(),
+                "Camion"
+            ));
+        }
+
+        for (Moto m : motos) {
+            result.add(new VehiculeSummary(
+                new LouableSummary(m.getIdLouable(), m.getStatut(), m.getPrixJour(), m.getLieuPrincipal(), "Moto"),
+                m.getMarque(),
+                m.getModele(),
+                m.getAnnee(),
+                m.getCouleur(),
+                m.getImmatriculation(),
+                m.getKilometrage(),
+                "Moto"
+            ));
+        }
+
+        return result;
     }
 
-    // Méthode helper pour la compatibilité (branche Parking)
     private LouableSummary toLouableSummary(int idLouable, int idAgent, StatutLouable statut,
                                            double prixJour, String lieuPrincipal, String type) {
         return new LouableSummary(idLouable, idAgent, statut, prixJour, lieuPrincipal, type, true);

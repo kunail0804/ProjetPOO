@@ -1,7 +1,10 @@
 package com.delorent.repository.LouableRepository;
 
 import com.delorent.model.Louable.Camion;
+import com.delorent.model.Louable.Carburant;
 import com.delorent.model.Louable.StatutLouable;
+import com.delorent.model.Louable.TypeBoite;
+import com.delorent.model.Louable.Voiture;
 import com.delorent.model.Louable.LouableFiltre;
 import com.delorent.model.Louable.SqlClause;
 import com.delorent.repository.RepositoryBase;
@@ -117,8 +120,16 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
 
     @Override
     public boolean delete(Integer id) {
-        // Implementation might be needed or keep as unsupported if not used yet
-        throw new UnsupportedOperationException();
+        String sqlCamion = "DELETE FROM CAMION WHERE id = ?";
+        jdbcTemplate.update(sqlCamion, id);
+
+        String sqlVehicule = "DELETE FROM VEHICULE WHERE id = ?";
+        jdbcTemplate.update(sqlVehicule, id);
+
+        String sqlLouable = "DELETE FROM LOUABLE WHERE id = ?";
+        jdbcTemplate.update(sqlLouable, id);
+
+        return true;
     }
 
     // --- Advanced Search Methods (Merged from US.L.10 and HEAD) ---
@@ -192,7 +203,43 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
 
     // Kept from HEAD for compatibility
     public List<Camion> getDisponibles(List<LouableFiltre> filtres){
-       return getCatalogue(LocalDate.now(), true, filtres);
+        StringBuilder sql = new StringBuilder(
+            "SELECT * FROM LOUABLE l "+
+            "JOIN VEHICULE v ON l.id = v.id "+
+            "JOIN CAMION vo ON v.id = vo.id WHERE 1=1 "
+        );
+
+        List<Object> params = new ArrayList<>();
+        for (LouableFiltre filtre : filtres) {
+            if (filtre.isActif()) {
+                SqlClause clause = filtre.toSqlClause();
+                if (clause.getPredicate() != null && !clause.getPredicate().isBlank()) {
+                    sql.append(" AND ").append(clause.getPredicate());
+                    params.addAll(clause.getParams());
+                }
+            }
+        }
+
+        return jdbcTemplate.query(sql.toString(), params.toArray(), (rs, rowNum) -> {
+            return new Camion(
+                rs.getInt("id"),
+                rs.getInt("idProprietaire"),
+                rs.getDouble("prixJour"),
+                StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
+                rs.getString("lieuPrincipal"),
+                rs.getString("marque"),
+                rs.getString("modele"),
+                rs.getInt("annee"),
+                rs.getString("couleur"),
+                rs.getString("immatriculation"),
+                rs.getInt("kilometrage"),
+                rs.getInt("chargeMaxKg"),
+                rs.getDouble("volumeUtileM3"),
+                rs.getDouble("hauteurM"),
+                rs.getDouble("longueurM"),
+                rs.getString("permisRequis")
+            );
+        });
     }
 
     // Kept from HEAD for owner management
