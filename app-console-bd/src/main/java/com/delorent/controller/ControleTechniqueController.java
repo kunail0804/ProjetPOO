@@ -48,7 +48,7 @@ public class ControleTechniqueController {
         model.addAttribute("controleValide", controleValide);
         model.addAttribute("aujourdhui", LocalDate.now());
         
-        return "controles-techniques/liste";
+        return "controle-technique/liste";
     }
 
     // 2. FORMULAIRE d'ajout
@@ -64,7 +64,7 @@ public class ControleTechniqueController {
         model.addAttribute("controleTechnique", new ControleTechnique());
         model.addAttribute("resultats", ResultatControle.values());
         
-        return "controles-techniques/formulaire";  // ou "nouveau" si tu gardes ce nom
+        return "controle-technique/nouveau";  // ou "nouveau" si tu gardes ce nom
     }
 
     // 3. ENREGISTRER un nouveau contrôle
@@ -91,7 +91,7 @@ public class ControleTechniqueController {
         model.addAttribute("vehicle", vehicle);
         model.addAttribute("controle", controleOpt.get());
         
-        return "controles-techniques/details";
+        return "controle-technique/details";
     }
 
     // 5. SUPPRIMER un contrôle

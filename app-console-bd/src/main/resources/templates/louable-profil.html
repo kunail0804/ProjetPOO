@@ -106,6 +106,18 @@
               Modifier Louable
             </a>
 
+            <a class="btn"
+               th:href="@{/vehicles/{vehicleId}/entretiens/(vehicleId=${louableSummary.idLouable()})}"
+               th:if="${canManage}">
+              Entretiens Techniques
+            </a>
+
+            <a class="btn"
+               th:href="@{/vehicles/{vehicleId}/controles-techniques/(vehicleId=${louableSummary.idLouable()})}"
+               th:if="${canManage}">
+              Controles Techniques
+            </a>
+
             <a class="btn danger"
                th:href="@{/louables/{id}/supprimer(id=${louableSummary.idLouable()})}"
                th:if="${canManage}"

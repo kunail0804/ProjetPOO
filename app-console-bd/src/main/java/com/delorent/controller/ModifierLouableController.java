@@ -4,9 +4,7 @@ import com.delorent.model.Louable.*;
 import com.delorent.model.Utilisateur.Agent;
 import com.delorent.model.Utilisateur.Utilisateur;
 
-import com.delorent.repository.LouableRepository.VoitureRepository;
-import com.delorent.repository.LouableRepository.MotoRepository;
-import com.delorent.repository.LouableRepository.CamionRepository;
+import com.delorent.repository.LouableRepository.*;
 
 import com.delorent.service.ConnexionService;
 
@@ -17,20 +15,24 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class ModifierLouableController {
 
+    private final VehiculeRepository vehiculeRepository;
     private final VoitureRepository voitureRepository;
     private final MotoRepository motoRepository;
     private final CamionRepository camionRepository;
     private final ConnexionService connexionService;
 
     public ModifierLouableController(
+            VehiculeRepository vehiculeRepository,
+            LouableRepository louableRepository,
             VoitureRepository voitureRepository,
             MotoRepository motoRepository,
             CamionRepository camionRepository,
             ConnexionService connexionService
     ) {
+        this.vehiculeRepository = vehiculeRepository;
+        this.camionRepository = camionRepository;
         this.voitureRepository = voitureRepository;
         this.motoRepository = motoRepository;
-        this.camionRepository = camionRepository;
         this.connexionService = connexionService;
     }
 
@@ -73,7 +75,7 @@ public class ModifierLouableController {
         catch (Exception e) { throw new IllegalArgumentException("Champ 'typeMoto' invalide."); }
     }
 
-    private void guardAgentOwner(Object louable) {
+    private void guardAgentOwner(Louable louable) {
         Utilisateur u = connexionService.getConnexion();
         if (u == null) throw new IllegalArgumentException("Vous devez être connecté.");
         if (!(u instanceof Agent)) throw new IllegalArgumentException("Accès réservé aux agents.");
@@ -81,33 +83,36 @@ public class ModifierLouableController {
         int idUser = u.getIdUtilisateur();
 
         // ⚠️ on part du principe que Vehicule contient getIdAgent()
-        if (louable instanceof Vehicule v) {
-            if (v.getIdAgent() != idUser) throw new IllegalArgumentException("Ce louable ne vous appartient pas.");
-        } else {
-            throw new IllegalArgumentException("Type de louable invalide.");
-        }
+        if (louable.getIdAgent() != idUser) throw new IllegalArgumentException("Ce louable ne vous appartient pas.");
     }
 
     @GetMapping("/louables/{id}/modifier")
     public String modifierLouable(@PathVariable("id") int id, Model model) {
 
-        // On tente dans l’ordre: voiture -> moto -> camion
-        // (si tu as un "type" en DB, c’est mieux, mais là on fait simple)
-        Object louable = voitureRepository.get(id);
-        String type = "VOITURE";
+        Voiture voiture = null;
+        Camion  camion  = null;
+        Moto    moto    = null;
 
-        if (louable == null) {
-            louable = motoRepository.get(id);
-            type = "MOTO";
-        }
-        if (louable == null) {
-            louable = camionRepository.get(id);
-            type = "CAMION";
-        }
+        try { voiture = voitureRepository.get(id); } catch (Exception ignored) {}
+        try { camion  = camionRepository.get(id); } catch (Exception ignored) {}
+        try { moto    = motoRepository.get(id); } catch (Exception ignored) {}
 
-        if (louable == null) {
+        if (voiture == null && camion == null && moto == null) {
             model.addAttribute("erreur", "Louable introuvable (id=" + id + ").");
             return "modifier_louable";
+        }
+
+        String type;
+        Louable louable;
+        if (voiture != null) {
+            louable = voiture;
+            type = "Voiture";
+        } else if (camion != null) {
+            louable = camion;
+            type = "Camion";
+        } else {
+            louable = moto;
+            type = "Moto";
         }
 
         // sécurité : agent + propriétaire
@@ -123,9 +128,9 @@ public class ModifierLouableController {
         model.addAttribute("louable", louable);
 
         // flags pour afficher le bon bloc
-        model.addAttribute("isVoiture", "VOITURE".equals(type));
-        model.addAttribute("isMoto", "MOTO".equals(type));
-        model.addAttribute("isCamion", "CAMION".equals(type));
+        model.addAttribute("isVoiture", "Voiture".equals(type));
+        model.addAttribute("isMoto", "Moto".equals(type));
+        model.addAttribute("isCamion", "Camion".equals(type));
 
         return "modifier_louable";
     }
@@ -169,19 +174,35 @@ public class ModifierLouableController {
             Model model
     ) {
         // Rechargement du louable complet pour connaître son type + sécurité
-        Object existing = voitureRepository.get(id);
-        String type = "VOITURE";
-        if (existing == null) { existing = motoRepository.get(id); type = "MOTO"; }
-        if (existing == null) { existing = camionRepository.get(id); type = "CAMION"; }
+        Voiture voiture = null;
+        Camion  camion  = null;
+        Moto    moto    = null;
 
-        if (existing == null) {
+        try { voiture = voitureRepository.get(id); } catch (Exception ignored) {}
+        try { camion  = camionRepository.get(id); } catch (Exception ignored) {}
+        try { moto    = motoRepository.get(id); } catch (Exception ignored) {}
+
+        if (voiture == null && camion == null && moto == null) {
             model.addAttribute("erreur", "Louable introuvable (id=" + id + ").");
             return "modifier_louable";
         }
 
+        String type;
+        Louable louable;
+        if (voiture != null) {
+            louable = voiture;
+            type = "Voiture";
+        } else if (camion != null) {
+            louable = camion;
+            type = "Camion";
+        } else {
+            louable = moto;
+            type = "Moto";
+        }
+
         // sécurité
         try {
-            guardAgentOwner(existing);
+            guardAgentOwner(louable);
         } catch (Exception e) {
             model.addAttribute("erreur", e.getMessage());
             return "modifier_louable";
@@ -202,7 +223,7 @@ public class ModifierLouableController {
             int idAgent = connexionService.getConnexion().getIdUtilisateur();
 
             switch (type) {
-                case "VOITURE" -> {
+                case "Voiture" -> {
                     if (blank(nbPortes) || blank(nbPlaces) || blank(volumeCoffreLitres) || blank(boite) || blank(carburant)) {
                         throw new IllegalArgumentException("Champs spécifiques Voiture obligatoires manquants.");
                     }
@@ -225,7 +246,7 @@ public class ModifierLouableController {
                     voitureRepository.modify(v);
                 }
 
-                case "MOTO" -> {
+                case "Moto" -> {
                     if (blank(cylindreeCc) || blank(puissanceCh) || blank(typeMoto) || blank(permisRequisMoto)) {
                         throw new IllegalArgumentException("Champs spécifiques Moto obligatoires manquants.");
                     }
@@ -241,7 +262,7 @@ public class ModifierLouableController {
                     motoRepository.modify(m);
                 }
 
-                case "CAMION" -> {
+                case "Camion" -> {
                     if (blank(chargeMaxKg) || blank(volumeUtileM3) || blank(hauteurM) || blank(longueurM) || blank(permisRequisCamion)) {
                         throw new IllegalArgumentException("Champs spécifiques Camion obligatoires manquants.");
                     }
@@ -275,7 +296,7 @@ public class ModifierLouableController {
             model.addAttribute("isCamion", "CAMION".equals(type));
 
             // on peut aussi remettre un "louable" reconstruit, mais au minimum on peut recharger l'existant
-            model.addAttribute("louable", existing);
+            model.addAttribute("louable", louable);
 
             return "modifier_louable";
         }

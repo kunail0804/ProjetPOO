@@ -54,9 +54,9 @@ public class LouableAdminController {
 
         try {
             dispoService.addOrMergeNonReservedRange(idLouable, dateDebut, dateFin);
-            return "redirect:/louables/" + idLouable + "/modifier?succes=Disponibilite%20ajoutee";
+            return "redirect:/louables/" + idLouable + "/modifierDisponibilite?succes=Disponibilite%20ajoutee";
         } catch (IllegalArgumentException e) {
-            return "redirect:/louables/" + idLouable + "/modifier?erreur=" + urlSafe(e.getMessage());
+            return "redirect:/louables/" + idLouable + "/modifierDisponibilite?erreur=" + urlSafe(e.getMessage());
         }
     }
 
@@ -67,9 +67,9 @@ public class LouableAdminController {
 
         try {
             dispoService.deleteRangeIfNoContrat(idLouable, idDisponibilite);
-            return "redirect:/louables/" + idLouable + "/modifier?succes=Disponibilite%20supprimee";
+            return "redirect:/louables/" + idLouable + "/modifierDisponibilite?succes=Disponibilite%20supprimee";
         } catch (IllegalArgumentException e) {
-            return "redirect:/louables/" + idLouable + "/modifier?erreur=" + urlSafe(e.getMessage());
+            return "redirect:/louables/" + idLouable + "/modifierDisponibilite?erreur=" + urlSafe(e.getMessage());
         }
     }
 

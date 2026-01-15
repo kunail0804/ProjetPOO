@@ -72,7 +72,6 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Voiture voiture = voitureRepository.get(id);
             if (voiture != null) {
-                // CORRECTION ICI : Ajout de voiture.getIdAgent()
                 return new VehiculeSummary(
                     toLouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
                     voiture.getMarque(), voiture.getModele(), voiture.getAnnee(), voiture.getCouleur(), voiture.getImmatriculation(), voiture.getKilometrage(), "Voiture"
@@ -85,7 +84,6 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Camion camion = camionRepository.get(id);
             if (camion != null) {
-                // CORRECTION ICI
                 return new VehiculeSummary(
                     toLouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
                     camion.getMarque(), camion.getModele(), camion.getAnnee(), camion.getCouleur(), camion.getImmatriculation(), camion.getKilometrage(), "Camion"
@@ -98,7 +96,6 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Moto moto = motoRepository.get(id);
             if (moto != null) {
-                // CORRECTION ICI
                 return new VehiculeSummary(
                     toLouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
                     moto.getMarque(), moto.getModele(), moto.getAnnee(), moto.getCouleur(), moto.getImmatriculation(), moto.getKilometrage(), "Moto"
