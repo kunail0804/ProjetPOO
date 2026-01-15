@@ -1,0 +1,19 @@
+<!-- src/main/resources/templates/controles/formulaire.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Ajouter contrôle</title></head>
+<body>
+    <h1>Ajouter un contrôle technique</h1>
+    <form method="post">
+        Date contrôle: <input type="date" name="dateControle"><br>
+        Résultat: 
+        <select name="resultat">
+            <option value="VALIDE">VALIDE</option>
+            <option value="REFUSE">REFUSÉ</option>
+            <option value="CONTRE_VISITE">CONTRE-VISITE</option>
+        </select><br>
+        <button>Enregistrer</button>
+    </form>
+    <a th:href="@{'/vehicles/' + ${vehicle.id} + '/controles-techniques/'}">Annuler</a>
+</body>
+</html>

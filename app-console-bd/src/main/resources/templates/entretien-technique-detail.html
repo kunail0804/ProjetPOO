@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails entretien technique</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Détails de l'entretien</h1>
+        
+        <p>
+            <strong>Véhicule:</strong> 
+            <span th:text="${vehicle.marque()}"></span> 
+            <span th:text="${vehicle.modele()}"></span>
+            (<span th:text="${vehicle.immatriculation()}"></span>)
+        </p>
+        
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title" th:text="${entretien.libelle}">Libellé</h5>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Date de l'entretien:</strong> <span th:text="${entretien.dateEntretien}"></span></p>
+                        <p><strong>Prestataire:</strong> 
+                            <span th:if="${entretien.prestataire}" th:text="${entretien.prestataire}"></span>
+                            <span th:unless="${entretien.prestataire}" class="text-muted">Non renseigné</span>
+                        </p>
+                        <p><strong>Coût:</strong> 
+                            <span th:if="${entretien.cout != null}" 
+                                  th:text="${'€ ' + #numbers.formatDecimal(entretien.cout, 1, 2)}"></span>
+                            <span th:if="${entretien.cout == null}" class="text-muted">Non renseigné</span>
+                        </p>
+                        <p><strong>Kilométrage effectué:</strong> 
+                            <span th:if="${entretien.kilometrageEffectue != null}" 
+                                  th:text="${entretien.kilometrageEffectue + ' km'}"></span>
+                            <span th:if="${entretien.kilometrageEffectue == null}" class="text-muted">Non renseigné</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p th:if="${entretien.piecesChangees}">
+                            <strong>Pièces changées:</strong><br>
+                            <span th:text="${entretien.piecesChangees}"></span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <p th:if="${entretien.compteRendu}">
+                        <strong>Compte rendu / Observations:</strong><br>
+                        <span th:text="${entretien.compteRendu}"></span>
+                    </p>
+                    <p th:unless="${entretien.compteRendu}">
+                        <strong>Compte rendu:</strong> 
+                        <span class="text-muted">Aucun compte rendu</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="mt-3">
+            <a th:href="@{'/vehicles/' + ${vehicle.louable().idLouable()} + '/entretiens/'}" 
+               class="btn btn-primary">← Retour à la liste</a>
+            
+            <form th:action="@{'/vehicles/' + ${vehicle.louable().idLouable()} + '/entretiens/' + ${entretien.id} + '/supprimer'}" 
+                  method="post" style="display: inline-block; margin-left: 10px;">
+                <button type="submit" class="btn btn-danger" 
+                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet entretien ?')">
+                    Supprimer cet entretien
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
