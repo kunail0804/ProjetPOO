@@ -42,6 +42,12 @@
             th:if="${estConnecte != true}"
             th:href="@{/inscription}">Inscription</a>
 
+            <a class="nav-link"
+              th:if="${session.userId != null and session.role == 'LOUEUR'}"
+              th:href="@{/parrainage}">
+              Parrainage
+            </a>
+
             <a class="nav-link danger"
                th:if="${estConnecte == true}"
                th:href="@{/deconnexion}">Déconnexion</a>

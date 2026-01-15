@@ -175,19 +175,23 @@ public class LoueurRepository implements RepositoryBase<Loueur, Long> {
     }
 
     // Crédit parrainage
-    // Il faut ajouter le crédit reçu d'un loueur dans la table LOUEUR dans BD
-    public double getCredit(int idLoueur) {
-        Double credit = jdbcTemplate.queryForObject(
-            "SELECT credit FROM LOUEUR WHERE idLoueur = ?",
-            Double.class, idLoueur
-    );
-    return credit == null ? 0.0 : credit;
-}
-
-    public void addCredit(int idLoueur, double amount) {
-        jdbcTemplate.update(
-                "UPDATE LOUEUR SET credit = credit + ? WHERE idLoueur = ?",
-                amount, idLoueur
-        );
-}
+    // // Il faut ajouter le crédit reçu d'un loueur dans la table LOUEUR dans BD
+    // public double getCredit(int idLoueur) {
+    //     Double credit = jdbcTemplate.queryForObject(
+    //         "SELECT credit FROM LOUEUR WHERE idUtilisateur = ?",
+    //         Double.class, idLoueur
+    //     );
+    //     return credit == null ? 0.0 : credit;
+    // }
+    // public void addCredit(int idLoueur, double amount) {
+    //     jdbcTemplate.update(
+    //             "UPDATE LOUEUR SET credit = credit + ? WHERE idUtilisateur = ?",
+    //             amount, idLoueur
+    //     );}
+    // Kiểm tra loueur có tồn tại không
+    public boolean existsById(int idLoueur) {
+        String sql = "SELECT COUNT(*) FROM LOUEUR WHERE idUtilisateur = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, idLoueur);
+        return count != null && count > 0;
+    }
 }

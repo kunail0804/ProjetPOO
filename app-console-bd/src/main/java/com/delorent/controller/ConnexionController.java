@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import jakarta.servlet.http.HttpSession;
+
 
 @Controller
 public class ConnexionController {
@@ -69,7 +71,8 @@ public class ConnexionController {
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam String password,
-            Model model
+            Model model,
+            HttpSession session
     ) {
         // garder valeurs pour réaffichage en cas d'erreur
         model.addAttribute("role", role);
@@ -90,6 +93,10 @@ public class ConnexionController {
         // 2) Connexion via service (stocke l'utilisateur connecté en session)
         try {
             Utilisateur u = connexionService.connecter(role, email, password);
+
+                    // SET SESSION
+            session.setAttribute("userId", u.getIdUtilisateur());
+            session.setAttribute("role", role); // "LOUEUR"
 
             // Message de debug (tu pourras remplacer par redirect vers un dashboard)
             model.addAttribute("message",

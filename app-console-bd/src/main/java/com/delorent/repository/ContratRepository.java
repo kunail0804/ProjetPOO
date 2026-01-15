@@ -195,4 +195,14 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
 
         return res.isEmpty() ? null : res.get(0);
     }
+
+    public int countByLoueurId(int idLoueur) {
+    Integer c = jdbc.queryForObject(
+        "SELECT COUNT(*) FROM CONTRAT WHERE idLoueur = ?",
+        Integer.class,
+        idLoueur
+    );
+    return c == null ? 0 : c;
+}
+
 }

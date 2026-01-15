@@ -18,6 +18,7 @@ public class ParrainageRepository {
         this.jdbc = jdbc;
     }
 
+    // Kiểm tra filleul đã có parrain chưa
     public boolean existsByFilleul(int idFilleul) {
         Integer count = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM PARRAINAGE WHERE idFilleul = ?",
@@ -26,6 +27,7 @@ public class ParrainageRepository {
         return count != null && count > 0;
     }
 
+    // Tạo parrainage mới
     public int create(int idParrain, int idFilleul) {
         // statut EN_ATTENTE par défaut en DB, sinon set ici
         return jdbc.update(
@@ -34,6 +36,7 @@ public class ParrainageRepository {
         );
     }
 
+    // Tìm parrainage en attente theo filleul
     public Optional<Parrainage> findPendingByFilleul(int idFilleul) {
         List<Parrainage> list = jdbc.query(
                 "SELECT * FROM PARRAINAGE WHERE idFilleul = ? AND statut = 'EN_ATTENTE' LIMIT 1",
@@ -53,6 +56,7 @@ public class ParrainageRepository {
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }
 
+    // Validate parrainage
     public void validate(int idParrainage) {
         jdbc.update(
                 "UPDATE PARRAINAGE SET statut='VALIDE', dateValidation=? WHERE idParrainage=?",
@@ -60,6 +64,7 @@ public class ParrainageRepository {
         );
     }
 
+    // Lấy danh sách parrainages của 1 parrain
     public List<Parrainage> findByParrain(int idParrain) {
         return jdbc.query(
                 "SELECT * FROM PARRAINAGE WHERE idParrain = ? ORDER BY dateCreation DESC",

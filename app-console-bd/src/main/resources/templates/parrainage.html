@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout('Parrainage', ~{::section})">
+
+<body>
+<section class="panel soft">
+  <h1>Parrainage</h1>
+
+  <div th:if="${message}" class="panel soft" th:text="${message}"></div>
+  <div th:if="${erreur}" class="panel soft" th:text="${erreur}"></div>
+
+  <p>Votre id (filleul): <b th:text="${idFilleul}">0</b></p>
+
+  <form th:action="@{/parrainage/ajouter}" method="post">
+    <label>ID du parrain :</label>
+    <input type="number" name="codeParrain" required>
+    <button type="submit">Valider</button>
+  </form>
+</section>
+</body>
+</html>
