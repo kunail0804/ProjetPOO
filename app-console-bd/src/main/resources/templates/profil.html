@@ -178,6 +178,54 @@
       Aucun louable.
     </div>
   </div>
+  <div class="panel soft" th:if="${isAgent}" style="margin-top: 20px;">
+    <div class="panel-head">
+      <div>
+        <div class="h2" style="margin:0;">Mes Assurances</div>
+        <div class="muted small">Proposez des assurances personnalisées aux locataires.</div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <form th:action="@{/profil/assurance/ajouter}" method="post" enctype="multipart/form-data" class="grid" style="gap: 15px; align-items: end;">
+      <div>
+        <label>Nom de l'assurance</label>
+        <input type="text" name="nom" placeholder="Ex: Assurance Jeune Conducteur" required class="form-input">
+      </div>
+      <div>
+        <label>Prix Journalier (€)</label>
+        <input type="number" step="0.5" name="tarif" placeholder="10" required class="form-input">
+      </div>
+      <div>
+        <label>Fichier (PDF/Image)</label>
+        <input type="file" name="fichier" accept=".pdf, .jpg, .png" required>
+      </div>
+      <div>
+        <button type="submit" class="btn primary">Ajouter</button>
+      </div>
+    </form>
+
+    <div class="spacer"></div>
+
+    <div class="tablewrap" th:if="${mesAssurances != null and mesAssurances.size() > 0}">
+      <table>
+        <tbody>
+          <tr th:each="assu : ${mesAssurances}">
+            <td th:text="${assu.nom}">Nom</td>
+            <td th:text="${assu.tarifJournalier} + ' €'">10 €</td>
+            <td>
+              <a th:if="${assu.cheminFichier != null}" 
+                 th:href="@{${assu.cheminFichier}}" 
+                 target="_blank" 
+                 class="btn secondary small">Voir le fichier</a>
+              <span th:if="${assu.cheminFichier == null}">Aucun</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
 </section>
 </html>
