@@ -98,7 +98,8 @@
               <option value="" disabled selected>Choisir…</option>
               <option th:each="a : ${assurances}"
                       th:value="${a.idAssurance}"
-                      th:text="${a.nom}">
+                      th:text="${a.nom}"
+                      th:attr="data-tarif=${a.tarifJournalier}">
                 Assurance
               </option>
             </select>
@@ -120,6 +121,56 @@
             <input class="input" type="text" name="lieuDepotOptionnel" placeholder="Ex: Toulouse centre" />
           </div>
 
+          <div class="hr"></div>
+
+          <div class="card-title" style="margin-top:10px;">Estimation prix</div>
+
+          <div class="kv">
+            <div class="kv-row">
+              <div class="k">Durée</div>
+              <div class="v"><strong id="est_nbjours">0</strong> jour(s)</div>
+            </div>
+
+            <!-- AJOUT : assurance -->
+            <div class="kv-row">
+              <div class="k">Assurance (/jour)</div>
+              <div class="v"><strong id="est_ass_jour">0.00</strong> € / jour</div>
+            </div>
+
+            <div class="kv-row">
+              <div class="k">Base assurance</div>
+              <div class="v"><strong id="est_ass_base">0.00</strong> €</div>
+            </div>
+            <!-- FIN AJOUT -->
+
+            <div class="kv-row">
+              <div class="k">Base (louable + assurance)</div>
+              <div class="v"><strong id="est_base">0.00</strong> €</div>
+            </div>
+
+            <div class="kv-row">
+              <div class="k">Commission 10%</div>
+              <div class="v"><strong id="est_var">0.00</strong> €</div>
+            </div>
+
+            <div class="kv-row">
+              <div class="k">Forfait 2€ / jour</div>
+              <div class="v"><strong id="est_fixe">0.00</strong> €</div>
+            </div>
+
+            <div class="kv-row">
+              <div class="k">Total client</div>
+              <div class="v"><strong id="est_total">0.00</strong> €</div>
+            </div>
+
+            <div class="kv-row">
+              <div class="k">Prix/jour (louable)</div>
+              <div class="v">
+                <span th:text="${#numbers.formatDecimal(louable.prixJour(), 1, 2)}">0.00</span> € / jour
+              </div>
+            </div>
+          </div>
+
           <div class="btnrow">
             <button class="btn primary" type="submit">Valider la location</button>
             <a class="btn ghost" th:href="@{/louables/{id}(id=${idLouable})}">Annuler</a>
@@ -135,6 +186,7 @@
           · Prise: <strong th:text="${contrat.lieuPrise}">X</strong>
           · Dépôt: <strong th:text="${contrat.lieuDepot}">Y</strong>
           · Assurance: <strong th:text="${contrat.assuranceNom}">Assurance</strong>
+          <span th:if="${prixContrat != null}">· Prix: <strong th:text="${#numbers.formatDecimal(prixContrat, 1, 2)}">0.00</strong> €</span>
         </div>
       </article>
 
@@ -158,26 +210,21 @@
         "juillet","août","septembre","octobre","novembre","décembre"
       ];
 
-      // ---- utilities ----
       const pad2 = (n)=> (n<10?("0"+n):(""+n));
       const ymd = (d)=> `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 
-      // Monday-based index (Mon=0..Sun=6)
       const mondayIndex = (d)=>{
-        const js = d.getDay(); // Sun=0..Sat=6
+        const js = d.getDay();
         return (js === 0) ? 6 : (js - 1);
       };
 
-      // Parse date safely from API strings
       const parseDate = (s)=>{
         if(!s) return null;
-        // expects yyyy-mm-dd (from Jackson)
         const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s));
         if(!m) return null;
         return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
       };
 
-      // Disponibilites => Set of available days (yyyy-mm-dd)
       async function loadAvailableSet(){
         const res = await fetch(`/louer/disponibilites?idLouable=${encodeURIComponent(idLouable)}`, {
           headers: { "Accept": "application/json" }
@@ -188,17 +235,14 @@
         const set = new Set();
 
         for(const item of (Array.isArray(arr) ? arr : [])){
-          // try common keys
           const d1 = parseDate(item.dateDebut ?? item.date_debut ?? item.debut ?? item.startDate);
           const d2 = parseDate(item.dateFin ?? item.date_fin ?? item.fin ?? item.endDate);
           const reservedRaw = (item.estReservee ?? item.reservee ?? item.isReserved ?? item.reserved);
           const reserved = String(reservedRaw).toLowerCase() === "true" || reservedRaw === 1;
 
-          // only non-reserved ranges
           if(reserved) continue;
           if(!d1 || !d2) continue;
 
-          // inclusive fill (dateDebut..dateFin)
           const cur = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
           const end = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate());
           while(cur <= end){
@@ -210,7 +254,7 @@
       }
 
       let availableSet = new Set();
-      let view = new Date(); // today
+      let view = new Date();
       view = new Date(view.getFullYear(), view.getMonth(), 1);
 
       function updateLabel(){
@@ -221,13 +265,11 @@
       function render(){
         updateLabel();
 
-        // first day of month
         const first = new Date(view.getFullYear(), view.getMonth(), 1);
-        const startOffset = mondayIndex(first); // 0..6
+        const startOffset = mondayIndex(first);
         const gridStart = new Date(first);
         gridStart.setDate(first.getDate() - startOffset);
 
-        // render 6 weeks (42 cells)
         calBody.innerHTML = "";
         const cur = new Date(gridStart);
 
@@ -257,17 +299,102 @@
       prevBtn?.addEventListener("click", ()=> addMonths(-1));
       nextBtn?.addEventListener("click", ()=> addMonths(1));
       monthPicker?.addEventListener("change", ()=>{
-        const v = monthPicker.value; // yyyy-mm
+        const v = monthPicker.value;
         const m = /^(\d{4})-(\d{2})$/.exec(v);
         if(!m) return;
         view = new Date(Number(m[1]), Number(m[2]) - 1, 1);
         render();
       });
 
-      // init: load availability then render
       loadAvailableSet()
         .then((set)=>{ availableSet = set; render(); })
         .catch(()=>{ availableSet = new Set(); render(); });
+
+      // ===== Estimation prix en direct (louable + assurance) =====
+      const prixJourLouableRaw = /*[[${louable != null ? louable.prixJour() : 0}]]*/ 0;
+      const prixJourLouable = Number(prixJourLouableRaw) || 0;
+
+      const pct = 0.10;
+      const fixeParJour = 2;
+
+      const inputDebut = document.querySelector('input[name="dateDebut"]');
+      const inputFin = document.querySelector('input[name="dateFin"]');
+      const selectAssurance = document.querySelector('select[name="idAssurance"]');
+
+      const elJ = document.getElementById("est_nbjours");
+      const elBase = document.getElementById("est_base");
+      const elVar = document.getElementById("est_var");
+      const elFixe = document.getElementById("est_fixe");
+      const elTotal = document.getElementById("est_total");
+
+      // AJOUT : éléments assurance
+      const elAssJour = document.getElementById("est_ass_jour");
+      const elAssBase = document.getElementById("est_ass_base");
+
+      function parseYMD(s){
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||""));
+        if(!m) return null;
+        return new Date(Number(m[1]), Number(m[2])-1, Number(m[3]));
+      }
+
+      function round2(n){
+        return Math.round((n + Number.EPSILON) * 100) / 100;
+      }
+
+      function getTarifAssuranceJour(){
+        const opt = selectAssurance?.selectedOptions?.[0];
+        const t = opt?.getAttribute("data-tarif");
+        const n = Number(t);
+        return Number.isFinite(n) ? n : 0;
+      }
+
+      function resetEstimation(){
+        if(elJ) elJ.textContent = "0";
+        if(elBase) elBase.textContent = "0.00";
+        if(elVar) elVar.textContent = "0.00";
+        if(elFixe) elFixe.textContent = "0.00";
+        if(elTotal) elTotal.textContent = "0.00";
+        if(elAssJour) elAssJour.textContent = "0.00";
+        if(elAssBase) elAssBase.textContent = "0.00";
+      }
+
+      function updateEstimation(){
+        const d1 = parseYMD(inputDebut?.value);
+        const d2 = parseYMD(inputFin?.value);
+
+        if(!d1 || !d2 || d2 < d1){
+          resetEstimation();
+          return;
+        }
+
+        // inclusif => +1
+        const diff = Math.floor((d2.getTime() - d1.getTime()) / (1000*60*60*24));
+        const nbJours = diff + 1;
+
+        const prixJourAssurance = getTarifAssuranceJour();
+        const baseAssurance = prixJourAssurance * nbJours;
+
+        const base = (prixJourLouable + prixJourAssurance) * nbJours;
+        const commissionVar = base * pct;
+        const commissionFixe = fixeParJour * nbJours;
+        const total = base + commissionVar + commissionFixe;
+
+        if(elJ) elJ.textContent = String(nbJours);
+        if(elBase) elBase.textContent = round2(base).toFixed(2);
+        if(elVar) elVar.textContent = round2(commissionVar).toFixed(2);
+        if(elFixe) elFixe.textContent = round2(commissionFixe).toFixed(2);
+        if(elTotal) elTotal.textContent = round2(total).toFixed(2);
+
+        // AJOUT : affichage assurance
+        if(elAssJour) elAssJour.textContent = round2(prixJourAssurance).toFixed(2);
+        if(elAssBase) elAssBase.textContent = round2(baseAssurance).toFixed(2);
+      }
+
+      inputDebut?.addEventListener("change", updateEstimation);
+      inputFin?.addEventListener("change", updateEstimation);
+      selectAssurance?.addEventListener("change", updateEstimation);
+      updateEstimation();
+
     })();
     /*]]>*/
   </script>

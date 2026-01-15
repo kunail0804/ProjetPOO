@@ -1,6 +1,7 @@
 package com.delorent.controller;
 
 import com.delorent.config.UploadProperties;
+import com.delorent.model.Utilisateur.Agent;
 import com.delorent.model.Utilisateur.Loueur;
 import com.delorent.model.Utilisateur.Utilisateur;
 import com.delorent.repository.ContratRepository;
@@ -39,34 +40,61 @@ public class ContratController {
         this.uploadProperties = uploadProperties;
     }
 
-    private Loueur requireLoueur() {
-        Utilisateur u = connexionService.getConnexion();
-        if (u == null) throw new IllegalStateException("Non connecté");
-        if (u instanceof Loueur l) return l;
-        throw new IllegalStateException("Accès réservé aux loueurs");
-    }
-
     @GetMapping("/{idContrat}")
     public String detail(@PathVariable int idContrat, Model model) {
-        Loueur loueur;
-        try {
-            loueur = requireLoueur();
-        } catch (Exception e) {
-            return "redirect:/connexion";
-        }
+        Utilisateur u = connexionService.getConnexion();
+        if (u == null) return "redirect:/connexion";
 
-        var contrat = contratRepository.getDetailByIdAndLoueur(idContrat, loueur.getIdUtilisateur());
-        if (contrat == null) {
+        boolean isLoueur = (u instanceof Loueur);
+        boolean isAgent = (u instanceof Agent);
+
+        if (!isLoueur && !isAgent) return "redirect:/profil";
+
+        int userId = u.getIdUtilisateur();
+
+        // --- 1) récupérer contrat + calcul prix depuis la BD (SQL)
+        ContratRepository.ContratPrixDetailView view =
+                isLoueur
+                        ? contratRepository.getPrixDetailByIdAndLoueur(idContrat, userId)
+                        : contratRepository.getPrixDetailByIdAndAgent(idContrat, userId);
+
+        if (view == null) {
             model.addAttribute("erreur", "Contrat introuvable ou non autorisé.");
             return "contrat";
         }
 
+        // --- 2) relevés
         var prise = releveRepository.findByContratAndType(idContrat, "PRISE");
         var retour = releveRepository.findByContratAndType(idContrat, "RETOUR");
 
-        model.addAttribute("contrat", contrat);
+        model.addAttribute("contrat", view);
         model.addAttribute("relevePrise", prise);
         model.addAttribute("releveRetour", retour);
+
+        // --- 3) prix (variables attendues par ton template contrat.html)
+        model.addAttribute("nbJours", view.nbJours());
+        model.addAttribute("prixJourLouable", view.prixJourLouable());
+        model.addAttribute("prixJourAssurance", view.prixJourAssurance());
+        model.addAttribute("baseAssurance", view.baseAssurance());
+        model.addAttribute("baseLoueur", view.baseLoueur());
+
+        model.addAttribute("pourcentageCommission", 10);
+        model.addAttribute("forfaitFixeParJour", java.math.BigDecimal.valueOf(2).setScale(2));
+
+        model.addAttribute("commissionVariable", view.commissionVariable());
+        model.addAttribute("commissionFixe", view.commissionFixe());
+        model.addAttribute("commissionTotale", view.commissionTotale());
+        model.addAttribute("totalClient", view.totalClient());
+
+        model.addAttribute("prixBd", view.prixBd());          // prix enregistré en BD
+        model.addAttribute("prixCalcule", view.prixCalcule()); // prix calculé SQL
+
+        // --- 4) notation : UNIQUEMENT loueur
+        model.addAttribute("canNoter", isLoueur);
+
+        // si tu veux exploiter noteMoyenne plus tard, laisse null pour l’instant
+        model.addAttribute("noteMoyenne", null);
+
         return "contrat";
     }
 
@@ -77,9 +105,14 @@ public class ContratController {
                                     @RequestParam("photo") MultipartFile photo,
                                     RedirectAttributes ra) throws IOException {
 
-        Loueur loueur = requireLoueur();
+        Utilisateur u = connexionService.getConnexion();
+        if (u == null) return "redirect:/connexion";
+        if (!(u instanceof Loueur)) return "redirect:/profil"; // saisie relevé réservée loueur (comme avant)
 
-        var contrat = contratRepository.getDetailByIdAndLoueur(idContrat, loueur.getIdUtilisateur());
+        int idLoueur = u.getIdUtilisateur();
+
+        // sécurité : contrat doit appartenir au loueur
+        var contrat = contratRepository.getDetailByIdAndLoueur(idContrat, idLoueur);
         if (contrat == null) {
             ra.addFlashAttribute("erreur", "Contrat introuvable ou non autorisé.");
             return "redirect:/contrats/" + idContrat;

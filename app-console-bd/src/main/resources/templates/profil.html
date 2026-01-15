@@ -134,6 +134,47 @@
     </div>
   </div>
 
+  <!-- ===== Contrats (agent) ===== -->
+  <div class="panel soft" th:if="${isAgent}">
+    <div class="panel-head">
+      <div>
+        <div class="h2" style="margin:0;">Contrats sur mes louables</div>
+        <div class="muted small">Clique sur une ligne.</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="tablewrap" th:if="${contratsAgent != null and contratsAgent.size() > 0}">
+      <table>
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Début</th>
+          <th>Fin</th>
+          <th>Lieu prise</th>
+          <th>Lieu dépôt</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="c : ${contratsAgent}"
+            th:onclick="|window.location='@{/contrats/{id}(id=${c.id})}'|"
+            style="cursor:pointer;">
+          <td><strong th:text="${c.id}">0</strong></td>
+          <td th:text="${#temporals.format(c.dateDebut,'dd/MM/yyyy')}">01/01/2026</td>
+          <td th:text="${#temporals.format(c.dateFin,'dd/MM/yyyy')}">02/01/2026</td>
+          <td th:text="${c.lieuPrise}">Lieu</td>
+          <td th:text="${c.lieuDepot}">Lieu</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert warn" th:if="${contratsAgent == null or contratsAgent.size() == 0}">
+      Aucun contrat sur tes louables.
+    </div>
+  </div>
+
   <!-- ===== Louables (agent) ===== -->
   <div class="panel soft" th:if="${isAgent}">
     <div class="panel-head">

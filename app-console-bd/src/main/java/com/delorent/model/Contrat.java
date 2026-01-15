@@ -1,6 +1,7 @@
 package com.delorent.model;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 public class Contrat {
     private int id;
@@ -8,6 +9,10 @@ public class Contrat {
     private LocalDate dateFin;
     private String lieuPrise;
     private String lieuDepot;
+
+    //Pour le calcul du prix
+    private BigDecimal prix;
+    private String etat;
     
     // Clés étrangères
     private int idLoueur;
@@ -74,4 +79,11 @@ public class Contrat {
 
     public Integer getIdParkingRetour() { return idParkingRetour; }
     public void setIdParkingRetour(Integer idParkingRetour) { this.idParkingRetour = idParkingRetour; }
+
+    // --- Getters et Setters pour le Prix ---
+    public BigDecimal getPrix() { return prix; }
+    public void setPrix(BigDecimal prix) { this.prix = prix; }
+
+    public String getEtat() { return etat; }
+    public void setEtat(String etat) { this.etat = etat; }
 }
