@@ -2,10 +2,11 @@ package com.delorent.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.math.BigDecimal;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping; // Import AJOUTÉ
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,29 +37,28 @@ public class LouerController {
     /* =========================
        GET Page louer
        ========================= */
-
     @GetMapping("/louables/{id}/louer")
     public String pageLouer(@PathVariable("id") int idLouable, Model model) {
 
-        // Louable (pour résumé + lieuPrincipal)
         LouableSummary louable = locationService.getLouable(idLouable);
         if (louable == null) {
             model.addAttribute("erreur", "Louable introuvable (id=" + idLouable + ").");
             return "louer";
         }
 
-        // --- AJOUT : Détection de l'offre Aller Simple ---
         OffreConvoyage offre = locationService.getOffreActive(idLouable);
         if (offre != null) {
             model.addAttribute("offreSpeciale", offre);
-            model.addAttribute("info", "🔥 PROMO : Ce véhicule est en Aller Simple vers " + offre.getVilleParking() + " (Réduction incluse).");
+            model.addAttribute("info",
+                    "🔥 PROMO : Ce véhicule est en Aller Simple vers " + offre.getVilleParking() + " (Réduction incluse).");
         }
-        // -------------------------------------------------
 
-        // Listes
         model.addAttribute("idLouable", idLouable);
         model.addAttribute("louable", louable);
         model.addAttribute("assurances", locationService.getAllAssurances());
+
+        // Pour l'estimation JS (on force un BigDecimal propre)
+        model.addAttribute("prixJour", BigDecimal.valueOf(louable.prixJour()).setScale(2, java.math.RoundingMode.HALF_UP));
 
         return "louer";
     }
@@ -66,24 +66,31 @@ public class LouerController {
     /* =========================
        POST Demande louer
        ========================= */
-
     @PostMapping("/louables/{id}/louer")
     public String louer(
             @PathVariable("id") int idLouablePath,
-
             @RequestParam int idLouable,
             @RequestParam int idAssurance,
             @RequestParam LocalDate dateDebut,
             @RequestParam LocalDate dateFin,
             @RequestParam(required = false) String lieuDepotOptionnel,
-
             Model model
     ) {
-        // Toujours recharger ce qui est nécessaire à l'affichage
         LouableSummary louable = locationService.getLouable(idLouablePath);
         model.addAttribute("idLouable", idLouablePath);
         model.addAttribute("louable", louable);
         model.addAttribute("assurances", locationService.getAllAssurances());
+
+        if (louable != null) {
+            model.addAttribute("prixJour", BigDecimal.valueOf(louable.prixJour()).setScale(2, java.math.RoundingMode.HALF_UP));
+        } else {
+            model.addAttribute("prixJour", BigDecimal.ZERO.setScale(2, java.math.RoundingMode.HALF_UP));
+        }
+
+        if (louable == null) {
+            model.addAttribute("erreur", "Louable introuvable (id=" + idLouablePath + ").");
+            return "louer";
+        }
 
         // 1) cohérence URL vs hidden
         if (idLouablePath != idLouable) {
@@ -100,12 +107,11 @@ public class LouerController {
         Utilisateur u = connexionService.getConnexion();
 
         // 3) autorisation + récupération idLoueur (celui qui signe le contrat)
-        Integer idLoueurConnecte = null;
-
-        if (u instanceof Loueur loueur) {
-            idLoueurConnecte = loueur.getIdUtilisateur();
-        } else if (u instanceof Agent agent) {
-            idLoueurConnecte = agent.getIdUtilisateur();
+        Integer idLoueurConnecte;
+        if (u instanceof Loueur loueurUser) {
+            idLoueurConnecte = loueurUser.getIdUtilisateur();
+        } else if (u instanceof Agent agentUser) {
+            idLoueurConnecte = agentUser.getIdUtilisateur();
         } else {
             model.addAttribute("erreur", "Rôle non autorisé pour louer.");
             return "louer";
@@ -121,7 +127,6 @@ public class LouerController {
             return "louer";
         }
 
-        // 5) appel service + gestion erreurs
         try {
             Contrat contrat = locationService.louer(
                     idLoueurConnecte,
@@ -134,22 +139,26 @@ public class LouerController {
 
             String assuranceNom = locationService.getAssurance(idAssurance).getNom();
 
-            // --- MODIFICATION : Message personnalisé si Aller Simple ---
             if (contrat.getIdParkingRetour() != null) {
-                model.addAttribute("succes", "✅ Location Validée ! ATTENTION : Ce véhicule doit être rendu au parking partenaire.");
+                model.addAttribute("succes",
+                        "✅ Location validée. ATTENTION : ce véhicule doit être rendu au parking partenaire.");
             } else {
                 model.addAttribute("succes", "Location créée (contrat #" + contrat.getId() + ").");
             }
-            // -----------------------------------------------------------
 
             model.addAttribute("contrat", new ContratView(
-                contrat.getId(),
-                contrat.getDateDebut(),
-                contrat.getDateFin(),
-                contrat.getLieuPrise(),
-                contrat.getLieuDepot(),
-                assuranceNom
+                    contrat.getId(),
+                    contrat.getDateDebut(),
+                    contrat.getDateFin(),
+                    contrat.getLieuPrise(),
+                    contrat.getLieuDepot(),
+                    assuranceNom
             ));
+
+            // Optionnel: exposer le prix final calculé/stocké (si tu veux l’afficher dans le résumé)
+            if (contrat.getPrix() != null) {
+                model.addAttribute("prixContrat", contrat.getPrix().setScale(2, java.math.RoundingMode.HALF_UP));
+            }
 
             return "louer";
 
@@ -162,13 +171,9 @@ public class LouerController {
     /* =========================
        API JSON dispo
        ========================= */
-
     @GetMapping("/louer/disponibilites")
     @ResponseBody
     public List<Disponibilite> disponibilites(@RequestParam int idLouable) {
         return locationService.getByLouable(idLouable);
     }
-    
-    // Je rajoute le Record ici pour être sûr que ça compile (au cas où il manquerait)
-    public record ContratView(int id, LocalDate debut, LocalDate fin, String depart, String retour, String assurance) {}
 }

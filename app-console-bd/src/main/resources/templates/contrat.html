@@ -73,21 +73,105 @@
           </div>
         </div>
 
+        <div class="hr"></div>
+
+        <div class="card-title" style="margin-top:10px;">Prix de location (détail)</div>
+
+        <div class="kv">
+        <div class="kv-row">
+            <div class="k">Durée</div>
+            <div class="v">
+            <strong th:text="${nbJours}">0</strong> jour(s)
+            </div>
+        </div>
+
+        <div class="kv-row">
+            <div class="k">Prix louable</div>
+            <div class="v">
+            <span th:text="${#numbers.formatDecimal(prixJourLouable, 1, 2)}">0.00</span> € / jour
+            </div>
+        </div>
+
+        <div class="kv-row">
+        <div class="k">Prix assurance</div>
+        <div class="v">
+            <span th:text="${#numbers.formatDecimal(prixJourAssurance, 1, 2)}">0.00</span> € / jour
+        </div>
+        </div>
+
+        <div class="kv-row">
+        <div class="k">Base assurance</div>
+        <div class="v">
+            <span th:text="${#numbers.formatDecimal(prixJourAssurance, 1, 2)}">0.00</span>
+            × <span th:text="${nbJours}">0</span>
+            = <strong th:text="${#numbers.formatDecimal(baseAssurance, 1, 2)}">0.00</strong> €
+        </div>
+        </div>
+
+        <div class="kv-row">
+            <div class="k">Base loueur</div>
+            <div class="v">
+            <span th:text="${#numbers.formatDecimal(prixJourLouable, 1, 2)}">0.00</span>
+            × <span th:text="${nbJours}">0</span>
+            = <strong th:text="${#numbers.formatDecimal(baseLoueur, 1, 2)}">0.00</strong> €
+            </div>
+        </div>
+
+        <div class="kv-row">
+            <div class="k">Commission %</div>
+            <div class="v">
+            <span th:text="${pourcentageCommission}">10</span>% de
+            <span th:text="${#numbers.formatDecimal(baseLoueur, 1, 2)}">0.00</span> €
+            = <strong th:text="${#numbers.formatDecimal(commissionVariable, 1, 2)}">0.00</strong> €
+            </div>
+        </div>
+
+        <div class="kv-row">
+            <div class="k">Forfait fixe</div>
+            <div class="v">
+            <span th:text="${#numbers.formatDecimal(forfaitFixeParJour, 1, 2)}">2.00</span> €
+            × <span th:text="${nbJours}">0</span>
+            = <strong th:text="${#numbers.formatDecimal(commissionFixe, 1, 2)}">0.00</strong> €
+            </div>
+        </div>
+
+        <div class="kv-row">
+            <div class="k">Total plateforme</div>
+            <div class="v">
+            <strong th:text="${#numbers.formatDecimal(commissionTotale, 1, 2)}">0.00</strong> €
+            </div>
+        </div>
+
+        <div class="kv-row">
+            <div class="k">Total client</div>
+            <div class="v">
+            <strong th:text="${#numbers.formatDecimal(totalClient, 1, 2)}">0.00</strong> €
+            <span class="muted small"> (base loueur + commission)</span>
+            </div>
+        </div>
+        <div>
+        </div>
+
+
+        <div class="kv-row">
+        <div class="k">Prix enregistré (BD)</div>
+        <div class="v">
+            <strong th:text="${#numbers.formatDecimal(prixBd, 1, 2)}">0.00</strong> €
+        </div>
+        </div>
+
         <div class="spacer"></div>
 
         <!-- Noter le louable -->
-        <div class="btnrow">
-          <!-- Si tu passes un booléen `peutNoter` depuis le controller, le bouton disparaît si déjà noté -->
-          <a class="btn primary"
-             th:if="${peutNoter == null or peutNoter}"
-             th:href="@{/notation/formulaire(idContrat=${contrat.idContrat()})}">
+        <div class="btnrow" th:if="${canNoter}">
+        <a class="btn primary"
+            th:href="@{/notation/formulaire(idContrat=${contrat.idContrat()})}">
             Noter ce louable
-          </a>
+        </a>
+        </div>
 
-          <span class="badge green"
-                th:if="${peutNoter != null and !peutNoter}">
-            Déjà noté
-          </span>
+        <div class="alert warn" th:if="${canNoter != null and !canNoter}">
+        Notation réservée au loueur (l’agent ne peut pas noter son propre louable).
         </div>
       </article>
 

@@ -40,11 +40,9 @@ public class ProfilController {
 
         model.addAttribute("utilisateur", utilisateur);
 
-        // Infos génériques (communes à tous)
         model.addAttribute("nomComplet", buildNomComplet(utilisateur));
         model.addAttribute("initiale", buildInitiale(utilisateur));
 
-        // Flags de rôle (simple, lisible côté Thymeleaf)
         model.addAttribute("isLoueur", utilisateur instanceof Loueur);
         model.addAttribute("isAgent", utilisateur instanceof Agent);
         model.addAttribute("isEntretien", utilisateur instanceof EntrepriseEntretien);
@@ -55,6 +53,8 @@ public class ProfilController {
 
         if (utilisateur instanceof Agent a) {
             model.addAttribute("louables", louableRepository.getByProprietaire(a.getIdUtilisateur()));
+            // NOUVEAU : contrats qui concernent l'agent (contrats sur SES louables)
+            model.addAttribute("contratsAgent", contratRepository.getByAgentId(a.getIdUtilisateur()));
         }
 
         return "profil";

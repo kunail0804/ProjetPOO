@@ -1,15 +1,19 @@
+// FICHIER: src/main/java/com/delorent/service/LocationService.java
 package com.delorent.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Import Nouveau
+import org.springframework.transaction.annotation.Transactional;
 
 import com.delorent.model.Assurance;
 import com.delorent.model.Contrat;
 import com.delorent.model.Louable.Disponibilite;
-import com.delorent.model.OffreConvoyage; // Import Nouveau
+import com.delorent.model.OffreConvoyage;
 import com.delorent.repository.AssuranceRepository;
 import com.delorent.repository.ContratRepository;
 import com.delorent.repository.DisponibiliteRepository;
@@ -24,7 +28,7 @@ public class LocationService {
     private final AssuranceRepository assuranceRepo;
     private final ContratRepository contratRepo;
     private final DisponibiliteRepository dispoRepo;
-    private final OffreConvoyageRepository offreRepo; // 1. Injection du nouveau repo
+    private final OffreConvoyageRepository offreRepo;
 
     public LocationService(LouableRepository louableRepo,
                            AssuranceRepository assuranceRepo,
@@ -46,12 +50,11 @@ public class LocationService {
                          LocalDate dateFin,
                          String lieuDepotOptionnel) {
 
-        // --- Vos vérifications de base (On garde tout !) ---
         if (dateDebut == null || dateFin == null) {
             throw new IllegalArgumentException("Dates manquantes.");
         }
-        if (!dateDebut.isBefore(dateFin)) {
-            throw new IllegalArgumentException("La date de début doit être strictement avant la date de fin.");
+        if (dateFin.isBefore(dateDebut)) {
+            throw new IllegalArgumentException("La date de fin doit être >= la date de début.");
         }
 
         LouableSummary louable = louableRepo.get(idLouable);
@@ -64,25 +67,21 @@ public class LocationService {
             throw new IllegalArgumentException("Assurance introuvable (id=" + idAssurance + ").");
         }
 
-        // --- 2. LOGIQUE ALLER SIMPLE (Insertion de la nouveauté ici) ---
         OffreConvoyage offre = offreRepo.getByLouable(idLouable);
         Integer idParkingRetour = null;
-        
+
         String lieuPrise = (louable.lieuPrincipal() == null) ? "" : louable.lieuPrincipal();
         String lieuDepot;
 
         if (offre != null) {
-            // Cas : Offre active -> On force le parking
             idParkingRetour = offre.getIdParkingArrivee();
             lieuDepot = "Parking Partenaire Vienci (" + offre.getVilleParking() + ")";
         } else {
-            // Cas : Classique (Code d'origine)
             lieuDepot = (lieuDepotOptionnel == null || lieuDepotOptionnel.trim().isEmpty())
                     ? lieuPrise
                     : lieuDepotOptionnel.trim();
         }
 
-        // --- Vos vérifications de disponibilité (On garde votre méthode optimisée !) ---
         Disponibilite dispoCouvrante = dispoRepo.findOneCoveringRange(idLouable, dateDebut, dateFin);
         if (dispoCouvrante == null) {
             throw new IllegalArgumentException("Ce véhicule n'est pas disponible sur toute la période demandée.");
@@ -92,8 +91,29 @@ public class LocationService {
             throw new IllegalArgumentException("Conflit : un contrat existe déjà sur tout ou partie de ces dates.");
         }
 
-        // --- 3. Création du Contrat (Modification pour utiliser 'add' et inclure le parking) ---
-        
+        // ===== CALCUL PRIX (inclusif + assurance/jour + commissions) =====
+        long nbJoursLong = ChronoUnit.DAYS.between(dateDebut, dateFin) + 1;
+        if (nbJoursLong <= 0) throw new IllegalArgumentException("Durée invalide.");
+        BigDecimal nbJours = BigDecimal.valueOf(nbJoursLong);
+
+        // LouableSummary.prixJour() est un double => jamais null
+        BigDecimal prixJourLouable = BigDecimal.valueOf(louable.prixJour());
+
+        // AssuranceRepository mappe en double, donc getTarifJournalier() doit être double
+        BigDecimal prixJourAssurance = BigDecimal.valueOf(assurance.getTarifJournalier());
+
+        // base = (louable + assurance) * nbJours
+        BigDecimal base = prixJourLouable.add(prixJourAssurance).multiply(nbJours);
+
+        BigDecimal commissionVariable = base.multiply(BigDecimal.valueOf(0.10));
+        BigDecimal commissionFixe = nbJours.multiply(BigDecimal.valueOf(2));
+
+        BigDecimal prixTotal = base
+                .add(commissionVariable)
+                .add(commissionFixe)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        // ===== INSERT CONTRAT =====
         Contrat contrat = new Contrat();
         contrat.setDateDebut(dateDebut);
         contrat.setDateFin(dateFin);
@@ -102,14 +122,15 @@ public class LocationService {
         contrat.setIdLoueur(idLoueur);
         contrat.setIdLouable(idLouable);
         contrat.setIdAssurance(idAssurance);
-        contrat.setIdParkingRetour(idParkingRetour); // La nouvelle info
+        contrat.setIdParkingRetour(idParkingRetour);
 
-        // On utilise .add() car c'est la seule méthode qui gère la colonne idParkingRetour
-        // (Votre méthode createContrat ne la gère pas, donc on bascule sur add pour cette fonctionnalité)
+        contrat.setPrix(prixTotal);
+        contrat.setEtat("accepte");
+
         int idContrat = contratRepo.add(contrat);
         contrat.setId(idContrat);
 
-        // --- Gestion de la disponibilité (On garde votre logique de découpage) ---
+        // ===== DECOUPAGE DISPO =====
         int idDispo = dispoCouvrante.getIdDisponibilite();
         LocalDate dispoDebut = dispoCouvrante.getDateDebut();
         LocalDate dispoFin = dispoCouvrante.getDateFin();
@@ -119,42 +140,41 @@ public class LocationService {
         if (dispoDebut.isBefore(dateDebut)) {
             LocalDate leftEnd = dateDebut.minusDays(1);
             if (!leftEnd.isBefore(dispoDebut)) {
-                dispoRepo.add(new Disponibilite(idLouable, dispoDebut, leftEnd));
+                dispoRepo.add(new Disponibilite(idLouable, dispoDebut, leftEnd, false, null));
             }
         }
 
         if (dateFin.isBefore(dispoFin)) {
             LocalDate rightStart = dateFin.plusDays(1);
             if (!dispoFin.isBefore(rightStart)) {
-                dispoRepo.add(new Disponibilite(idLouable, rightStart, dispoFin));
+                dispoRepo.add(new Disponibilite(idLouable, rightStart, dispoFin, false, null));
             }
         }
 
         return contrat;
     }
 
-    // --- Helpers (On rajoute juste l'offre, on garde le reste) ---
-
+    @Transactional(readOnly = true)
     public OffreConvoyage getOffreActive(int idLouable) {
         return offreRepo.getByLouable(idLouable);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public LouableSummary getLouable(int idLouable) {
         return louableRepo.get(idLouable);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Assurance> getAllAssurances() {
         return assuranceRepo.getAll();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Disponibilite> getByLouable(int idLouable) {
         return dispoRepo.getByLouable(idLouable);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Assurance getAssurance(int idAssurance) {
         return assuranceRepo.get(idAssurance);
     }
