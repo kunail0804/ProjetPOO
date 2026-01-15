@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <title>Noter un agent</title>
+  <style>
+    .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
+    .row { margin: 10px 0; }
+    .muted { color: #666; font-size: 0.9em; }
+    .err { color: #b00020; }
+    .ok  { color: #0a7a28; }
+    .crit { padding: 10px; border: 1px solid #eee; border-radius: 8px; margin: 8px 0; }
+    .radio { display: inline-flex; gap: 8px; align-items: center; margin-right: 10px; }
+    textarea { width: 100%; min-height: 100px; }
+    .btn { padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; background: #fafafa; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<h1>Noter l'agent</h1>
+
+<div class="box">
+  <div class="ok" th:if="${succes}" th:text="${succes}">Succès</div>
+  <div class="err" th:if="${erreur}" th:text="${erreur}">Erreur</div>
+
+  <div class="muted">
+    Agent #<strong th:text="${idAgent}">0</strong> · Contrat #<strong th:text="${idContrat}">0</strong>
+  </div>
+
+  <!-- Optionnel : récap contrat -->
+  <div class="muted" th:if="${contrat != null}">
+    <div>Du <span th:text="${contrat.dateDebut}">dateDebut</span> au <span th:text="${contrat.dateFin}">dateFin</span></div>
+    <div th:if="${contrat.lieu != null}">Lieu : <span th:text="${contrat.lieu}">-</span></div>
+    <div th:if="${contrat.marque != null}">Véhicule : <span th:text="${contrat.marque}">-</span> <span th:text="${contrat.modele}">-</span></div>
+  </div>
+
+  <form method="post" th:action="@{/profilAgent/{idAgent}/noter(idAgent=${idAgent})}">
+    <input type="hidden" name="idContrat" th:value="${idContrat}"/>
+
+    <h3>Critères</h3>
+
+    <div th:if="${criteres == null || #lists.isEmpty(criteres)}" class="muted">
+      Aucun critère n'est défini pour les agents.
+    </div>
+
+    <div class="crit" th:each="c : ${criteres}">
+      <div><strong th:text="${c.libelle}">Libellé</strong></div>
+      <div class="row">
+        <label class="radio"><input type="radio" th:name="${'notes[' + c.id + ']'}" value="1" required/> 1</label>
+        <label class="radio"><input type="radio" th:name="${'notes[' + c.id + ']'}" value="2"/> 2</label>
+        <label class="radio"><input type="radio" th:name="${'notes[' + c.id + ']'}" value="3"/> 3</label>
+        <label class="radio"><input type="radio" th:name="${'notes[' + c.id + ']'}" value="4"/> 4</label>
+        <label class="radio"><input type="radio" th:name="${'notes[' + c.id + ']'}" value="5"/> 5</label>
+      </div>
+    </div>
+
+    <h3>Commentaire (optionnel)</h3>
+    <textarea name="commentaire" placeholder="Ton avis..."></textarea>
+
+    <div class="row" style="display:flex; gap:10px;">
+      <button class="btn" type="submit">Envoyer la note</button>
+      <a class="btn" th:href="@{/profilAgent/{id}(id=${idAgent})}">Annuler</a>
+    </div>
+  </form>
+</div>
+
+</body>
+</html>

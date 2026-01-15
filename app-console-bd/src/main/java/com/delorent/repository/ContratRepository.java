@@ -192,18 +192,20 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
             String marque,
             String modele,
             Integer annee,
-            String immatriculation
+            String immatriculation,
+            int idAgent
     ) {}
 
     public ContratDetailView getDetailByIdAndLoueur(int idContrat, int idLoueur) {
         String sql = """
             SELECT c.idContrat, c.dateDebut, c.dateFin, c.lieuPrise, c.lieuDepot, c.prix, c.etat,
                    c.idLoueur, c.idLouable,
-                   v.marque, v.modele, v.annee, v.immatriculation
-            FROM CONTRAT c
-            JOIN LOUABLE l ON l.id = c.idLouable
-            JOIN VEHICULE v ON v.id = l.id
-            WHERE c.idContrat = ? AND c.idLoueur = ?
+                   v.marque, v.modele, v.annee, v.immatriculation,
+                   l.idProprietaire
+            FROM CONTRAT c, LOUABLE l, VEHICULE v
+            WHERE l.id = c.idLouable
+            AND v.id = l.id
+            AND c.idContrat = ? AND c.idLoueur = ?
         """;
 
         var res = jdbc.query(sql, (rs, i) -> new ContratDetailView(
@@ -219,7 +221,8 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
                 rs.getString("marque"),
                 rs.getString("modele"),
                 (Integer) rs.getObject("annee"),
-                rs.getString("immatriculation")
+                rs.getString("immatriculation"),
+                rs.getInt("idProprietaire")
         ), idContrat, idLoueur);
 
         return res.isEmpty() ? null : res.get(0);

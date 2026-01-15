@@ -1,0 +1,89 @@
+<!-- FICHIER: src/main/resources/templates/profil_agent.html -->
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Profil Agent', ~{::section})}">
+
+<section>
+
+  <div class="panel soft">
+    <div class="panel-head">
+      <div>
+        <h1 class="h1" style="margin-bottom:6px;">Profil public</h1>
+        <div class="muted small">
+          <span class="badge cyan">AGENT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="row">
+      <div class="col">
+        <div class="h2" style="margin-top:0;">Identité</div>
+        <div class="kv">
+          <div class="kv-row">
+            <div class="k">Nom</div>
+            <div class="v" th:text="${nomComplet}">Nom Prénom</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="h2" style="margin-top:0;">Zone</div>
+        <div class="kv">
+          <div class="kv-row">
+            <div class="k">Ville</div>
+            <div class="v" th:text="${agent.ville}">ville</div>
+          </div>
+          <div class="kv-row">
+            <div class="k">Région</div>
+            <div class="v" th:text="${agent.region}">region</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <!-- Louables (public) -->
+  <div class="panel soft">
+    <div class="panel-head">
+      <div>
+        <div class="h2" style="margin:0;">Louables proposés</div>
+        <div class="muted small">Clique pour ouvrir la fiche.</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="grid" th:if="${louables != null and louables.size() > 0}">
+      <article class="card" th:each="l : ${louables}">
+        <div class="panel-head">
+          <div>
+            <span class="badge cyan" th:text="${l.type}">Type</span>
+            <div class="card-title" th:text="'Louable #' + ${l.idLouable}">Louable #</div>
+            <div class="muted small" th:text="${l.lieuPrincipal}">Lieu</div>
+          </div>
+
+          <div class="text-right">
+            <div class="h3" style="margin:0;" th:text="${l.prixJour} + ' € / jour'">0 €</div>
+            <div class="muted small" th:text="${l.statut}">STATUT</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="btnrow">
+          <a class="btn primary" th:href="@{/louables/{id}(id=${l.idLouable})}">Voir</a>
+        </div>
+      </article>
+    </div>
+
+    <div class="alert warn" th:if="${louables == null or louables.size() == 0}">
+      Aucun louable.
+    </div>
+  </div>
+
+</section>
+</html>

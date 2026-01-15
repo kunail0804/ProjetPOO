@@ -190,6 +190,19 @@
       </form>
     </div>
 
+    <div class="spacer"></div>
+
+    <div class="btnrow">
+      <a class="btn"
+        th:href="@{/profilAgent/{id}(id=${contrat.idAgent()})}">
+        Voir le profil de l’agent
+      </a>
+      <a class="btn"
+        th:href="@{/profilAgent/{id}/noter(id=${contrat.idAgent()})}">
+        Noter l'agent
+      </a>
+    </div>
+
   </div>
 </section>
 </html>

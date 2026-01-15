@@ -245,4 +245,9 @@ public class UtilisateurService {
     public void updateEntrepriseEntretien(EntrepriseEntretien entrepriseEntretien) {
         entrepriseEntretienRepository.modify(entrepriseEntretien);
     }
+
+    @Transactional
+    public Agent getAgentById(long id){
+        return agentRepository.get(id);
+    }
 }
