@@ -3,15 +3,12 @@ package com.delorent.repository.LouableRepository;
 import com.delorent.model.Louable.Camion;
 import com.delorent.model.Louable.LouableFiltre;
 import com.delorent.model.Louable.Moto;
-import com.delorent.model.Louable.SqlClause;
 import com.delorent.model.Louable.StatutLouable;
 import com.delorent.model.Louable.Voiture;
 import com.delorent.repository.RepositoryBase;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,49 +32,31 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
 
     @Override
     public List<VehiculeSummary> getAll() {
-
         List<VehiculeSummary> result = new ArrayList<>();
 
         List<Voiture> voitures = voitureRepository.getAll();
         List<Camion> camions = camionRepository.getAll();
         List<Moto> motos = motoRepository.getAll();
 
+        // CORRECTION : On passe getIdAgent() via la méthode helper
         for (Voiture v : voitures) {
             result.add(new VehiculeSummary(
-                new LouableSummary(v.getIdLouable(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Voiture"),
-                v.getMarque(),
-                v.getModele(),
-                v.getAnnee(),
-                v.getCouleur(),
-                v.getImmatriculation(),
-                v.getKilometrage(),
-                "Voiture"
+                toLouableSummary(v.getIdLouable(), v.getIdAgent(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Voiture"),
+                v.getMarque(), v.getModele(), v.getAnnee(), v.getCouleur(), v.getImmatriculation(), v.getKilometrage(), "Voiture"
             ));
         }
 
         for (Camion c : camions) {
             result.add(new VehiculeSummary(
-                new LouableSummary(c.getIdLouable(), c.getStatut(), c.getPrixJour(), c.getLieuPrincipal(), "Camion"),
-                c.getMarque(),
-                c.getModele(),
-                c.getAnnee(),
-                c.getCouleur(),
-                c.getImmatriculation(),
-                c.getKilometrage(),
-                "Camion"
+                toLouableSummary(c.getIdLouable(), c.getIdAgent(), c.getStatut(), c.getPrixJour(), c.getLieuPrincipal(), "Camion"),
+                c.getMarque(), c.getModele(), c.getAnnee(), c.getCouleur(), c.getImmatriculation(), c.getKilometrage(), "Camion"
             ));
         }
 
         for (Moto m : motos) {
             result.add(new VehiculeSummary(
-                new LouableSummary(m.getIdLouable(), m.getStatut(), m.getPrixJour(), m.getLieuPrincipal(), "Moto"),
-                m.getMarque(),
-                m.getModele(),
-                m.getAnnee(),
-                m.getCouleur(),
-                m.getImmatriculation(),
-                m.getKilometrage(),
-                "Moto"
+                toLouableSummary(m.getIdLouable(), m.getIdAgent(), m.getStatut(), m.getPrixJour(), m.getLieuPrincipal(), "Moto"),
+                m.getMarque(), m.getModele(), m.getAnnee(), m.getCouleur(), m.getImmatriculation(), m.getKilometrage(), "Moto"
             ));
         }
 
@@ -86,7 +65,6 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
 
     @Override
     public VehiculeSummary get(Integer id) {
-
         boolean voitureFail = false;
         boolean camionFail = false;
         boolean motoFail = false;
@@ -94,15 +72,10 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Voiture voiture = voitureRepository.get(id);
             if (voiture != null) {
+                // CORRECTION ICI : Ajout de voiture.getIdAgent()
                 return new VehiculeSummary(
-                    new LouableSummary(voiture.getIdLouable(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
-                    voiture.getMarque(),
-                    voiture.getModele(),
-                    voiture.getAnnee(),
-                    voiture.getCouleur(),
-                    voiture.getImmatriculation(),
-                    voiture.getKilometrage(),
-                    "Voiture"
+                    toLouableSummary(voiture.getIdLouable(), voiture.getIdAgent(), voiture.getStatut(), voiture.getPrixJour(), voiture.getLieuPrincipal(), "Voiture"),
+                    voiture.getMarque(), voiture.getModele(), voiture.getAnnee(), voiture.getCouleur(), voiture.getImmatriculation(), voiture.getKilometrage(), "Voiture"
                 );
             }
         } catch (Exception e) {
@@ -112,15 +85,10 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Camion camion = camionRepository.get(id);
             if (camion != null) {
+                // CORRECTION ICI
                 return new VehiculeSummary(
-                    new LouableSummary(camion.getIdLouable(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Voiture"),
-                    camion.getMarque(),
-                    camion.getModele(),
-                    camion.getAnnee(),
-                    camion.getCouleur(),
-                    camion.getImmatriculation(),
-                    camion.getKilometrage(),
-                    "Camion"
+                    toLouableSummary(camion.getIdLouable(), camion.getIdAgent(), camion.getStatut(), camion.getPrixJour(), camion.getLieuPrincipal(), "Camion"),
+                    camion.getMarque(), camion.getModele(), camion.getAnnee(), camion.getCouleur(), camion.getImmatriculation(), camion.getKilometrage(), "Camion"
                 );
             }
         } catch (Exception e) {
@@ -130,15 +98,10 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try {
             Moto moto = motoRepository.get(id);
             if (moto != null) {
+                // CORRECTION ICI
                 return new VehiculeSummary(
-                    new LouableSummary(moto.getIdLouable(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Voiture"),
-                    moto.getMarque(),
-                    moto.getModele(),
-                    moto.getAnnee(),
-                    moto.getCouleur(),
-                    moto.getImmatriculation(),
-                    moto.getKilometrage(),
-                    "Moto"
+                    toLouableSummary(moto.getIdLouable(), moto.getIdAgent(), moto.getStatut(), moto.getPrixJour(), moto.getLieuPrincipal(), "Moto"),
+                    moto.getMarque(), moto.getModele(), moto.getAnnee(), moto.getCouleur(), moto.getImmatriculation(), moto.getKilometrage(), "Moto"
                 );
             }
         } catch (Exception e) {
@@ -146,9 +109,8 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         }
 
         if (voitureFail && camionFail && motoFail) {
-            return null; // ou throw new NoSuchElementException("Véhicule introuvable id=" + id);
+            return null;
         }
-
         return null;
     }
 
@@ -160,69 +122,45 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
     public boolean delete(Integer id) { throw new UnsupportedOperationException(); }
 
     public List<VehiculeSummary> getDisponibles(List<LouableFiltre> filtres) {
-
         List<VehiculeSummary> result = new ArrayList<>();
 
         List<Voiture> voitures = new ArrayList<>();
         List<Camion> camions = new ArrayList<>();
         List<Moto> motos = new ArrayList<>();
 
-        try {
-            voitures = voitureRepository.getDisponibles(filtres);
-        } catch (Exception ignored) {}
+        try { voitures = voitureRepository.getDisponibles(filtres); } catch (Exception ignored) {}
+        try { camions = camionRepository.getDisponibles(filtres); } catch (Exception ignored) {}
+        try { motos = motoRepository.getDisponibles(filtres); } catch (Exception ignored) {}
 
-        try {
-            camions = camionRepository.getDisponibles(filtres);
-        } catch (Exception ignored) {}
-
-        try {
-            motos = motoRepository.getDisponibles(filtres);
-        } catch (Exception ignored) {}
-
+        // CORRECTION DANS LES BOUCLES AUSSI
         for (Voiture v : voitures) {
             result.add(new VehiculeSummary(
-                new LouableSummary(v.getIdLouable(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Voiture"),
-                v.getMarque(),
-                v.getModele(),
-                v.getAnnee(),
-                v.getCouleur(),
-                v.getImmatriculation(),
-                v.getKilometrage(),
-                "Voiture"
+                toLouableSummary(v.getIdLouable(), v.getIdAgent(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Voiture"),
+                v.getMarque(), v.getModele(), v.getAnnee(), v.getCouleur(), v.getImmatriculation(), v.getKilometrage(), "Voiture"
             ));
         }
 
         for (Camion c : camions) {
             result.add(new VehiculeSummary(
-                new LouableSummary(c.getIdLouable(), c.getStatut(), c.getPrixJour(), c.getLieuPrincipal(), "Camion"),
-                c.getMarque(),
-                c.getModele(),
-                c.getAnnee(),
-                c.getCouleur(),
-                c.getImmatriculation(),
-                c.getKilometrage(),
-                "Camion"
+                toLouableSummary(c.getIdLouable(), c.getIdAgent(), c.getStatut(), c.getPrixJour(), c.getLieuPrincipal(), "Camion"),
+                c.getMarque(), c.getModele(), c.getAnnee(), c.getCouleur(), c.getImmatriculation(), c.getKilometrage(), "Camion"
             ));
         }
 
         for (Moto m : motos) {
             result.add(new VehiculeSummary(
-                new LouableSummary(m.getIdLouable(), m.getStatut(), m.getPrixJour(), m.getLieuPrincipal(), "Moto"),
-                m.getMarque(),
-                m.getModele(),
-                m.getAnnee(),
-                m.getCouleur(),
-                m.getImmatriculation(),
-                m.getKilometrage(),
-                "Moto"
+                toLouableSummary(m.getIdLouable(), m.getIdAgent(), m.getStatut(), m.getPrixJour(), m.getLieuPrincipal(), "Moto"),
+                m.getMarque(), m.getModele(), m.getAnnee(), m.getCouleur(), m.getImmatriculation(), m.getKilometrage(), "Moto"
             ));
         }
 
         return result;
     }
 
+    // Le Helper qui fait tout le travail
     private LouableSummary toLouableSummary(int idLouable, int idAgent, StatutLouable statut,
                                            double prixJour, String lieuPrincipal, String type) {
+        // Le "true" à la fin est sans doute pour le flag 'isCodeAccessible' ou autre, je le laisse tel quel
         return new LouableSummary(idLouable, idAgent, statut, prixJour, lieuPrincipal, type, true);
     }
 
@@ -237,8 +175,7 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         for (Moto v : motos) summaries.add(wrap(v, "Moto"));
         return summaries;
     }
-    
-    // Petit helper pour éviter de dupliquer le code dans getByProprietaire
+
     private VehiculeSummary wrap(com.delorent.model.Louable.Vehicule v, String type) {
          return new VehiculeSummary(
                 toLouableSummary(v.getIdLouable(), v.getIdAgent(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), type),

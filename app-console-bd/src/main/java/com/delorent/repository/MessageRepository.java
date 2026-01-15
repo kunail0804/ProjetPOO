@@ -2,8 +2,6 @@ package com.delorent.repository;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +25,12 @@ public class MessageRepository {
 
     // 1. Trouver toutes mes discussions
     public List<Discussion> trouverDiscussionsUtilisateur(int monId) {
-        // ICI C'ETAIT DEJA BON (DISCUSSION en majuscule)
+        // CORRECTION : idUtilisateur1 (sans underscore)
         String sql = "SELECT " +
                      "d.idDiscussion, " +
                      "d.dateCreation, " +
                      "COALESCE(a.nom, l.nom, u.mail) AS nomInterlocuteur " +
-                     "FROM DISCUSSION d " + // <--- MAJUSCULE
+                     "FROM DISCUSSION d " +
                      "JOIN UTILISATEUR u ON (u.idUtilisateur = d.idUtilisateur1 OR u.idUtilisateur = d.idUtilisateur2) " +
                      "LEFT JOIN AGENT a ON u.idUtilisateur = a.idUtilisateur " +
                      "LEFT JOIN LOUEUR l ON u.idUtilisateur = l.idUtilisateur " +
@@ -44,31 +42,29 @@ public class MessageRepository {
 
     // 2. Récupérer les messages
     public List<Message> trouverMessages(int idDiscussion) {
-        // Correction : MESSAGE en majuscule
         String sql = "SELECT * FROM MESSAGE WHERE idDiscussion = ? ORDER BY dateHeure ASC";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Message.class), idDiscussion);
     }
 
     // 3. Envoyer un message
     public void envoyerMessage(Message msg) {
-        // Correction : MESSAGE en majuscule
         String sql = "INSERT INTO MESSAGE (idDiscussion, idExpediteur, contenu, dateHeure) VALUES (?, ?, ?, NOW())";
         jdbcTemplate.update(sql, msg.getIdDiscussion(), msg.getIdExpediteur(), msg.getContenu());
     }
 
     // 4. Chercher une discussion existante
     public Optional<Discussion> findByUtilisateurs(int idUser1, int idUser2) {
-        // Correction : DISCUSSION en majuscule
+        // CORRECTION : idUtilisateur1 (sans underscore)
         String sql = "SELECT * FROM DISCUSSION " + 
-                     "WHERE (id_utilisateur1 = ? AND id_utilisateur2 = ?) " +
-                     "   OR (id_utilisateur1 = ? AND id_utilisateur2 = ?)";
+                     "WHERE (idUtilisateur1 = ? AND idUtilisateur2 = ?) " +
+                     "   OR (idUtilisateur1 = ? AND idUtilisateur2 = ?)";
 
         try {
             List<Discussion> resultats = jdbcTemplate.query(sql, 
                 new Object[]{idUser1, idUser2, idUser2, idUser1},
                 (rs, rowNum) -> {
                     Discussion discussion = new Discussion();
-                    discussion.setIdDiscussion(rs.getInt("idDiscussion")); // Attention aux noms de colonnes aussi
+                    discussion.setIdDiscussion(rs.getInt("idDiscussion"));
                     discussion.setIdUtilisateur1(rs.getInt("idUtilisateur1"));
                     discussion.setIdUtilisateur2(rs.getInt("idUtilisateur2"));
                     discussion.setDateCreation(rs.getString("dateCreation"));
@@ -90,7 +86,7 @@ public class MessageRepository {
 
     // 5. Créer une nouvelle discussion
     public Discussion save(Discussion discussion) {
-        // Correction : DISCUSSION en majuscule
+        // CORRECTION : idUtilisateur1 (sans underscore)
         String sql = "INSERT INTO DISCUSSION (idUtilisateur1, idUtilisateur2, dateCreation) VALUES (?, ?, ?)";
         
         KeyHolder keyHolder = new GeneratedKeyHolder();
