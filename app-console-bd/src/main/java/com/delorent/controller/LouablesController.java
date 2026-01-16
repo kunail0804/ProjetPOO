@@ -8,7 +8,7 @@ import com.delorent.repository.LouableRepository.LouableRepository;
 import com.delorent.repository.LouableRepository.LouableSummary;
 import com.delorent.repository.LouableRepository.VehiculeRepository;
 import com.delorent.repository.LouableRepository.VehiculeSummary;
-import com.delorent.repository.NoteRepository; // Apport de la branche Notation
+import com.delorent.repository.NoteRepository;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,7 +26,6 @@ public class LouablesController {
 
     private final LouableRepository louableRepository;
     private final VehiculeRepository vehiculeRepository;
-    // Ajout du repository de notes (apport branche Notation)
     private final NoteRepository noteRepository;
 
     public LouablesController(LouableRepository louableRepository,
@@ -45,7 +44,6 @@ public class LouablesController {
             @RequestParam(required = false, defaultValue = "false") boolean uniquementDisponibles,
             Model model
     ) {
-        // 1. Gestion de la date (Logique HEAD)
         LocalDate dateCible = LocalDate.now();
         try {
             if (date != null && !date.isBlank()) {
@@ -55,7 +53,6 @@ public class LouablesController {
             dateCible = LocalDate.now();
         }
 
-        // 2. Préparation des variables pour la Vue
         model.addAttribute("filtrePrixMax", prixMax);
         model.addAttribute("filtreVehicule", vehicule);
         model.addAttribute("filtreDate", dateCible.toString());
@@ -68,17 +65,13 @@ public class LouablesController {
 
         try {
             if (vehicule) {
-                // A. Récupération optimisée (HEAD)
                 List<VehiculeSummary> resultats = vehiculeRepository.getDisponibles(filtres);
 
-                // B. Calcul des stats et Notes (Intégration branche Notation)
                 List<Integer> ids = resultats.stream().map(v -> v.louable().idLouable()).collect(Collectors.toList());
                 long availableCount = resultats.stream().filter(v -> v.louable().disponibleAujourdhui()).count();
                 
-                // Récupération des notes pour ces véhicules
                 Map<Integer, Double> moyennesNotes = noteRepository.findMoyennesByLouables(ids);
 
-                // C. Envoi au Model
                 model.addAttribute("vehicules", resultats);
                 model.addAttribute("louables", null);
                 model.addAttribute("moyennesNotes", moyennesNotes);
@@ -86,15 +79,12 @@ public class LouablesController {
                 model.addAttribute("availableCount", availableCount);
 
             } else {
-                // A. Récupération optimisée (HEAD)
                 List<LouableSummary> resultats = louableRepository.getDisponibles(filtres);
-                // B. Calcul des stats et Notes
                 List<Integer> ids = resultats.stream().map(LouableSummary::idLouable).collect(Collectors.toList());
                 long availableCount = resultats.stream().filter(LouableSummary::disponibleAujourdhui).count();
 
                 Map<Integer, Double> moyennesNotes = noteRepository.findMoyennesByLouables(ids);
 
-                // C. Envoi au Model
                 model.addAttribute("louables", resultats);
                 model.addAttribute("vehicules", null);
                 model.addAttribute("moyennesNotes", moyennesNotes);

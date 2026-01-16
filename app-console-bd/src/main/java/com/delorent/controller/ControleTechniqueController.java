@@ -2,7 +2,7 @@ package com.delorent.controller;
 
 import com.delorent.model.Louable.ControleTechnique;
 import com.delorent.model.Louable.ResultatControle;
-import com.delorent.repository.LouableRepository.ControleTechniqueRepository;  // IMPORT CORRIGÉ
+import com.delorent.repository.LouableRepository.ControleTechniqueRepository;
 import com.delorent.repository.LouableRepository.VehiculeRepository;
 import com.delorent.repository.LouableRepository.VehiculeSummary;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,6 @@ public class ControleTechniqueController {
         this.vehiculeRepository = vehiculeRepository;
     }
 
-    // 1. LISTE des contrôles techniques
     @GetMapping("/")
     public String listeControles(@PathVariable("vehicleId") Integer vehicleId, Model model) {
         VehiculeSummary vehicle = vehiculeRepository.get(vehicleId);
@@ -51,7 +50,6 @@ public class ControleTechniqueController {
         return "controle-technique/liste";
     }
 
-    // 2. FORMULAIRE d'ajout
     @GetMapping("/nouveau")
     public String formulaireNouveauControle(@PathVariable("vehicleId") Integer vehicleId, Model model) {
         VehiculeSummary vehicle = vehiculeRepository.get(vehicleId);
@@ -64,10 +62,9 @@ public class ControleTechniqueController {
         model.addAttribute("controleTechnique", new ControleTechnique());
         model.addAttribute("resultats", ResultatControle.values());
         
-        return "controle-technique/nouveau";  // ou "nouveau" si tu gardes ce nom
+        return "controle-technique/nouveau";
     }
 
-    // 3. ENREGISTRER un nouveau contrôle
     @PostMapping("/nouveau")
     public String enregistrerControle(@PathVariable("vehicleId") Integer vehicleId,
                                       @ModelAttribute ControleTechnique controleTechnique) {
@@ -76,7 +73,6 @@ public class ControleTechniqueController {
         return "redirect:/vehicles/" + vehicleId + "/controles-techniques/";
     }
 
-    // 4. DÉTAILS d'un contrôle
     @GetMapping("/{controleId}")
     public String detailsControle(@PathVariable("vehicleId") Integer vehicleId,
                                   @PathVariable("controleId") Long controleId,
@@ -94,7 +90,6 @@ public class ControleTechniqueController {
         return "controle-technique/details";
     }
 
-    // 5. SUPPRIMER un contrôle
     @PostMapping("/{controleId}/supprimer")
     public String supprimerControle(@PathVariable("vehicleId") Integer vehicleId,
                                     @PathVariable("controleId") Long controleId) {

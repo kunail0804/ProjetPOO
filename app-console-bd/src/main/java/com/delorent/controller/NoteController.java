@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/controller/NoteController.java
 package com.delorent.controller;
 
 import com.delorent.service.NoteService;
@@ -82,7 +81,6 @@ public class NoteController {
                 ra.addFlashAttribute("erreur", "Ce contrat a déjà été noté.");
             }
 
-            // IMPORTANT : on redirige vers la page contrat EXISTANTE
             return "redirect:/contrats/" + idContrat;
 
         } catch (Exception e) {

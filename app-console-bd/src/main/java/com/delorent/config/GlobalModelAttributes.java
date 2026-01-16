@@ -24,7 +24,6 @@ public class GlobalModelAttributes {
         model.addAttribute("estConnecte", estConnecte);
         model.addAttribute("utilisateur", u);
 
-        // pratique pour le menu
         model.addAttribute("isAgent", u instanceof Agent);
     }
 }

@@ -58,7 +58,7 @@ public class VoitureRepository implements RepositoryBase<Voiture,Integer> {
                 " JOIN VOITURE ON VEHICULE.id = VOITURE.id";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Voiture(
                 rs.getInt("id"),
-                rs.getInt("idProprietaire"), // On garde l'ID Propriétaire
+                rs.getInt("idProprietaire"),
                 rs.getDouble("prixJour"),
                 StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                 rs.getString("lieuPrincipal"),

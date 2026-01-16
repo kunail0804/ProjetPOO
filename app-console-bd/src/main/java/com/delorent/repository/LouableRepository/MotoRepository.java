@@ -21,19 +21,15 @@ import java.util.ArrayList;
 public class MotoRepository implements RepositoryBase<Moto, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
-    // Ajout de US.L.10 pour la gestion de la disponibilité dans le catalogue
     private final ThreadLocal<Boolean> lastDisponibleLeJour = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     public MotoRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Helper de US.L.10
     public boolean isDernierDisponibleLeJour(Moto ignored) {
         return Boolean.TRUE.equals(lastDisponibleLeJour.get());
     }
-
-    // --- Opérations CRUD (Gardées de HEAD pour la gestion propriétaire) ---
 
     @Override
     public List<Moto> getAll() {
@@ -42,7 +38,7 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
                 " JOIN MOTO ON VEHICULE.id = MOTO.id";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Moto(
                 rs.getInt("id"),
-                rs.getInt("idProprietaire"), // On garde l'idProprietaire
+                rs.getInt("idProprietaire"),
                 rs.getDouble("prixJour"),
                 StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                 rs.getString("lieuPrincipal"),
@@ -131,8 +127,6 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
         return true;
     }
 
-    // --- Méthodes de Recherche Avancée (Fusion US.L.10 et HEAD) ---
-
     public List<Moto> getCatalogue(LocalDate dateCible, boolean uniquementDisponibles, List<LouableFiltre> filtres) {
         Date d = Date.valueOf(dateCible);
 
@@ -173,14 +167,13 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
         }
 
         return jdbcTemplate.query(sql.toString(), params.toArray(), (rs, rowNum) -> {
-            // Logique US.L.10 pour traquer la dispo
             if (rs.getObject("disponibleLeJour") != null) {
                 lastDisponibleLeJour.set(rs.getInt("disponibleLeJour") == 1);
             }
 
             return new Moto(
                     rs.getInt("id"),
-                    rs.getInt("idProprietaire"), // Inclus
+                    rs.getInt("idProprietaire"),
                     rs.getDouble("prixJour"),
                     StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                     rs.getString("lieuPrincipal"),
@@ -198,7 +191,6 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
         });
     }
 
-    // Gardé pour compatibilité HEAD
     public List<Moto> getDisponibles(List<LouableFiltre> filtres) {
                 StringBuilder sql = new StringBuilder(
             "SELECT * FROM LOUABLE l "+
@@ -238,7 +230,6 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
         });
     }
 
-    // Gardé pour compatibilité HEAD (Gestion Propriétaire)
     public List<Moto> getByProprietaire(int idProprietaire) {
         String sql = "SELECT * FROM LOUABLE l " +
                 "JOIN VEHICULE v ON l.id = v.id " +
@@ -266,7 +257,7 @@ public class MotoRepository implements RepositoryBase<Moto, Integer> {
         return new VehiculeSummary(
                 new LouableSummary(
                     moto.getIdLouable(),
-                    moto.getIdAgent(), // <--- AJOUTER ICI
+                    moto.getIdAgent(),
                     moto.getStatut(),
                     moto.getPrixJour(),
                     moto.getLieuPrincipal(),

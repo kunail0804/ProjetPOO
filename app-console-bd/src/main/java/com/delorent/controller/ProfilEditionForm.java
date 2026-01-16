@@ -1,7 +1,6 @@
 package com.delorent.controller;
 
 public class ProfilEditionForm {
-    // Commun
     private String mail;
     private String motDePasse;
     private String adresse;
@@ -10,11 +9,9 @@ public class ProfilEditionForm {
     private String region;
     private String telephone;
 
-    // Spécifique Agent/Loueur
     private String nom;
     private String prenom;
 
-    // Spécifique EntrepriseEntretien
     private String nomEntreprise;
     private String raisonSoc;
     private String noSiret;

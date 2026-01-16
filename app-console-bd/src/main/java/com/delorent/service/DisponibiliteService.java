@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/service/DisponibiliteService.java
 package com.delorent.service;
 
 import com.delorent.model.Louable.Disponibilite;
@@ -30,17 +29,14 @@ public class DisponibiliteService {
     public void addOrMergeNonReservedRange(int idLouable, LocalDate debut, LocalDate fin) {
         validate(debut, fin);
 
-        // Pas de conflit avec contrats
         if (contratRepo.contratChevauche(idLouable, debut, fin)) {
             throw new IllegalArgumentException("Impossible: un contrat existe déjà sur tout ou partie de cette période.");
         }
 
-        // Si tu utilises estReservee=1 quelque part, on bloque aussi
         if (dispoRepo.existsOverlappingReserved(idLouable, debut, fin)) {
             throw new IllegalArgumentException("Impossible: une disponibilité réservée existe déjà sur cette période.");
         }
 
-        // Merge avec périodes non réservées chevauchantes ou adjacentes
         List<Disponibilite> overlaps = dispoRepo.findOverlappingOrAdjacentNonReserved(idLouable, debut, fin);
 
         LocalDate mergedStart = debut;
@@ -51,12 +47,10 @@ public class DisponibiliteService {
             if (d.getDateFin().isAfter(mergedEnd)) mergedEnd = d.getDateFin();
         }
 
-        // supprimer les anciennes périodes (non réservées) qui se merge
         for (Disponibilite d : overlaps) {
             dispoRepo.delete(d.getIdDisponibilite());
         }
 
-        // insérer la période merge
         dispoRepo.add(new Disponibilite(idLouable, mergedStart, mergedEnd, false, null));
     }
 

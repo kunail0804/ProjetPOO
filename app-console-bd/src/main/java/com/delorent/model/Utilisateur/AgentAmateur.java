@@ -8,7 +8,6 @@ public class AgentAmateur extends Agent {
         super(idUtilisateur, mail, motDePasse, adresse, ville, codePostal, region, telephone, nom, prenom);
     }
     
-    // Constructeur sans ID (pour l'insertion)
     public AgentAmateur(String mail, String motDePasse, String adresse,
                         String ville, String codePostal, String region, String telephone, 
                         String nom, String prenom) {

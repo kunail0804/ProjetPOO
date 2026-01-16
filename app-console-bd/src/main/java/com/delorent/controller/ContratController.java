@@ -52,7 +52,6 @@ public class ContratController {
 
         int userId = u.getIdUtilisateur();
 
-        // --- 1) récupérer contrat + calcul prix depuis la BD (SQL)
         ContratRepository.ContratPrixDetailView view =
                 isLoueur
                         ? contratRepository.getPrixDetailByIdAndLoueur(idContrat, userId)
@@ -63,7 +62,6 @@ public class ContratController {
             return "contrat";
         }
 
-        // --- 2) relevés
         var prise = releveRepository.findByContratAndType(idContrat, "PRISE");
         var retour = releveRepository.findByContratAndType(idContrat, "RETOUR");
 
@@ -71,7 +69,6 @@ public class ContratController {
         model.addAttribute("relevePrise", prise);
         model.addAttribute("releveRetour", retour);
 
-        // --- 3) prix (variables attendues par ton template contrat.html)
         model.addAttribute("nbJours", view.nbJours());
         model.addAttribute("prixJourLouable", view.prixJourLouable());
         model.addAttribute("prixJourAssurance", view.prixJourAssurance());
@@ -86,13 +83,11 @@ public class ContratController {
         model.addAttribute("commissionTotale", view.commissionTotale());
         model.addAttribute("totalClient", view.totalClient());
 
-        model.addAttribute("prixBd", view.prixBd());          // prix enregistré en BD
-        model.addAttribute("prixCalcule", view.prixCalcule()); // prix calculé SQL
+        model.addAttribute("prixBd", view.prixBd());
+        model.addAttribute("prixCalcule", view.prixCalcule());
 
-        // --- 4) notation : UNIQUEMENT loueur
         model.addAttribute("canNoter", isLoueur);
 
-        // si tu veux exploiter noteMoyenne plus tard, laisse null pour l’instant
         model.addAttribute("noteMoyenne", null);
 
         return "contrat";
@@ -107,11 +102,10 @@ public class ContratController {
 
         Utilisateur u = connexionService.getConnexion();
         if (u == null) return "redirect:/connexion";
-        if (!(u instanceof Loueur)) return "redirect:/profil"; // saisie relevé réservée loueur (comme avant)
+        if (!(u instanceof Loueur)) return "redirect:/profil";
 
         int idLoueur = u.getIdUtilisateur();
 
-        // sécurité : contrat doit appartenir au loueur
         var contrat = contratRepository.getDetailByIdAndLoueur(idContrat, idLoueur);
         if (contrat == null) {
             ra.addFlashAttribute("erreur", "Contrat introuvable ou non autorisé.");

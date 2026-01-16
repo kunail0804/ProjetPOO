@@ -25,21 +25,15 @@ public class ConnexionController {
         return s == null || s.isBlank();
     }
 
-    /**
-     * Valide chaque champ via regex (tous les champs passent ici).
-     * Retourne null si OK, sinon un message d'erreur.
-     */
     private String validerChamps(Map<String, String> champs) {
         Pattern emailP = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-        //Pattern passwordP = Pattern.compile("^.{6,100}$"); // min 6//
-        Pattern passwordP = Pattern.compile("^.{4,100}$"); // min 4
+        Pattern passwordP = Pattern.compile("^.{4,100}$");
 
         record Rule(String label, Pattern pattern, boolean required, String messageSiInvalide) {}
 
         Rule[] rules = new Rule[] {
                 new Rule("role", Pattern.compile("^(AGENT|LOUEUR|ENTRETIEN)$"), true, "Veuillez sélectionner un type de compte valide."),
                 new Rule("email", emailP, true, "Email invalide."),
-                //new Rule("password", passwordP, true, "Mot de passe invalide (min 6 caractères).")//
                 new Rule("password", passwordP, true, "Mot de passe invalide (min 4 caractères).")
         };
 
@@ -71,11 +65,9 @@ public class ConnexionController {
             @RequestParam String password,
             Model model
     ) {
-        // garder valeurs pour réaffichage en cas d'erreur
         model.addAttribute("role", role);
         model.addAttribute("email", email);
 
-        // 1) Validation regex (tout passe ici)
         Map<String, String> champs = new LinkedHashMap<>();
         champs.put("role", role);
         champs.put("email", email);
@@ -87,11 +79,9 @@ public class ConnexionController {
             return "connexion";
         }
 
-        // 2) Connexion via service (stocke l'utilisateur connecté en session)
         try {
             Utilisateur u = connexionService.connecter(role, email, password);
 
-            // Message de debug (tu pourras remplacer par redirect vers un dashboard)
             model.addAttribute("message",
                     "Connecté: " + u.getMail() + " | rôle=" + role + " | id=" + u.getIdUtilisateur()
             );
@@ -99,10 +89,8 @@ public class ConnexionController {
             return "resultat-connexion";
 
         } catch (Exception ex) {
-            // Pour analyser côté console/log
             ex.printStackTrace();
 
-            // Pour afficher côté page
             model.addAttribute("error",
                     "Connexion impossible: " + ex.getMessage()
             );
@@ -110,9 +98,6 @@ public class ConnexionController {
         }
     }
 
-    /**
-     * Optionnel: endpoint de déconnexion
-     */
     @GetMapping("/deconnexion")
     public String deconnexion() {
         connexionService.deconnecter();

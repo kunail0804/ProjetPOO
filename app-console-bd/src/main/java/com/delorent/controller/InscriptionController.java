@@ -24,26 +24,17 @@ public class InscriptionController {
         return s == null || s.isBlank();
     }
 
-    /**
-     * Valide chaque champ via regex (tous les champs passent ici).
-     * Retourne null si OK, sinon un message d'erreur.
-     *
-     * Note: patterns volontairement "raisonnables" (pas parfaits, mais utiles).
-     */
     private String validerChamps(Map<String, String> champs) {
-        // Patterns
         Pattern emailP = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
         Pattern telP = Pattern.compile("^\\+?[0-9 .()-]{6,20}$");
-        Pattern codePostalP = Pattern.compile("^[0-9]{4,6}$");               // FR: 5 chiffres, mais on tolère 4-6
-        Pattern siretP = Pattern.compile("^[0-9]{14}$");                     // SIRET = 14 chiffres
-        Pattern texteCourtP = Pattern.compile("^[\\p{L}0-9][\\p{L}0-9 '\\-.,]{1,80}$"); // nom/prénom/ville/région/raison sociale
+        Pattern codePostalP = Pattern.compile("^[0-9]{4,6}$");
+        Pattern siretP = Pattern.compile("^[0-9]{14}$");
+        Pattern texteCourtP = Pattern.compile("^[\\p{L}0-9][\\p{L}0-9 '\\-.,]{1,80}$");
         Pattern adresseP = Pattern.compile("^[\\p{L}0-9][\\p{L}0-9 '\\-.,/]{3,120}$");
-        Pattern passwordP = Pattern.compile("^.{6,100}$");                   // minimum 6 caractères
+        Pattern passwordP = Pattern.compile("^.{6,100}$");
 
-        // Helpers
         record Rule(String label, Pattern pattern, boolean required, String messageSiInvalide) {}
 
-        // Règles (tous les champs passent ici, même si optionnels: on valide s'ils sont non vides)
         Rule[] rules = new Rule[] {
                 new Rule("email", emailP, true, "Email invalide."),
                 new Rule("password", passwordP, true, "Mot de passe invalide (min 6 caractères)."),
@@ -80,20 +71,17 @@ public class InscriptionController {
     public String inscription(Model model) {
         model.addAttribute("role", "");
 
-        // commun
         model.addAttribute("email", "");
-        model.addAttribute("password", ""); // (souvent on ne réaffiche pas, mais on garde pour cohérence)
+        model.addAttribute("password", "");
         model.addAttribute("adresse", "");
         model.addAttribute("ville", "");
         model.addAttribute("codePostal", "");
         model.addAttribute("region", "");
         model.addAttribute("telephone", "");
 
-        // personne
         model.addAttribute("nom", "");
         model.addAttribute("prenom", "");
 
-        // entreprise
         model.addAttribute("nomEntreprise", "");
         model.addAttribute("raisonSociale", "");
         model.addAttribute("siret", "");
@@ -107,25 +95,21 @@ public class InscriptionController {
             @RequestParam String email,
             @RequestParam String password,
 
-            // commun (adresse)
             @RequestParam String adresse,
             @RequestParam String ville,
             @RequestParam String codePostal,
             @RequestParam String region,
             @RequestParam String telephone,
 
-            // personne
             @RequestParam(required = false) String nom,
             @RequestParam(required = false) String prenom,
 
-            // entreprise
             @RequestParam(required = false) String nomEntreprise,
             @RequestParam(required = false) String raisonSociale,
             @RequestParam(required = false) String siret,
 
             Model model
     ) {
-        // garder les valeurs pour réaffichage
         model.addAttribute("role", role);
         model.addAttribute("email", email);
 
@@ -142,13 +126,11 @@ public class InscriptionController {
         model.addAttribute("raisonSociale", raisonSociale);
         model.addAttribute("siret", siret);
 
-        // validation role
         if (blank(role)) {
             model.addAttribute("error", "Veuillez sélectionner un type de compte.");
             return "inscription";
         }
 
-        // 1) Validation de présence selon le rôle (champs requis)
         if (blank(email) || blank(password) || blank(adresse) || blank(ville) || blank(codePostal) || blank(region) || blank(telephone)) {
             model.addAttribute("error", "Tous les champs communs (email, mot de passe, adresse, ville, code postal, région, téléphone) sont obligatoires.");
             return "inscription";
@@ -168,7 +150,6 @@ public class InscriptionController {
             }
         }
 
-        // 2) Validation regex (tous les champs passent par validerChamps)
         Map<String, String> champs = new LinkedHashMap<>();
         champs.put("email", email);
         champs.put("password", password);
@@ -192,7 +173,6 @@ public class InscriptionController {
             return "inscription";
         }
 
-        // 3) appel service (ordre des arguments selon tes constructors)
         try {
             switch (role) {
                 case "AGENT" -> utilisateurService.ajouterAgent(
@@ -216,10 +196,8 @@ public class InscriptionController {
                 default -> throw new IllegalArgumentException("Rôle inconnu: " + role);
             }
         } catch (Exception ex) {
-            // ✅ pour analyser: stacktrace dans la console/log
             ex.printStackTrace();
 
-            // ✅ pour l'utilisateur: message simple
             model.addAttribute("error", "Erreur lors de l'inscription: " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
             return "inscription";
         }

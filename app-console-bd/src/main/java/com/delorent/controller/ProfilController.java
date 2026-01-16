@@ -9,14 +9,13 @@ import java.util.UUID;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile; // Important pour le fichier
-
+import org.springframework.web.multipart.MultipartFile;
 import com.delorent.model.*;
 import com.delorent.model.Utilisateur.Agent;
 import com.delorent.model.Utilisateur.EntrepriseEntretien;
 import com.delorent.model.Utilisateur.Loueur;
 import com.delorent.model.Utilisateur.Utilisateur;
-import com.delorent.repository.AssuranceRepository; // Import ajouté
+import com.delorent.repository.AssuranceRepository;
 import com.delorent.repository.ContratRepository;
 import com.delorent.repository.LouableRepository.LouableRepository;
 import com.delorent.service.ConnexionService;
@@ -29,16 +28,15 @@ public class ProfilController {
     private final UtilisateurService utilisateurService;
     private final ContratRepository contratRepository;
     private final LouableRepository louableRepository;
-    private final AssuranceRepository assuranceRepository; // On ajoute le repo
+    private final AssuranceRepository assuranceRepository;
 
-    // Dossier où seront stockés les fichiers (dans static/uploads)
     public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/src/main/resources/static/uploads/assurances";
 
     public ProfilController(ConnexionService connexionService, 
                             UtilisateurService utilisateurService, 
                             ContratRepository contratRepository, 
                             LouableRepository louableRepository,
-                            AssuranceRepository assuranceRepository) { // Constructeur mis à jour
+                            AssuranceRepository assuranceRepository) {
         this.connexionService = connexionService;
         this.utilisateurService = utilisateurService;
         this.contratRepository = contratRepository;
@@ -66,24 +64,20 @@ public class ProfilController {
 
         if (utilisateur instanceof Agent a) {
             model.addAttribute("louables", louableRepository.getByProprietaire(a.getIdUtilisateur()));
-            // NOUVEAU : contrats qui concernent l'agent (contrats sur SES louables)
             model.addAttribute("contratsAgent", contratRepository.getByAgentId(a.getIdUtilisateur()));
             
-            // NOUVEAU : On charge les assurances de l'agent pour les afficher
             model.addAttribute("mesAssurances", assuranceRepository.getByProprietaire(a.getIdUtilisateur()));
         }
 
         return "profil";
     }
 
-    // --- NOUVELLE METHODE POUR UPLOAD ASSURANCE ---
     @PostMapping("/profil/assurance/ajouter")
     public String ajouterAssurance(@RequestParam("nom") String nom,
                                    @RequestParam("tarif") double tarif,
                                    @RequestParam("fichier") MultipartFile fichier) {
         
         Utilisateur utilisateur = connexionService.getConnexion();
-        // Sécurité : seul un agent connecté peut faire ça
         if (utilisateur == null || !(utilisateur instanceof Agent)) {
             return "redirect:/connexion";
         }
@@ -91,50 +85,36 @@ public class ProfilController {
         try {
             String cheminFichierEnBase = null;
 
-            // 1. Sauvegarde du fichier si présent
             if (!fichier.isEmpty()) {
-                // Créer le dossier s'il n'existe pas
                 Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
 
-                // Générer un nom unique pour éviter les conflits (ex: mon_fichier_12345.pdf)
                 String nomFichier = UUID.randomUUID().toString() + "_" + fichier.getOriginalFilename();
                 Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, nomFichier);
                 
-                // Écriture sur le disque
                 Files.write(fileNameAndPath, fichier.getBytes());
 
-                // Chemin relatif à stocker en base (accessible via http://localhost:8080/uploads/assurances/...)
                 cheminFichierEnBase = "/uploads/assurances/" + nomFichier;
             }
 
-            // 2. Création de l'objet Assurance
             Assurance nouvelle = new Assurance(
                 nom,
                 tarif,
                 cheminFichierEnBase,
-                utilisateur.getIdUtilisateur() // ID du propriétaire (l'agent connecté)
+                utilisateur.getIdUtilisateur()
             );
 
-            // 3. Sauvegarde en BDD
             assuranceRepository.add(nouvelle);
 
         } catch (IOException e) {
             e.printStackTrace();
-            // Idéalement, ajouter un message d'erreur dans le modèle
         }
 
         return "redirect:/profil";
     }
 
-    // ... (Reste des méthodes: editionProfil, enregistrerEdition, supprimerCompte...)
-    // ... (Gardez-les telles quelles, j'ai juste ajouté le code ci-dessus)
-    
-    // Garde bien tes méthodes buildNomComplet et buildInitiale en bas...
-    
-    // CODE ORIGINAL POUR LA COMPILATION :
     @GetMapping("/profil/edition")
     public String editionProfil(Model model) {
         Utilisateur utilisateur = connexionService.getConnexion();

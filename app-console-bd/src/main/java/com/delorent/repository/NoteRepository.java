@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/repository/NoteRepository.java
 package com.delorent.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -106,9 +105,6 @@ public class NoteRepository {
         }, idLouable);
     }
 
-    // =============================
-    // EXISTANT : moyenne depuis noteGlobale
-    // =============================
     public Double findMoyenneByLouable(int idLouable) {
         String sql =
                 "SELECT ROUND(AVG(n.noteGlobale), 1) AS moyenne " +
@@ -150,11 +146,6 @@ public class NoteRepository {
         return out;
     }
 
-    // =============================
-    // NOUVEAU : moyenne depuis les CRITERES (contrat -> moyenne critères -> moyenne louable)
-    // =============================
-
-    /** Moyenne du louable basée sur la moyenne des critères de chaque contrat. */
     public Double findMoyenneByLouableFromCriteres(int idLouable) {
         String sql = """
             SELECT ROUND(AVG(t.noteContrat), 1) AS moyenne
@@ -176,7 +167,6 @@ public class NoteRepository {
         }, idLouable);
     }
 
-    /** Nombre d'avis (= nb de contrats notés, avec au moins un critère). */
     public int countNotesByLouableFromCriteres(int idLouable) {
         String sql = """
             SELECT COUNT(*) AS nb
@@ -195,7 +185,6 @@ public class NoteRepository {
         return nb == null ? 0 : nb;
     }
 
-    /** Moyennes par louable (catalogue) basées sur les critères. */
     public Map<Integer, Double> findMoyennesByLouablesFromCriteres(List<Integer> idsLouables) {
         Map<Integer, Double> out = new HashMap<>();
         if (idsLouables == null || idsLouables.isEmpty()) return out;

@@ -34,9 +34,6 @@ public class LouerController {
         this.connexionService = connexionService;
     }
 
-    /* =========================
-       GET Page louer
-       ========================= */
     @GetMapping("/louables/{id}/louer")
     public String pageLouer(@PathVariable("id") int idLouable, Model model) {
 
@@ -57,15 +54,11 @@ public class LouerController {
         model.addAttribute("louable", louable);
         model.addAttribute("assurances", locationService.getAllAssurances());
 
-        // Pour l'estimation JS (on force un BigDecimal propre)
         model.addAttribute("prixJour", BigDecimal.valueOf(louable.prixJour()).setScale(2, java.math.RoundingMode.HALF_UP));
 
         return "louer";
     }
 
-    /* =========================
-       POST Demande louer
-       ========================= */
     @PostMapping("/louables/{id}/louer")
     public String louer(
             @PathVariable("id") int idLouablePath,
@@ -92,13 +85,11 @@ public class LouerController {
             return "louer";
         }
 
-        // 1) cohérence URL vs hidden
         if (idLouablePath != idLouable) {
             model.addAttribute("erreur", "Incohérence: idLouable URL != idLouable formulaire.");
             return "louer";
         }
 
-        // 2) utilisateur connecté ?
         if (!connexionService.estConnecte()) {
             model.addAttribute("erreur", "Vous devez être connecté pour louer un véhicule.");
             return "louer";
@@ -106,7 +97,6 @@ public class LouerController {
 
         Utilisateur u = connexionService.getConnexion();
 
-        // 3) autorisation + récupération idLoueur (celui qui signe le contrat)
         Integer idLoueurConnecte;
         if (u instanceof Loueur loueurUser) {
             idLoueurConnecte = loueurUser.getIdUtilisateur();
@@ -117,7 +107,6 @@ public class LouerController {
             return "louer";
         }
 
-        // 4) validations dates
         if (dateDebut == null || dateFin == null) {
             model.addAttribute("erreur", "Dates manquantes.");
             return "louer";
@@ -155,7 +144,6 @@ public class LouerController {
                     assuranceNom
             ));
 
-            // Optionnel: exposer le prix final calculé/stocké (si tu veux l’afficher dans le résumé)
             if (contrat.getPrix() != null) {
                 model.addAttribute("prixContrat", contrat.getPrix().setScale(2, java.math.RoundingMode.HALF_UP));
             }
@@ -168,9 +156,6 @@ public class LouerController {
         }
     }
 
-    /* =========================
-       API JSON dispo
-       ========================= */
     @GetMapping("/louer/disponibilites")
     @ResponseBody
     public List<Disponibilite> disponibilites(@RequestParam int idLouable) {

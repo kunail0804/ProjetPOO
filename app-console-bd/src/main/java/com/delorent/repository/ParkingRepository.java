@@ -39,7 +39,6 @@ public class ParkingRepository implements RepositoryBase<Parking, Integer> {
         return res.isEmpty() ? null : res.get(0);
     }
 
-    // Pas nécessaire pour l'instant (géré par admin SQL)
     @Override public Integer add(Parking p) { return null; }
     @Override public boolean modify(Parking p) { return false; }
     @Override public boolean delete(Integer id) { return false; }

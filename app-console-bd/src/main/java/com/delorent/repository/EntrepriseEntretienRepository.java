@@ -21,7 +21,6 @@ public class EntrepriseEntretienRepository implements RepositoryBase<EntrepriseE
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Tables / Colonnes
     private static final String T_USER = "UTILISATEUR";
     private static final String T_ENT = "ENTREPRISE_ENTRETIEN";
 

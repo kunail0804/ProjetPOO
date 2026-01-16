@@ -5,11 +5,9 @@ public class Assurance {
     private String nom;
     private double tarifJournalier;
     
-    // Nouveaux champs
     private String cheminFichier;
-    private Integer idProprietaire; // Null si c'est une assurance globale, ID de l'agent sinon
+    private Integer idProprietaire;
 
-    // Constructeur complet (Lecture depuis la BDD)
     public Assurance(Integer idAssurance, String nom, double tarifJournalier, String cheminFichier, Integer idProprietaire) {
         this.idAssurance = idAssurance;
         this.nom = nom;
@@ -18,7 +16,6 @@ public class Assurance {
         this.idProprietaire = idProprietaire;
     }
 
-    // Constructeur pour la création (Avant BDD)
     public Assurance(String nom, double tarifJournalier, String cheminFichier, Integer idProprietaire) {
         this.nom = nom;
         this.tarifJournalier = tarifJournalier;
@@ -26,7 +23,6 @@ public class Assurance {
         this.idProprietaire = idProprietaire;
     }
 
-    // Getters et Setters classiques
     public Integer getIdAssurance() { return idAssurance; }
     public void setIdAssurance(Integer idAssurance) { this.idAssurance = idAssurance; }
 

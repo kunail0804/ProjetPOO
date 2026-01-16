@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/model/Louable/Disponibilite.java
 package com.delorent.model.Louable;
 
 import java.time.LocalDate;
@@ -10,7 +9,6 @@ public class Disponibilite {
     private LocalDate dateDebut;
     private LocalDate dateFin;
 
-    // DB fields (présents dans ta table)
     private boolean estReservee;
     private Double prixJournalier;
 
@@ -46,7 +44,6 @@ public class Disponibilite {
     public void setEstReservee(boolean estReservee) { this.estReservee = estReservee; }
     public void setPrixJournalier(Double prixJournalier) { this.prixJournalier = prixJournalier; }
 
-    // couvre un intervalle [debut..fin] inclusif
     public boolean couvre(LocalDate debut, LocalDate fin) {
         return (dateDebut == null || dateFin == null || debut == null || fin == null)
                 ? false

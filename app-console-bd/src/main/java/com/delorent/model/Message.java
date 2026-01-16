@@ -9,7 +9,6 @@ public class Message {
 
     public Message() {}
 
-    // Getters & Setters
     public int getIdMessage() { return idMessage; }
     public void setIdMessage(int idMessage) { this.idMessage = idMessage; }
 

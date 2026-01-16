@@ -32,7 +32,6 @@ public class DisponibiliteRepository implements RepositoryBase<Disponibilite, In
     private static final String COL_PRIX = "prixJournalier";
 
     private Disponibilite mapRow(ResultSet rs) throws java.sql.SQLException {
-        // dateDebut/dateFin sont DATETIME en DB -> on récupère la partie date via getTimestamp/getDate
         LocalDate debut = rs.getTimestamp(COL_DEBUT).toLocalDateTime().toLocalDate();
         LocalDate fin = rs.getTimestamp(COL_FIN).toLocalDateTime().toLocalDate();
 
@@ -61,10 +60,6 @@ public class DisponibiliteRepository implements RepositoryBase<Disponibilite, In
         return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), idLouable);
     }
 
-    /**
-     * Trouve une dispo NON réservée qui couvre toute la période (inclusive).
-     * On compare en DATE() car la DB est en DATETIME.
-     */
     public Disponibilite findOneCoveringRange(int idLouable, LocalDate debut, LocalDate fin) {
         String sql = """
             SELECT idDisponibilite, idLouable, dateDebut, dateFin, estReservee, prixJournalier
@@ -100,7 +95,6 @@ public class DisponibiliteRepository implements RepositoryBase<Disponibilite, In
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            // Stockage DATETIME: début = 00:00:00, fin = 23:59:59 (ça respecte le CHECK dateFin > dateDebut même le même jour)
             var startTs = java.sql.Timestamp.valueOf(entity.getDateDebut().atStartOfDay());
             var endTs = java.sql.Timestamp.valueOf(entity.getDateFin().atTime(23, 59, 59));
 
@@ -146,8 +140,6 @@ public class DisponibiliteRepository implements RepositoryBase<Disponibilite, In
         return deleted == 1;
     }
 
-    // --------- méthodes nécessaires pour DisponibiliteService ---------
-
     public boolean existsOverlappingReserved(int idLouable, LocalDate debut, LocalDate fin) {
         Integer count = jdbcTemplate.queryForObject("""
             SELECT COUNT(*)
@@ -160,10 +152,6 @@ public class DisponibiliteRepository implements RepositoryBase<Disponibilite, In
         return count != null && count > 0;
     }
 
-    /**
-     * Overlap OU adjacent (à 1 jour près) pour les périodes NON réservées.
-     * Adjacent = fin+1 == debut ou debut-1 == fin.
-     */
     public List<Disponibilite> findOverlappingOrAdjacentNonReserved(int idLouable, LocalDate debut, LocalDate fin) {
         LocalDate debutMinus1 = debut.minusDays(1);
         LocalDate finPlus1 = fin.plusDays(1);
@@ -179,7 +167,6 @@ public class DisponibiliteRepository implements RepositoryBase<Disponibilite, In
     }
 
     public Integer getProprietaireIdForLouable(int idLouable) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getProprietaireIdForLouable'");
     }
 }

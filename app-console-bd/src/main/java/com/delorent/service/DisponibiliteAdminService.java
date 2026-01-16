@@ -42,7 +42,6 @@ public class DisponibiliteAdminService {
             throw new IllegalArgumentException("Impossible : un contrat existe déjà sur tout ou partie de cette période.");
         }
 
-        // Ajout simple (non réservé)
         dispoRepo.add(new Disponibilite(idLouable, debut, fin, false, null));
     }
 

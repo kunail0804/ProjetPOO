@@ -23,11 +23,9 @@ public class AgentRepository implements RepositoryBase<Agent, Long> {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Tables / Colonnes
     private static final String T_USER = "UTILISATEUR";
     private static final String T_AGENT = "AGENT";
 
-    // Colonnes Utilisateur
     private static final String COL_ID = "idUtilisateur";
     private static final String COL_MAIL = "mail";
     private static final String COL_MDP = "mdp";
@@ -37,16 +35,14 @@ public class AgentRepository implements RepositoryBase<Agent, Long> {
     private static final String COL_REGION = "region";
     private static final String COL_TEL = "telephone";
 
-    // Colonnes Agent
     private static final String COL_NOM = "nom";
     private static final String COL_PRENOM = "prenom";
-    private static final String COL_TYPE = "typeAgent"; // Nouvelle colonne
-    private static final String COL_SIRET = "siret";    // Nouvelle colonne
+    private static final String COL_TYPE = "typeAgent";
+    private static final String COL_SIRET = "siret";
 
     private Agent mapRow(ResultSet rs) throws java.sql.SQLException {
         String type = rs.getString(COL_TYPE);
         
-        // Données communes
         int id = rs.getInt(COL_ID);
         String mail = rs.getString(COL_MAIL);
         String mdp = rs.getString(COL_MDP);
@@ -58,12 +54,10 @@ public class AgentRepository implements RepositoryBase<Agent, Long> {
         String nom = rs.getString(COL_NOM);
         String prenom = rs.getString(COL_PRENOM);
 
-        // Factory simple : on instancie selon le type
         if ("PRO".equals(type)) {
             String siret = rs.getString(COL_SIRET);
             return new AgentProfessionnel(id, mail, mdp, adr, ville, cp, region, tel, nom, prenom, siret);
         } else {
-            // Par défaut AMATEUR
             return new AgentAmateur(id, mail, mdp, adr, ville, cp, region, tel, nom, prenom);
         }
     }
@@ -83,7 +77,6 @@ public class AgentRepository implements RepositoryBase<Agent, Long> {
 
     @Override
     public Long add(Agent entity) {
-        // 1. Insertion Utilisateur
         String sqlUtilisateur = "INSERT INTO " + T_USER + 
                 " (" + COL_MAIL + ", " + COL_MDP + ", " + COL_ADR + ", " + COL_VILLE + ", " + COL_CP + ", " + COL_REGION + ", " + COL_TEL + ") " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -103,7 +96,6 @@ public class AgentRepository implements RepositoryBase<Agent, Long> {
 
         long idUtilisateur = keyHolder.getKey().longValue();
 
-        // 2. Insertion Agent (Gestion du polymorphisme)
         String sqlAgent = "INSERT INTO " + T_AGENT + 
                 " (" + COL_ID + ", " + COL_NOM + ", " + COL_PRENOM + ", " + COL_TYPE + ", " + COL_SIRET + ") " +
                 "VALUES (?, ?, ?, ?, ?)";
@@ -121,10 +113,8 @@ public class AgentRepository implements RepositoryBase<Agent, Long> {
         return idUtilisateur;
     }
 
-    // Le reste (modify/delete/findByEmail) ne change pas trop, sauf si vous voulez modifier le SIRET dans modify
     @Override
     public boolean modify(Agent entity) {
-        // ... (Code modify existant pour l'utilisateur) ...
         String sqlUtilisateur = "UPDATE " + T_USER + " SET " + COL_MAIL + "=?, " + COL_MDP + "=?, " + COL_ADR + "=?, " + COL_VILLE + "=?, " + COL_CP + "=?, " + COL_REGION + "=?, " + COL_TEL + "=? WHERE " + COL_ID + "=?";
         int u = jdbcTemplate.update(sqlUtilisateur, entity.getMail(), entity.getMotDePasse(), entity.getAdresse(), entity.getVille(), entity.getCodePostal(), entity.getRegion(), entity.getTelephone(), entity.getIdUtilisateur());
 

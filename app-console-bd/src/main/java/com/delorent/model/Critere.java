@@ -6,14 +6,12 @@ public class Critere {
     private String libelle;
     private int note;
 
-    // Constructeur
     public Critere(int id, String libelle, int note) {
         this.id = id;
         this.libelle = libelle;
         this.note = note;
     }
 
-    // --- Getters et Setters ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

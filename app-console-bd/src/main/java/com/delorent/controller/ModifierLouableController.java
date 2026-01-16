@@ -82,7 +82,6 @@ public class ModifierLouableController {
 
         int idUser = u.getIdUtilisateur();
 
-        // ⚠️ on part du principe que Vehicule contient getIdAgent()
         if (louable.getIdAgent() != idUser) throw new IllegalArgumentException("Ce louable ne vous appartient pas.");
     }
 
@@ -115,7 +114,6 @@ public class ModifierLouableController {
             type = "Moto";
         }
 
-        // sécurité : agent + propriétaire
         try {
             guardAgentOwner(louable);
         } catch (Exception e) {
@@ -127,7 +125,6 @@ public class ModifierLouableController {
         model.addAttribute("type", type);
         model.addAttribute("louable", louable);
 
-        // flags pour afficher le bon bloc
         model.addAttribute("isVoiture", "Voiture".equals(type));
         model.addAttribute("isMoto", "Moto".equals(type));
         model.addAttribute("isCamion", "Camion".equals(type));
@@ -139,7 +136,6 @@ public class ModifierLouableController {
     public String enregistrerModification(
             @PathVariable("id") int id,
 
-            // commun
             @RequestParam String prixJour,
             @RequestParam String statut,
             @RequestParam String lieuPrincipal,
@@ -150,7 +146,6 @@ public class ModifierLouableController {
             @RequestParam String immatriculation,
             @RequestParam String kilometrage,
 
-            // voiture
             @RequestParam(required = false) String nbPortes,
             @RequestParam(required = false) String nbPlaces,
             @RequestParam(required = false) String volumeCoffreLitres,
@@ -158,13 +153,11 @@ public class ModifierLouableController {
             @RequestParam(required = false) String carburant,
             @RequestParam(required = false) String climatisation,
 
-            // moto
             @RequestParam(required = false) String cylindreeCc,
             @RequestParam(required = false) String puissanceCh,
             @RequestParam(required = false) String typeMoto,
             @RequestParam(required = false) String permisRequisMoto,
 
-            // camion
             @RequestParam(required = false) String chargeMaxKg,
             @RequestParam(required = false) String volumeUtileM3,
             @RequestParam(required = false) String hauteurM,
@@ -173,7 +166,6 @@ public class ModifierLouableController {
 
             Model model
     ) {
-        // Rechargement du louable complet pour connaître son type + sécurité
         Voiture voiture = null;
         Camion  camion  = null;
         Moto    moto    = null;
@@ -200,7 +192,6 @@ public class ModifierLouableController {
             type = "Moto";
         }
 
-        // sécurité
         try {
             guardAgentOwner(louable);
         } catch (Exception e) {
@@ -209,7 +200,6 @@ public class ModifierLouableController {
         }
 
         try {
-            // validations de base
             if (blank(prixJour) || blank(statut) || blank(lieuPrincipal) || blank(marque) || blank(modele)
                     || blank(annee) || blank(couleur) || blank(immatriculation) || blank(kilometrage)) {
                 throw new IllegalArgumentException("Tous les champs communs sont obligatoires.");
@@ -234,7 +224,6 @@ public class ModifierLouableController {
                     TypeBoite b = parseBoite(boite);
                     Carburant carb = parseCarburant(carburant);
 
-                    // Ton Voiture a climatisation boolean (pas nullable)
                     Boolean climN = toBooleanNullable(climatisation, "climatisation");
                     boolean clim = (climN != null) ? climN : false;
 
@@ -242,7 +231,6 @@ public class ModifierLouableController {
                             marque, modele, an, couleur, immatriculation, km,
                             portes, places, coffre, b, carb, clim);
 
-                    // ⚠️ adapte le nom : update/modify
                     voitureRepository.modify(v);
                 }
 
@@ -287,7 +275,6 @@ public class ModifierLouableController {
         } catch (Exception ex) {
             ex.printStackTrace();
 
-            // réaffichage page avec erreur + valeurs
             model.addAttribute("erreur", ex.getMessage());
             model.addAttribute("idLouable", id);
             model.addAttribute("type", type);
@@ -295,7 +282,6 @@ public class ModifierLouableController {
             model.addAttribute("isMoto", "MOTO".equals(type));
             model.addAttribute("isCamion", "CAMION".equals(type));
 
-            // on peut aussi remettre un "louable" reconstruit, mais au minimum on peut recharger l'existant
             model.addAttribute("louable", louable);
 
             return "modifier_louable";

@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/controller/AjouterLouableController.java
 package com.delorent.controller;
 
 import com.delorent.model.Louable.*;
@@ -67,7 +66,6 @@ public class AjouterLouableController {
     public String ajouterLouablePost(
             @RequestParam TypeLouable type,
 
-            // commun
             @RequestParam String prixJour,
             @RequestParam String lieuPrincipal,
 
@@ -78,11 +76,9 @@ public class AjouterLouableController {
             @RequestParam String immatriculation,
             @RequestParam String kilometrage,
 
-            // période optionnelle
             @RequestParam(required = false) String dispoDebut,
             @RequestParam(required = false) String dispoFin,
 
-            // voiture
             @RequestParam(required = false) String nbPortes,
             @RequestParam(required = false) String nbPlaces,
             @RequestParam(required = false) String volumeCoffreLitres,
@@ -90,13 +86,11 @@ public class AjouterLouableController {
             @RequestParam(required = false) String carburant,
             @RequestParam(required = false) String climatisation,
 
-            // moto
             @RequestParam(required = false) String cylindreeCc,
             @RequestParam(required = false) String puissanceCh,
             @RequestParam(required = false) String typeMoto,
             @RequestParam(required = false) String permisRequisMoto,
 
-            // camion
             @RequestParam(required = false) String chargeMaxKg,
             @RequestParam(required = false) String volumeUtileM3,
             @RequestParam(required = false) String hauteurM,
@@ -119,8 +113,6 @@ public class AjouterLouableController {
             Integer an = toInt(annee, "annee");
             Integer km = toInt(kilometrage, "kilometrage");
 
-            // IMPORTANT: on ne demande plus DISPONIBLE/INDISPONIBLE
-            // Mets un statut métier stable (adapte si ton enum diffère)
             StatutLouable statutEnum = StatutLouable.EN_LOCATION;
 
             int idAgent = connexionService.getConnexion().getIdUtilisateur();
@@ -188,7 +180,6 @@ public class AjouterLouableController {
                 default -> throw new IllegalArgumentException("Type inconnu: " + type);
             }
 
-            // période optionnelle à la création
             if (!blank(dispoDebut) && !blank(dispoFin)) {
                 LocalDate d1 = LocalDate.parse(dispoDebut);
                 LocalDate d2 = LocalDate.parse(dispoFin);

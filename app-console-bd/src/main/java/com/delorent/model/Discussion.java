@@ -6,12 +6,10 @@ public class Discussion {
     private int idUtilisateur2;
     private String dateCreation;
     
-    // Champ "Bonus" pour l'affichage (le nom de la personne avec qui on parle)
     private String nomInterlocuteur; 
 
     public Discussion() {}
 
-    // Getters & Setters
     public int getIdDiscussion() { return idDiscussion; }
     public void setIdDiscussion(int idDiscussion) { this.idDiscussion = idDiscussion; }
 

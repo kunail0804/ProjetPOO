@@ -13,7 +13,6 @@ public class ControleTechnique {
     private Double prix;
     private String commentaires;
     
-    // Constructeurs
     public ControleTechnique() {
     }
     
@@ -26,7 +25,6 @@ public class ControleTechnique {
         this.centre = centre;
     }
     
-    // Constructeur pour tous les champs
     public ControleTechnique(Long id, Long vehiculeId, LocalDate dateControle, 
                             LocalDate dateValidite, ResultatControle resultat, 
                             String centre, Double prix, String commentaires) {
@@ -40,7 +38,6 @@ public class ControleTechnique {
         this.commentaires = commentaires;
     }
     
-    // Getters et Setters
     public Long getId() {
         return id;
     }
@@ -81,7 +78,6 @@ public class ControleTechnique {
         this.resultat = resultat;
     }
     
-    // Méthodes de compatibilité pour les anciens appels qui utilisent String
     public String getResultatString() {
         return resultat != null ? resultat.name() : null;
     }
@@ -116,7 +112,6 @@ public class ControleTechnique {
         this.commentaires = commentaires;
     }
     
-    // Méthode utilitaire pour vérifier si le contrôle est encore valide
     public boolean isValide() {
         return resultat == ResultatControle.VALIDE && 
                dateValidite.isAfter(LocalDate.now());

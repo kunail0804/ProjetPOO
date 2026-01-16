@@ -38,7 +38,6 @@ public abstract class Louable {
         this.lieuPrincipal = lieuPrincipal;
     }
 
-     // Getters et Setters
 
     public int getIdLouable() {
         return idLouable;

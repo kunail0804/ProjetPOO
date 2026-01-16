@@ -13,7 +13,6 @@ public class Notes {
 
     private List<Critere> criteres;
 
-    // Constructeur
     public Notes(int id, String commentaire) {
         this.id = id;
         this.commentaire = commentaire;
@@ -39,7 +38,6 @@ public class Notes {
         calculerNoteGlobale(); 
     }
 
-    // --- Getters et Setters ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

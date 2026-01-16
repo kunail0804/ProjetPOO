@@ -24,7 +24,6 @@ public class EntretienTechniqueController {
         this.vehiculeRepository = vehiculeRepository;
     }
 
-    // 1. LISTE des entretiens techniques
     @GetMapping("/")
     public String listeEntretiens(@PathVariable("vehicleId") Integer vehicleId, Model model) {
         VehiculeSummary vehicle = vehiculeRepository.get(vehicleId);
@@ -35,10 +34,8 @@ public class EntretienTechniqueController {
         
         List<EntretienTechnique> entretiens = entretienRepository.findByVehiculeId(vehicleId.longValue());
         
-        // Derniers entretiens (5 plus récents)
         List<EntretienTechnique> derniersEntretiens = entretienRepository.findRecentByVehiculeId(vehicleId.longValue(), 5);
         
-        // Calcul du coût total des entretiens
         Double coutTotal = entretiens.stream()
             .filter(e -> e.getCout() != null)
             .mapToDouble(EntretienTechnique::getCout)
@@ -53,7 +50,6 @@ public class EntretienTechniqueController {
         return "entretiens-techniques/liste";
     }
 
-    // 2. FORMULAIRE d'ajout
     @GetMapping("/nouveau")
     public String formulaireNouveauEntretien(@PathVariable("vehicleId") Integer vehicleId, Model model) {
         VehiculeSummary vehicle = vehiculeRepository.get(vehicleId);
@@ -68,7 +64,6 @@ public class EntretienTechniqueController {
         return "entretiens-techniques/formulaire";
     }
 
-    // 3. ENREGISTRER un nouvel entretien
     @PostMapping("/nouveau")
     public String enregistrerEntretien(@PathVariable("vehicleId") Integer vehicleId,
                                        @ModelAttribute EntretienTechnique entretienTechnique) {
@@ -77,7 +72,6 @@ public class EntretienTechniqueController {
         return "redirect:/vehicles/" + vehicleId + "/entretiens/";
     }
 
-    // 4. DÉTAILS d'un entretien
     @GetMapping("/{entretienId}")
     public String detailsEntretien(@PathVariable("vehicleId") Integer vehicleId,
                                    @PathVariable("entretienId") Long entretienId,
@@ -95,7 +89,6 @@ public class EntretienTechniqueController {
         return "entretiens-techniques/details";
     }
 
-    // 5. SUPPRIMER un entretien
     @PostMapping("/{entretienId}/supprimer")
     public String supprimerEntretien(@PathVariable("vehicleId") Integer vehicleId,
                                      @PathVariable("entretienId") Long entretienId) {

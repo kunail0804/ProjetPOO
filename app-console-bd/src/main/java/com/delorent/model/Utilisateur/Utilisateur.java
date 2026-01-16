@@ -1,7 +1,6 @@
 package com.delorent.model.Utilisateur;
 
 
-//import java.time.LocalDate;
 
 public abstract class Utilisateur {
 
@@ -13,13 +12,11 @@ public abstract class Utilisateur {
     private String telephone;
     private String mail;
     private String motDePasse;
-    //private LocalDate dateInscription;
 
-    // Constructeur
     public Utilisateur(String mail, String motDePasse, String adresse,
                        String ville, String codePostal, String region,
                        String telephone
-                       /*LocalDate dateInscription*/) {
+                       ) {
         this.adresse = adresse;
         this.ville = ville;
         this.codePostal = codePostal;
@@ -27,13 +24,12 @@ public abstract class Utilisateur {
         this.telephone = telephone;
         this.mail = mail;
         this.motDePasse = motDePasse;
-        //this.dateInscription = dateInscription;
     }
 
     public Utilisateur(int idUtilisateur, String mail, String motDePasse, String adresse,
                        String ville, String codePostal, String region,
                        String telephone
-                       /*LocalDate dateInscription*/) {
+                       ) {
         this.idUtilisateur = idUtilisateur;
         this.adresse = adresse;
         this.ville = ville;
@@ -42,13 +38,10 @@ public abstract class Utilisateur {
         this.telephone = telephone;
         this.mail = mail;
         this.motDePasse = motDePasse;
-        //this.dateInscription = dateInscription;
     }
 
     public Utilisateur() {
-        // Constructeur vide indispensable
     }
-    // Getters et Setters
 
     public int getIdUtilisateur() {
         return idUtilisateur;
@@ -114,13 +107,5 @@ public abstract class Utilisateur {
     public void setMotDePasse(String motDePasse) {
         this.motDePasse = motDePasse;
     }
-
-    /*public LocalDate getDateInscription() {
-        return dateInscription;
-    }
-
-    public void setDateInscription(LocalDate dateInscription) {
-        this.dateInscription = dateInscription;
-    }*/
 
 }

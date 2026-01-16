@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/controller/DisponibiliteController.java
 package com.delorent.controller;
 
 import com.delorent.model.Louable.Disponibilite;
@@ -39,15 +38,12 @@ public class DisponibiliteController {
         if (owner != u.getIdUtilisateur()) throw new IllegalArgumentException("Ce louable ne vous appartient pas.");
     }
 
-    // --- ENDPOINT JSON pour ton calendrier (utilisé par louer.html JS) ---
     @GetMapping(value = "/louer/disponibilites", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<Disponibilite> disponibilitesJson(@RequestParam("idLouable") int idLouable) {
-        // ici on ne restreint pas (les locataires doivent voir le calendrier)
         return dispoService.getByLouable(idLouable);
     }
 
-    // --- AJOUT période (agent) ---
     @PostMapping("/louables/{idLouable}/disponibilites/ajouter")
     public String ajouterDispoAgent(@PathVariable int idLouable,
                                     @RequestParam("dateDebut") String dateDebut,
@@ -63,7 +59,6 @@ public class DisponibiliteController {
         return "redirect:/louables/" + idLouable + "?succes=Disponibilit%C3%A9%20ajout%C3%A9e";
     }
 
-    // --- SUPPRESSION période (agent) ---
     @PostMapping("/louables/{idLouable}/disponibilites/supprimer")
     public String supprimerDispoAgent(@PathVariable int idLouable,
                                      @RequestParam("idDisponibilite") int idDisponibilite) {

@@ -17,7 +17,6 @@ public class ConnexionService {
     private final LoueurRepository loueurRepository;
     private final EntrepriseEntretienRepository entrepriseEntretienRepository;
 
-    // ✅ stocké par session (car bean session-scoped)
     private Utilisateur utilisateurConnecte;
 
     public ConnexionService(
@@ -30,9 +29,6 @@ public class ConnexionService {
         this.entrepriseEntretienRepository = entrepriseEntretienRepository;
     }
 
-    /**
-     * Retourne l'utilisateur actuellement connecté (ou null si personne).
-     */
     public Utilisateur getConnexion() {
         return utilisateurConnecte;
     }
@@ -45,12 +41,6 @@ public class ConnexionService {
         utilisateurConnecte = null;
     }
 
-    /**
-     * Auth "simple": vérifie email+password dans la table correspondant au rôle.
-     * ⚠️ Si tu hashes les mots de passe (recommandé), remplace l'égalité directe par une vérif hash.
-     *
-     * @throws IllegalArgumentException si credentials invalides
-     */
     public Utilisateur connecter(String role, String email, String password) {
         if (role == null || role.isBlank()) throw new IllegalArgumentException("Rôle manquant.");
         if (email == null || email.isBlank()) throw new IllegalArgumentException("Email manquant.");
@@ -71,12 +61,9 @@ public class ConnexionService {
         return found;
     }
 
-    /**
-     * Rafraîchit l'utilisateur connecté en mémoire après une modification.
-     */
     public void refreshConnexion(Long idUtilisateur) {
         if (utilisateurConnecte == null || utilisateurConnecte.getIdUtilisateur() != idUtilisateur.intValue()) {
-            return; // pas connecté ou pas le bon utilisateur
+            return;
         }
 
         Utilisateur refreshed = null;

@@ -21,7 +21,6 @@ public class LoueurRepository implements RepositoryBase<Loueur, Long> {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Tables / Colonnes
     private static final String T_USER = "UTILISATEUR";
     private static final String T_LOUEUR = "LOUEUR";
 

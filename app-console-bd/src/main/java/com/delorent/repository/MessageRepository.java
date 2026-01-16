@@ -23,9 +23,7 @@ public class MessageRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // 1. Trouver toutes mes discussions
     public List<Discussion> trouverDiscussionsUtilisateur(int monId) {
-        // CORRECTION : idUtilisateur1 (sans underscore)
         String sql = "SELECT " +
                      "d.idDiscussion, " +
                      "d.dateCreation, " +
@@ -40,21 +38,17 @@ public class MessageRepository {
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Discussion.class), monId, monId, monId);
     }
 
-    // 2. Récupérer les messages
     public List<Message> trouverMessages(int idDiscussion) {
         String sql = "SELECT * FROM MESSAGE WHERE idDiscussion = ? ORDER BY dateHeure ASC";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Message.class), idDiscussion);
     }
 
-    // 3. Envoyer un message
     public void envoyerMessage(Message msg) {
         String sql = "INSERT INTO MESSAGE (idDiscussion, idExpediteur, contenu, dateHeure) VALUES (?, ?, ?, NOW())";
         jdbcTemplate.update(sql, msg.getIdDiscussion(), msg.getIdExpediteur(), msg.getContenu());
     }
 
-    // 4. Chercher une discussion existante
     public Optional<Discussion> findByUtilisateurs(int idUser1, int idUser2) {
-        // CORRECTION : idUtilisateur1 (sans underscore)
         String sql = "SELECT * FROM DISCUSSION " + 
                      "WHERE (idUtilisateur1 = ? AND idUtilisateur2 = ?) " +
                      "   OR (idUtilisateur1 = ? AND idUtilisateur2 = ?)";
@@ -84,9 +78,7 @@ public class MessageRepository {
         }
     }
 
-    // 5. Créer une nouvelle discussion
     public Discussion save(Discussion discussion) {
-        // CORRECTION : idUtilisateur1 (sans underscore)
         String sql = "INSERT INTO DISCUSSION (idUtilisateur1, idUtilisateur2, dateCreation) VALUES (?, ?, ?)";
         
         KeyHolder keyHolder = new GeneratedKeyHolder();

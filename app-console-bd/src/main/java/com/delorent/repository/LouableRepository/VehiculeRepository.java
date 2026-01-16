@@ -38,7 +38,6 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         List<Camion> camions = camionRepository.getAll();
         List<Moto> motos = motoRepository.getAll();
 
-        // CORRECTION : On passe getIdAgent() via la méthode helper
         for (Voiture v : voitures) {
             result.add(new VehiculeSummary(
                 toLouableSummary(v.getIdLouable(), v.getIdAgent(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Voiture"),
@@ -129,7 +128,6 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
         try { camions = camionRepository.getDisponibles(filtres); } catch (Exception ignored) {}
         try { motos = motoRepository.getDisponibles(filtres); } catch (Exception ignored) {}
 
-        // CORRECTION DANS LES BOUCLES AUSSI
         for (Voiture v : voitures) {
             result.add(new VehiculeSummary(
                 toLouableSummary(v.getIdLouable(), v.getIdAgent(), v.getStatut(), v.getPrixJour(), v.getLieuPrincipal(), "Voiture"),
@@ -153,11 +151,8 @@ public class VehiculeRepository implements RepositoryBase<VehiculeSummary, Integ
 
         return result;
     }
-
-    // Le Helper qui fait tout le travail
     private LouableSummary toLouableSummary(int idLouable, int idAgent, StatutLouable statut,
                                            double prixJour, String lieuPrincipal, String type) {
-        // Le "true" à la fin est sans doute pour le flag 'isCodeAccessible' ou autre, je le laisse tel quel
         return new LouableSummary(idLouable, idAgent, statut, prixJour, lieuPrincipal, type, true);
     }
 

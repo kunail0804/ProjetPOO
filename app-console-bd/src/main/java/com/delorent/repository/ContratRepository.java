@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/repository/ContratRepository.java
 package com.delorent.repository;
 
 import java.sql.Date;
@@ -32,15 +31,12 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
     private static final String COL_LIEU_PRISE = "lieuPrise";
     private static final String COL_LIEU_DEPOT = "lieuDepot";
 
-    // FK
     private static final String COL_ID_LOUEUR = "idLoueur";
     private static final String COL_ID_LOUABLE = "idLouable";
     private static final String COL_ID_ASSURANCE = "idAssurance";
 
-    // Aller Simple
     private static final String COL_ID_PARKING = "idParkingRetour";
 
-    // Prix
     private static final String COL_PRIX = "prix";
     private static final String COL_ETAT = "etat";
 
@@ -70,9 +66,6 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
         return res.isEmpty() ? null : res.get(0);
     }
 
-    /**
-     * Insertion complète avec prix + état + parking (Aller simple).
-     */
     @Override
     public Integer add(Contrat entity) {
         String sql = "INSERT INTO " + T_CONTRAT +
@@ -91,20 +84,16 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
             ps.setString(3, entity.getLieuPrise());
             ps.setString(4, entity.getLieuDepot());
 
-            // prix
             ps.setBigDecimal(5, entity.getPrix() == null ? java.math.BigDecimal.ZERO : entity.getPrix());
 
-            // état par défaut
             String etat = entity.getEtat();
             if (etat == null || etat.isBlank()) etat = "accepte";
             ps.setString(6, etat);
 
-            // FK
             ps.setInt(7, entity.getIdLoueur());
             ps.setInt(8, entity.getIdLouable());
             ps.setInt(9, entity.getIdAssurance());
 
-            // Aller simple : parking retour
             if (entity.getIdParkingRetour() != null) ps.setInt(10, entity.getIdParkingRetour());
             else ps.setNull(10, Types.INTEGER);
 
@@ -156,9 +145,6 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
         return count != null && count > 0;
     }
 
-    /**
-     * Contrats visibles par un AGENT (propriétaire du louable).
-     */
     public List<Contrat> getByAgentId(int idAgent) {
         String sql = """
             SELECT c.*
@@ -170,9 +156,6 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
         return jdbc.query(sql, (rs, i) -> mapRow(rs), idAgent);
     }
 
-    // -----------------------
-    // DETAIL contrat
-    // -----------------------
     public record ContratDetailView(
             int idContrat,
             LocalDate dateDebut,
@@ -249,10 +232,6 @@ public class ContratRepository implements RepositoryBase<Contrat, Integer> {
         return res.isEmpty() ? null : res.get(0);
     }
 
-    // -----------------------
-    // DETAIL + CALCUL PRIX (loueur / agent)
-    // (avec assurance au jour + nb jours inclusif +1)
-    // -----------------------
     public record ContratPrixDetailView(
             int idContrat,
             LocalDate dateDebut,

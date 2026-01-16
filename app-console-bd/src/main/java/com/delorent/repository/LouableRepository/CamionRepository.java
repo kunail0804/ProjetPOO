@@ -20,19 +20,15 @@ import java.util.ArrayList;
 public class CamionRepository implements RepositoryBase<Camion, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
-    // ThreadLocal from US.L.10 for availability check in catalog
     private final ThreadLocal<Boolean> lastDisponibleLeJour = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     public CamionRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Helper method from US.L.10
     public boolean isDernierDisponibleLeJour(Camion ignored) {
         return Boolean.TRUE.equals(lastDisponibleLeJour.get());
     }
-
-    // --- CRUD Operations (Kept from HEAD to support existing features) ---
 
     @Override
     public List<Camion> getAll() {
@@ -41,7 +37,7 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
                 " JOIN CAMION ON VEHICULE.id = CAMION.id";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Camion(
                 rs.getInt("id"),
-                rs.getInt("idProprietaire"), // Preserving idProprietaire
+                rs.getInt("idProprietaire"),
                 rs.getDouble("prixJour"),
                 StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                 rs.getString("lieuPrincipal"),
@@ -132,8 +128,6 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
         return true;
     }
 
-    // --- Advanced Search Methods (Merged from US.L.10 and HEAD) ---
-
     public List<Camion> getCatalogue(LocalDate dateCible, boolean uniquementDisponibles, List<LouableFiltre> filtres) {
         Date d = Date.valueOf(dateCible);
 
@@ -156,7 +150,6 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
         );
 
         List<Object> params = new ArrayList<>();
-        // Parameters for the 'disponibleLeJour' check
         params.add(d); params.add(d);
 
         if (uniquementDisponibles) {
@@ -175,14 +168,13 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
         }
 
         return jdbcTemplate.query(sql.toString(), params.toArray(), (rs, rowNum) -> {
-            // Logic from US.L.10 to track availability
             if (rs.getObject("disponibleLeJour") != null) {
                 lastDisponibleLeJour.set(rs.getInt("disponibleLeJour") == 1);
             }
 
             return new Camion(
                     rs.getInt("id"),
-                    rs.getInt("idProprietaire"), // Ensure idProprietaire is included
+                    rs.getInt("idProprietaire"),
                     rs.getDouble("prixJour"),
                     StatutLouable.valueOf(rs.getString("statut").toUpperCase()),
                     rs.getString("lieuPrincipal"),
@@ -201,7 +193,6 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
         });
     }
 
-    // Kept from HEAD for compatibility
     public List<Camion> getDisponibles(List<LouableFiltre> filtres){
         StringBuilder sql = new StringBuilder(
             "SELECT * FROM LOUABLE l "+
@@ -242,7 +233,6 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
         });
     }
 
-    // Kept from HEAD for owner management
     public List<Camion> getByProprietaire(int idProprietaire) {
         String sql = "SELECT * FROM LOUABLE l " +
                 "JOIN VEHICULE v ON l.id = v.id " +
@@ -272,7 +262,7 @@ public class CamionRepository implements RepositoryBase<Camion, Integer> {
         return new VehiculeSummary(
                 new LouableSummary(
                     camion.getIdLouable(),
-                    camion.getIdAgent(), // <--- AJOUTER ICI
+                    camion.getIdAgent(),
                     camion.getStatut(),
                     camion.getPrixJour(),
                     camion.getLieuPrincipal(),

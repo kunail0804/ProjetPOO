@@ -1,6 +1,5 @@
 package com.delorent.model.Utilisateur;
 
-// Ajout du mot clé 'abstract'
 public abstract class Agent extends Utilisateur {
 
     private String nom;
@@ -22,7 +21,6 @@ public abstract class Agent extends Utilisateur {
         this.prenom = prenom;
     }
     
-    // On force les enfants à dire qui ils sont
     public abstract boolean isProfessionnel();
 
     public String getNom() { return nom; }

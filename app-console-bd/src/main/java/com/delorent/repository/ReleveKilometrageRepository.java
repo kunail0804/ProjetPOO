@@ -19,9 +19,9 @@ public class ReleveKilometrageRepository {
     public record ReleveView(
             int idReleve,
             int idContrat,
-            String typeReleve, // "PRISE" ou "RETOUR"
+            String typeReleve,
             int kilometrage,
-            String photoPath,  // "/uploads/releves/xxx.jpg"
+            String photoPath,
             LocalDateTime dateSaisie
     ) {}
 

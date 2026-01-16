@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/repository/LouableRepository/VehiculeSummary.java
 package com.delorent.repository.LouableRepository;
 
 public record VehiculeSummary(

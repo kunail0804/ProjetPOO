@@ -14,7 +14,6 @@ public class EntretienTechnique {
     private String prestataire;
     private String piecesChangees;
     
-    // Constructeurs
     public EntretienTechnique() {}
     
     public EntretienTechnique(Long vehiculeId, String libelle, LocalDate dateEntretien) {
@@ -23,7 +22,6 @@ public class EntretienTechnique {
         this.dateEntretien = dateEntretien;
     }
     
-    // Getters et Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     

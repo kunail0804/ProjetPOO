@@ -53,7 +53,6 @@ public class EntretienTechniqueRepository {
         }
     }
     
-    // Méthodes CRUD similaires au ControleTechniqueRepository
     public List<EntretienTechnique> findByVehiculeId(Long vehiculeId) {
         String sql = "SELECT * FROM ENTRETIEN_TECHNIQUE WHERE vehicule_id = ? ORDER BY date_entretien DESC";
         return jdbcTemplate.query(sql, new EntretienTechniqueRowMapper(), vehiculeId);
@@ -71,7 +70,6 @@ public class EntretienTechniqueRepository {
     
     public void save(EntretienTechnique entretien) {
         if (entretien.getId() == null) {
-            // INSERT
             String sql = "INSERT INTO ENTRETIEN_TECHNIQUE " +
                         "(vehicule_id, libelle, date_entretien, compte_rendu, " +
                         "kilometrage_effectue, cout, prestataire, pieces_changees) " +
@@ -87,7 +85,6 @@ public class EntretienTechniqueRepository {
                 entretien.getPrestataire(),
                 entretien.getPiecesChangees());
         } else {
-            // UPDATE
             String sql = "UPDATE ENTRETIEN_TECHNIQUE SET " +
                         "vehicule_id = ?, libelle = ?, date_entretien = ?, " +
                         "compte_rendu = ?, kilometrage_effectue = ?, cout = ?, " +

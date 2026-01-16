@@ -23,7 +23,6 @@ public class LouableAdminController {
         this.dispoService = dispoService;
     }
 
-    // Page MODIFIER
     @GetMapping("/louables/{id:\\d+}/modifierDisponibilite")
     public String modifierLouable(@PathVariable("id") int idLouable,
                                   @RequestParam(required = false) String succes,
@@ -46,7 +45,6 @@ public class LouableAdminController {
         return "modifier_disponibilite";
     }
 
-    // Ajouter une disponibilité (avec MERGE intelligent + contrôles)
     @PostMapping("/louables/{id:\\d+}/disponibilites/add")
     public String addDispo(@PathVariable("id") int idLouable,
                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
@@ -60,7 +58,6 @@ public class LouableAdminController {
         }
     }
 
-    // Supprimer une disponibilité (si pas de contrat dessus)
     @PostMapping("/louables/{id:\\d+}/disponibilites/delete")
     public String deleteDispo(@PathVariable("id") int idLouable,
                               @RequestParam int idDisponibilite) {

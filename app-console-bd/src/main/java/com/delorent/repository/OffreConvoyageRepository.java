@@ -25,17 +25,14 @@ public class OffreConvoyageRepository implements RepositoryBase<OffreConvoyage, 
             rs.getInt("idParkingArrivee"),
             rs.getDouble("reduction")
         );
-        // On remplit les infos jointes si disponibles (via les alias)
         try {
             off.setNomParking(rs.getString("nomParking"));
             off.setVilleParking(rs.getString("villeParking"));
         } catch (SQLException e) { 
-            // Colonnes non demandées dans la requête, on ignore
         }
         return off;
     }
 
-    // Récupérer l'offre active pour un véhicule (avec les détails du parking)
     public OffreConvoyage getByLouable(int idLouable) {
         String sql = "SELECT o.*, p.nom as nomParking, p.ville as villeParking " +
                      "FROM OFFRE_CONVOYAGE o " +
@@ -51,7 +48,6 @@ public class OffreConvoyageRepository implements RepositoryBase<OffreConvoyage, 
         return jdbcTemplate.update(sql, o.getIdLouable(), o.getIdParkingArrivee(), o.getReduction());
     }
     
-    // Supprime l'offre (quand le trajet est terminé ou annulé par l'agent)
     public void deleteByLouable(int idLouable) {
         jdbcTemplate.update("DELETE FROM OFFRE_CONVOYAGE WHERE idLouable = ?", idLouable);
     }

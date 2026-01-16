@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/service/NoteService.java
 package com.delorent.service;
 
 import com.delorent.model.Contrat;

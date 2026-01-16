@@ -4,9 +4,8 @@ public class OffreConvoyage {
     private int idOffre;
     private int idLouable;
     private int idParkingArrivee;
-    private double reduction; // ex: 0.10 pour 10%
+    private double reduction;
 
-    // Attributs pour faciliter l'affichage (optionnel mais pratique)
     private String nomParking;
     private String villeParking;
 
@@ -31,7 +30,6 @@ public class OffreConvoyage {
     public double getReduction() { return reduction; }
     public void setReduction(double reduction) { this.reduction = reduction; }
 
-    // Helpers affichage
     public String getNomParking() { return nomParking; }
     public void setNomParking(String nomParking) { this.nomParking = nomParking; }
     public String getVilleParking() { return villeParking; }

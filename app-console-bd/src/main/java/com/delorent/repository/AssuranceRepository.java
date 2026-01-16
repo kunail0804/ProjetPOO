@@ -20,7 +20,6 @@ public class AssuranceRepository implements RepositoryBase<Assurance, Integer> {
     private static final String COL_ID = "idAssurance";
     private static final String COL_NOM = "nom";
     private static final String COL_PRIX_JOUR = "tarifJournalier";
-    // Nouveaux champs BDD
     private static final String COL_FICHIER = "cheminFichier";
     private static final String COL_PROPRIO = "idProprietaire";
 
@@ -29,30 +28,22 @@ public class AssuranceRepository implements RepositoryBase<Assurance, Integer> {
                 rs.getInt(COL_ID),
                 rs.getString(COL_NOM),
                 rs.getDouble(COL_PRIX_JOUR),
-                rs.getString(COL_FICHIER),   // Nouveau
-                (Integer) rs.getObject(COL_PROPRIO) // Nouveau (peut être null)
+                rs.getString(COL_FICHIER),
+                (Integer) rs.getObject(COL_PROPRIO)
         );
     }
 
     @Override
     public List<Assurance> getAll() {
-        // On récupère tout (Globales + celles des agents)
         String sql = "SELECT * FROM " + T_ASSURANCE;
         return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs));
     }
 
-    /**
-     * Récupère uniquement les assurances créées par un Agent spécifique
-     */
     public List<Assurance> getByProprietaire(int idAgent) {
         String sql = "SELECT * FROM " + T_ASSURANCE + " WHERE " + COL_PROPRIO + " = ?";
         return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), idAgent);
     }
 
-    /**
-     * Récupère les assurances globales (Système) + celles de cet agent spécifique
-     * (Utile pour la liste déroulante lors de la location plus tard)
-     */
     public List<Assurance> getGlobalesEtAgent(int idAgent) {
         String sql = "SELECT * FROM " + T_ASSURANCE + " WHERE " + COL_PROPRIO + " IS NULL OR " + COL_PROPRIO + " = ?";
         return jdbcTemplate.query(sql, (rs, i) -> mapRow(rs), idAgent);
@@ -67,7 +58,6 @@ public class AssuranceRepository implements RepositoryBase<Assurance, Integer> {
 
     @Override
     public Integer add(Assurance entity) {
-        // Insertion avec les nouveaux champs
         String sql = "INSERT INTO " + T_ASSURANCE + " (" + COL_NOM + ", " + COL_PRIX_JOUR + ", " + COL_FICHIER + ", " + COL_PROPRIO + ") VALUES (?, ?, ?, ?)";
         return jdbcTemplate.update(sql, entity.getNom(), entity.getTarifJournalier(), entity.getCheminFichier(), entity.getIdProprietaire());
     }

@@ -7,8 +7,8 @@ import com.delorent.model.Utilisateur.Agent;
 import com.delorent.model.Utilisateur.AgentAmateur;
 import com.delorent.model.Utilisateur.AgentProfessionnel;
 import com.delorent.model.Utilisateur.EntrepriseEntretien;
-import com.delorent.model.Utilisateur.Loueur;       // Import Ajouté
-import com.delorent.repository.AgentRepository; // Import Ajouté
+import com.delorent.model.Utilisateur.Loueur;
+import com.delorent.repository.AgentRepository;
 import com.delorent.repository.EntrepriseEntretienRepository;
 import com.delorent.repository.LoueurRepository;
 
@@ -29,8 +29,6 @@ public class UtilisateurService {
         this.entrepriseEntretienRepository = entrepriseEntretienRepository;
     }
 
-    // --- Helpers validation/normalisation ---
-
     private String clean(String s) {
         if (s == null) return null;
         String t = s.trim();
@@ -44,15 +42,9 @@ public class UtilisateurService {
     }
 
     private String hashPassword(String rawPassword) {
-        // Pour l'instant on retourne le mot de passe en clair (TODO: BCrypt)
         return rawPassword;
     }
 
-    // --- Méthodes demandées ---
-
-    /**
-     * Ajoute un Agent AMATEUR (Particulier)
-     */
     @Transactional
     public long ajouterAgent(
             String email,
@@ -86,15 +78,9 @@ public class UtilisateurService {
         require(pr, "prenom");
 
         String passwordHash = hashPassword(p);
-
-        // MODIFICATION : On instancie AgentAmateur car Agent est abstrait
-        // Le Repository se chargera de mettre typeAgent='AMATEUR'
         return agentRepository.add(new AgentAmateur(e, passwordHash, a, v, cp, r, t, n, pr));
     }
 
-    /**
-     * Ajoute un Agent PROFESSIONNEL (Avec SIRET)
-     */
     @Transactional
     public long ajouterAgentProfessionnel(
             String email,
@@ -131,9 +117,6 @@ public class UtilisateurService {
         require(s, "siret");
 
         String passwordHash = hashPassword(p);
-
-        // MODIFICATION : On instancie AgentProfessionnel
-        // Le Repository se chargera de mettre typeAgent='PRO' et d'insérer le SIRET
         return agentRepository.add(new AgentProfessionnel(e, passwordHash, a, v, cp, r, t, n, pr, s));
     }
 
@@ -213,8 +196,6 @@ public class UtilisateurService {
 
         return entrepriseEntretienRepository.add(new EntrepriseEntretien(e, passwordHash, a, v, cp, r, t, ne, rs, si));
     }
-
-    // --- Suppression et Mises à jour ---
 
     @Transactional
     public void supprimerAgent(Long idAgent) {

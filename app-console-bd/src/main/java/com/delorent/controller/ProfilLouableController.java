@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-// --- Imports ---
 import com.delorent.model.Louable.Louable;
 import com.delorent.model.Louable.Vehicule;
 import com.delorent.model.Utilisateur.Agent;
@@ -18,7 +17,6 @@ import com.delorent.model.Utilisateur.Utilisateur;
 import com.delorent.model.OffreConvoyage;
 import com.delorent.model.Parking;
 
-// --- Repositories ---
 import com.delorent.repository.LouableRepository.LouableRepository;
 import com.delorent.repository.LouableRepository.LouableSummary;
 import com.delorent.repository.LouableRepository.VehiculeRepository;
@@ -28,7 +26,7 @@ import com.delorent.repository.LouableRepository.MotoRepository;
 import com.delorent.repository.LouableRepository.CamionRepository;
 import com.delorent.repository.OffreConvoyageRepository;
 import com.delorent.repository.ParkingRepository;
-import com.delorent.repository.NoteRepository; // Apport branche Notation
+import com.delorent.repository.NoteRepository;
 
 import com.delorent.service.ConnexionService;
 
@@ -72,7 +70,6 @@ public class ProfilLouableController {
     @GetMapping("/louables/{id}")
     public String profilLouable(@PathVariable("id") int id, Model model) {
 
-        // 1. Récupération via VehiculeRepository (avec Marque)
         VehiculeSummary vehiculeSum = vehiculeRepository.get(id);
         
         if (vehiculeSum == null) {
@@ -94,7 +91,6 @@ public class ProfilLouableController {
         model.addAttribute("isMoto", "Moto".equals(summary.type()));
         model.addAttribute("isCamion", "Camion".equals(summary.type()));
 
-        // 2. Chargement de l'objet complet
         Object specificLouable = null;
         switch (summary.type()) {
             case "Voiture" -> specificLouable = voitureRepository.get(id);
@@ -104,7 +100,6 @@ public class ProfilLouableController {
         }
         model.addAttribute("louable", specificLouable);
 
-        // 3. Gestion des Notes (Apport branche Notation)
         Double moy = noteRepository.findMoyenneByLouableFromCriteres(id);
         int nb = noteRepository.countNotesByLouableFromCriteres(id);
 
@@ -116,7 +111,6 @@ public class ProfilLouableController {
         if (noteArrondie > 5) noteArrondie = 5;
         model.addAttribute("noteArrondie", noteArrondie);
 
-        // 4. Gestion des permissions
         Utilisateur u = connexionService.getConnexion();
         boolean connected = (u != null);
         boolean isAgent = (u instanceof Agent);
@@ -135,7 +129,6 @@ public class ProfilLouableController {
         model.addAttribute("backToProfile", canManage);
         model.addAttribute("canManage", canManage);
 
-        // 5. Gestion Parking / Aller Simple (Apport branche Parking)
         OffreConvoyage offreExistante = offreRepository.getByLouable(id);
         model.addAttribute("offreActuelle", offreExistante);
 
@@ -146,8 +139,6 @@ public class ProfilLouableController {
 
         return "louable-profil";
     }
-
-    // --- Actions Offre (Apport branche Parking) ---
 
     @PostMapping("/louables/{id}/offre/ajouter")
     public String ajouterOffre(@PathVariable("id") int idLouable,

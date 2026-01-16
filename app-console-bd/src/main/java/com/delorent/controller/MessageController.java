@@ -14,7 +14,7 @@ import com.delorent.model.Utilisateur.Utilisateur;
 import com.delorent.model.Discussion;
 import com.delorent.model.Message;
 import com.delorent.repository.MessageRepository;
-import com.delorent.service.ConnexionService; // <--- On importe ton service
+import com.delorent.service.ConnexionService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -22,9 +22,8 @@ import jakarta.servlet.http.HttpSession;
 public class MessageController {
 
     private final MessageRepository messageRepository;
-    private final ConnexionService connexionService; // <--- On l'injecte ici
+    private final ConnexionService connexionService;
 
-    // On demande à Spring de nous donner les deux outils
     public MessageController(MessageRepository messageRepository, ConnexionService connexionService) {
         this.messageRepository = messageRepository;
         this.connexionService = connexionService;
@@ -34,23 +33,18 @@ public class MessageController {
     public String afficherMessagerie(@RequestParam(required = false) Integer idDiscussion, 
                                      Model model) {
         
-        // 1. On demande au service : "Qui est connecté ?" 
         Utilisateur user = connexionService.getConnexion();
         
-        // Si personne n'est connecté, on redirige
         if (user == null) {
             return "redirect:/connexion";
         }
 
-        // On récupère l'ID proprement
         Integer idConnecte = user.getIdUtilisateur();
 
-        // 2. Charger la liste de mes conversations (Colonne de gauche)
         List<Discussion> mesDiscussions = messageRepository.trouverDiscussionsUtilisateur(idConnecte);
         model.addAttribute("discussions", mesDiscussions);
         model.addAttribute("userId", idConnecte);
 
-        // 3. Si une discussion est sélectionnée, charger les messages (Colonne de droite)
         if (idDiscussion != null) {
             List<Message> messages = messageRepository.trouverMessages(idDiscussion);
             model.addAttribute("messages", messages);
@@ -80,7 +74,6 @@ public class MessageController {
     @PostMapping("/messagerie/nouveau")
     public String demarrerDiscussion(@RequestParam int idDestinataire) {
         
-        // 1. Récupération via le service
         Utilisateur user = connexionService.getConnexion();
         
         if (user == null) {
@@ -91,7 +84,6 @@ public class MessageController {
         Integer idConnecte = user.getIdUtilisateur();
         System.out.println("✅ Utilisateur identifié ID : " + idConnecte);
 
-        // 2. Logique de création de discussion
         Optional<Discussion> existing = messageRepository.findByUtilisateurs(idConnecte, idDestinataire);
 
         int idDiscussion;

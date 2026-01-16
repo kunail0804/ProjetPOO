@@ -22,7 +22,6 @@ public class ControleTechniqueRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
     
-    // RowMapper pour convertir les résultats SQL en objets ControleTechnique
     private static class ControleTechniqueRowMapper implements RowMapper<ControleTechnique> {
         @Override
         public ControleTechnique mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -30,7 +29,6 @@ public class ControleTechniqueRepository {
             controle.setId(rs.getLong("id"));
             controle.setVehiculeId(rs.getLong("vehicule_id"));
             
-            // Convertir java.sql.Date en LocalDate
             java.sql.Date sqlDateControle = rs.getDate("date_controle");
             if (sqlDateControle != null) {
                 controle.setDateControle(sqlDateControle.toLocalDate());
@@ -41,7 +39,6 @@ public class ControleTechniqueRepository {
                 controle.setDateValidite(sqlDateValidite.toLocalDate());
             }
             
-            // Gérer l'enum ResultatControle
             String resultatStr = rs.getString("resultat");
             if (resultatStr != null) {
                 controle.setResultat(ResultatControle.valueOf(resultatStr));
@@ -55,23 +52,20 @@ public class ControleTechniqueRepository {
         }
     }
     
-    // 1. Trouver tous les contrôles d'un véhicule
     public List<ControleTechnique> findByVehiculeId(Long vehiculeId) {
         String sql = "SELECT * FROM CONTROLE_TECHNIQUE WHERE vehicule_id = ? ORDER BY date_controle DESC";
         return jdbcTemplate.query(sql, new ControleTechniqueRowMapper(), vehiculeId);
     }
     
-    // 2. Trouver le dernier contrôle d'un véhicule
     public ControleTechnique findFirstByVehiculeIdOrderByDateControleDesc(Long vehiculeId) {
         String sql = "SELECT * FROM CONTROLE_TECHNIQUE WHERE vehicule_id = ? ORDER BY date_controle DESC LIMIT 1";
         try {
             return jdbcTemplate.queryForObject(sql, new ControleTechniqueRowMapper(), vehiculeId);
         } catch (EmptyResultDataAccessException e) {
-            return null; // Aucun contrôle trouvé
+            return null;
         }
     }
     
-    // 3. Trouver un contrôle par son ID
     public Optional<ControleTechnique> findById(Long id) {
         String sql = "SELECT * FROM CONTROLE_TECHNIQUE WHERE id = ?";
         try {
@@ -82,10 +76,8 @@ public class ControleTechniqueRepository {
         }
     }
     
-    // 4. Sauvegarder un nouveau contrôle
     public void save(ControleTechnique controle) {
         if (controle.getId() == null) {
-            // INSERT
             String sql = "INSERT INTO CONTROLE_TECHNIQUE " +
                         "(vehicule_id, date_controle, date_validite, resultat, centre, prix, commentaires) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -94,12 +86,11 @@ public class ControleTechniqueRepository {
                 controle.getVehiculeId(),
                 controle.getDateControle(),
                 controle.getDateValidite(),
-                controle.getResultat().name(), // Convertir enum en String
+                controle.getResultat().name(),
                 controle.getCentre(),
                 controle.getPrix(),
                 controle.getCommentaires());
         } else {
-            // UPDATE
             String sql = "UPDATE CONTROLE_TECHNIQUE SET " +
                         "vehicule_id = ?, date_controle = ?, date_validite = ?, " +
                         "resultat = ?, centre = ?, prix = ?, commentaires = ? " +
@@ -117,13 +108,11 @@ public class ControleTechniqueRepository {
         }
     }
     
-    // 5. Supprimer un contrôle
     public void deleteById(Long id) {
         String sql = "DELETE FROM CONTROLE_TECHNIQUE WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
     
-    // 6. Vérifier si un véhicule a un contrôle technique valide
     public boolean hasControleValide(Long vehiculeId) {
         String sql = "SELECT COUNT(*) FROM CONTROLE_TECHNIQUE " +
                     "WHERE vehicule_id = ? " +
@@ -134,15 +123,9 @@ public class ControleTechniqueRepository {
         return count != null && count > 0;
     }
     
-    // 7. Compter le nombre de contrôles pour un véhicule
     public int countByVehiculeId(Long vehiculeId) {
         String sql = "SELECT COUNT(*) FROM CONTROLE_TECHNIQUE WHERE vehicule_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, vehiculeId);
         return count != null ? count : 0;
     }
-
-   
-
-    
-    
 }

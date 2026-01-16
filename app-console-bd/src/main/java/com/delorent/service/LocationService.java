@@ -1,4 +1,3 @@
-// FICHIER: src/main/java/com/delorent/service/LocationService.java
 package com.delorent.service;
 
 import java.math.BigDecimal;
@@ -91,18 +90,14 @@ public class LocationService {
             throw new IllegalArgumentException("Conflit : un contrat existe déjà sur tout ou partie de ces dates.");
         }
 
-        // ===== CALCUL PRIX (inclusif + assurance/jour + commissions) =====
         long nbJoursLong = ChronoUnit.DAYS.between(dateDebut, dateFin) + 1;
         if (nbJoursLong <= 0) throw new IllegalArgumentException("Durée invalide.");
         BigDecimal nbJours = BigDecimal.valueOf(nbJoursLong);
 
-        // LouableSummary.prixJour() est un double => jamais null
         BigDecimal prixJourLouable = BigDecimal.valueOf(louable.prixJour());
 
-        // AssuranceRepository mappe en double, donc getTarifJournalier() doit être double
         BigDecimal prixJourAssurance = BigDecimal.valueOf(assurance.getTarifJournalier());
 
-        // base = (louable + assurance) * nbJours
         BigDecimal base = prixJourLouable.add(prixJourAssurance).multiply(nbJours);
 
         BigDecimal commissionVariable = base.multiply(BigDecimal.valueOf(0.10));
@@ -113,7 +108,6 @@ public class LocationService {
                 .add(commissionFixe)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        // ===== INSERT CONTRAT =====
         Contrat contrat = new Contrat();
         contrat.setDateDebut(dateDebut);
         contrat.setDateFin(dateFin);
@@ -130,7 +124,6 @@ public class LocationService {
         int idContrat = contratRepo.add(contrat);
         contrat.setId(idContrat);
 
-        // ===== DECOUPAGE DISPO =====
         int idDispo = dispoCouvrante.getIdDisponibilite();
         LocalDate dispoDebut = dispoCouvrante.getDateDebut();
         LocalDate dispoFin = dispoCouvrante.getDateFin();

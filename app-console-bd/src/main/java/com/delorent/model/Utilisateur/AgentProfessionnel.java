@@ -2,7 +2,7 @@ package com.delorent.model.Utilisateur;
 
 public class AgentProfessionnel extends Agent {
 
-    private String siret; // Spécifique au Pro
+    private String siret;
 
     public AgentProfessionnel(int idUtilisateur, String mail, String motDePasse, String adresse,
                               String ville, String codePostal, String region, String telephone, 
